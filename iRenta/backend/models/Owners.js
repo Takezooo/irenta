@@ -1,7 +1,7 @@
 // backend/models/Owner.js
 import mongoose from 'mongoose';
 
-const OwnersSchema = new mongoose.Schema({
+const OwnerSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',  // Reference to User model
@@ -22,5 +22,5 @@ const OwnersSchema = new mongoose.Schema({
     },
 });
 
-const Owners = mongoose.model('Owners', OwnersSchema);
+const Owners = mongoose.model('Owners', OwnerSchema);
 export default Owners;

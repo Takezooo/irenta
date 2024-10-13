@@ -3,12 +3,15 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/Users.js';  // Import the User model
+import Owners from '../models/Owners.js';
 
 const router = express.Router();
 
 // @route POST /api/auth/register
 router.post('/register', async (req, res) => {
     const { firstName, middleName, lastName, email, phoneNumber, imageUrl, password, userRole, address, ownerDetails } = req.body;
+
+    console.log("Incoming registration data:", req.body); // Log the request body for debugging
 
     try {
         // Check if the user already exists
@@ -17,7 +20,7 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create a new user object with the embedded schemas
+        // Create a new user object
         user = new User({
             name: {
                 firstName,
@@ -29,32 +32,28 @@ router.post('/register', async (req, res) => {
             imageUrl,
             password: await bcrypt.hash(password, 10),  // Hash the password
             userRole,
-            ...(userRole === 'Owner' && {
+        });
+
+        // Save the user in the database
+        await user.save();
+
+        // If userRole is Owner, save owner details
+        if (userRole === 'Owners') {
+            const ownerDetailsData = new Owners({
+                userId: user.id, // Link back to the User
                 address: {
                     houseNumber: address.houseNumber,
                     street: address.street,
                     city: address.city,
                     zip: address.zip,
-                    latitude: address.latitude,
-                    longitude: address.longitude,
                 },
-                ownerDetails: {
-                    address: {
-                        houseNumber: ownerDetails.address.houseNumber,
-                        street: ownerDetails.address.street,
-                        city: ownerDetails.address.city,
-                        zip: ownerDetails.address.zip,
-                        latitude: ownerDetails.address.latitude,
-                        longitude: ownerDetails.address.longitude,
-                    },
-                    businessPermitPath: ownerDetails.businessPermitPath,
-                    verificationStatus: ownerDetails.verificationStatus,
-                },
-            }),
-        });
+                businessPermitPath: ownerDetails.businessPermitPath,
+                verificationStatus: ownerDetails.verificationStatus, // Adjust as necessary
+            });
 
-        // Save the user in the database
-        await user.save();
+            // Save the owner in the owners table
+            await ownerDetailsData.save();
+        }
 
         // Generate a JWT token for authentication
         const payload = {
@@ -74,7 +73,7 @@ router.post('/register', async (req, res) => {
         );
 
     } catch (err) {
-        console.error("Error in registration:", err.message);  // Log the error message
+        console.error("Error in registration:", err.message);
         res.status(500).json({ message: 'Server error' });
     }
 });

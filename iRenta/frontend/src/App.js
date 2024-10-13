@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-iort Login from './components/Login';
-import Register from './components/Register';mport LandingPage from './components/LandingPage';
-imp
+import LandingPage from './components/LandingPage';
+import Login from './components/Login';
+import Register from './components/Register';
 
 const App = () => {
     return (

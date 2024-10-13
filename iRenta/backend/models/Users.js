@@ -1,51 +1,42 @@
 // backend/models/User.js
 import mongoose from 'mongoose';
 
-// Address Schema (for owners)
-const AddressSchema = new mongoose.Schema({
-    houseNumber: String,
-    street: String,
-    city: String,
-    zip: String,
-    latitude: Number,
-    longitude: Number,
-});
 
-// Name Schema
-const NameSchema = new mongoose.Schema({
-    firstName: String,
-    middleName: String,
-    lastName: String,
-});
-
-// Owner Details Schema (for owners)
-const OwnerDetailsSchema = new mongoose.Schema({
-    address: AddressSchema,  // Embedded address schema
-    businessPermitPath: String,  // Path to business permit file
-    verificationStatus: {
-        type: String,
-        enum: ['Basic', 'Semi-Verified', 'Fully-Verified'],  // Basic by default
-        default: 'Basic',
+const ownerDetailsSchema = new mongoose.Schema({
+    address: {
+        houseNumber: { type: String },
+        street: { type: String },
+        city: { type: String },
+        zip: { type: String },
+        latitude: { type: Number },
+        longitude: { type: Number },
     },
+    businessPermitPath: { type: String, required: false },
+    verificationStatus: { type: String, required: false },
 });
 
-// Define the User schema
-const UserSchema = new mongoose.Schema({
-    name: NameSchema,  // Embedded name schema
-    email: { type: String, required: true, unique: true },  // Email must be unique
-    phoneNumber: String,
-    imageUrl: String,
-    password: { type: String, required: true },  // Password field
-    userRole: {
-        type: String,
-        enum: ['Owner', 'Seeker'],  // Role is either Owner or Seeker
-        required: true,
+const userSchema = new mongoose.Schema({
+    name: {
+        firstName: { type: String, required: true },
+        middleName: { type: String, required: false },
+        lastName: { type: String, required: true },
     },
-    ownerDetails: {
-        type: OwnerDetailsSchema,
-        required: function() { return this.userRole === 'Owners'; },  // Only required if user is Owner
+    email: { type: String, required: true, unique: true },
+    phoneNumber: { type: String, required: true },
+    imageUrl: { type: String, required: false },
+    password: { type: String, required: true },
+    userRole: { type: String, enum: ['Seeker', 'Owners'], required: true },
+    address: {
+        houseNumber: { type: String },
+        street: { type: String },
+        city: { type: String },
+        zip: { type: String },
+        latitude: { type: Number },
+        longitude: { type: Number },
     },
+    ownerDetails: { type: ownerDetailsSchema, required: false }, // Allow this to be optional
 });
 
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', userSchema);
+
 export default User;

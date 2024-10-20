@@ -1,4 +1,3 @@
-// backend/models/User.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -23,9 +22,9 @@ const userSchema = new mongoose.Schema({
     lastName: { type: String, required: true },
     phoneNumber: { type: Number, required: true },
     profile: {
-        id: { type: String, required: true },
-        name: { type: String, required: true },
-        link: { type: String, required: true},
+        id: { type: String },
+        name: { type: String },
+        link: { type: String},
       },
     userType: { type: String, enum: ["Seeker", "Owners"], required: true },
     address: {

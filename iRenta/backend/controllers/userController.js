@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
 import Users from "../models/Users.js";
 import BCrypt from "../config/BCrypt.js";
+import dotenv from "dotenv";
+import driveService from "../utils/driveService.js";
 
+dotenv.config();
+
+// function for geting all users
 const getAllUsers = async (req, res) => {
     try {
         const users = await Users.find();
@@ -11,6 +16,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+// function for getting a specific user
 const getSpecificUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -26,10 +32,28 @@ const getSpecificUser = async (req, res) => {
     }
 };
 
+// function for creating a new user
 const createUser = async (req, res) => {
     try {
-        const user = req.body;
+        const { body, file } = req;
+        const user = JSON.parse(body.user);
+
+        let userProfile = {}
         
+        // upload file part
+        if (file) {
+            const {id, name} = await driveService.UploadFiles(
+                file,
+                process.env.PROFILE_FOLDER_ID
+            );
+        
+            Object.assign(userProfile, {
+                id: id,
+                name: name,
+                link: `https://drive.google.com/thumbnail?id=${id}&sz=w800`,
+            });
+        }
+
         const result = await Users.create({
             credentials: {
                 username: user.username,
@@ -41,17 +65,20 @@ const createUser = async (req, res) => {
                 middleName: user.middleName, 
                 lastName: user.lastName,
                 phoneNumber: user.phoneNumber,
-                profile: user.profile,
+                profile: userProfile,
                 userType: user.userType,
                 address: user.address,
             },
         });
+
+        res.status(200).json(result);
 
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 };
 
+// function for updating user info
 const updateUser = async (req, res) => {
     try {
     } catch (err) {
@@ -59,6 +86,7 @@ const updateUser = async (req, res) => {
     }
 };
 
+// function for deleting user
 const deleteUser = async (req, res) => {
     try {
     } catch (error) {

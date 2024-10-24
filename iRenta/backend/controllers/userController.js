@@ -90,9 +90,9 @@ const updateUser = async (req, res) => {
 
     let userProfile = {};
 
-    
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Invalid Id!" });
+      return res.status(400).json({ message: "Invalid Id!" });
     }
 
     // upload file part
@@ -100,7 +100,7 @@ const updateUser = async (req, res) => {
       const { id: fileId, name: fileName } = await driveService.UploadFiles(
         file,
         process.env.PROFILE_FOLDER_ID
-      ); 
+      );
 
       Object.assign(userProfile, {
         id: fileId,
@@ -145,7 +145,28 @@ const updateUser = async (req, res) => {
 // function for deleting user
 const deleteUser = async (req, res) => {
   try {
-  } catch (error) {
+
+    const { id } = req.params;
+    // const user = JSON.parse(body.user);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Id!" });
+    }
+
+    const user = await Users.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    await driveService.DeleteFiles(user.info.profile.id);
+    console.log("File Deleted Successfully");
+
+    const result = await Users.findByIdAndDelete(user._id);
+    res.status(200).json(result);
+    console.log("Deleted Successfully");
+
+  } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };

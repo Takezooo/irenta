@@ -26,14 +26,12 @@ const userSchema = new mongoose.Schema({
         name: { type: String },
         link: { type: String},
       },
-    userType: { type: String, enum: ["Seeker", "Owners"], required: true },
+    userType: { type: String, enum: ["Seeker", "Owner"], required: true },
     address: {
       houseNumber: { type: String },
       street: { type: String },
       city: { type: String },
       zip: { type: String },
-      latitude: { type: Number },
-      longitude: { type: Number },
     },
   },
 });

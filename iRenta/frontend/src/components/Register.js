@@ -1,193 +1,160 @@
 // src/components/Register.js
 
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
+
+const API_LINK = "http://localhost:5000/api";
 
 const Register = () => {
-    const [firstName, setFirstName] = useState('');
-    const [middleName, setMiddleName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [password, setPassword] = useState('');
-    const [userRole, setUserRole] = useState('Seeker');  // Default to Seeker
+  const [user, setUser] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    phoneNumber: "",
+    userType: "Seeker",
+    address: {
+      houseNumber: "",
+      street: "",
+      city: "",
+      zip: "",
+    },
+  });
 
-    // Owner-specific fields
-    const [houseNumber, setHouseNumber] = useState('');
-    const [street, setStreet] = useState('');
-    const [city, setCity] = useState('');
-    const [zip, setZip] = useState('');
-    const [businessPermitPath, setBusinessPermitPath] = useState('');
+  const [profile, setProfile] = useState(null);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        // Collect all the fields for the request body
-        const requestBody = {
-            firstName,
-            middleName,
-            lastName,
-            email,
-            phoneNumber,
-            imageUrl,
-            password,
-            userRole,
-            // Include address and ownerDetails only if userRole is 'Owner'
-            ...(userRole === 'Owners' && {
-                address: {
-                    houseNumber,
-                    street,
-                    city,
-                    zip,
-                },
-                ownerDetails: {
-                    businessPermitPath,
-                    verificationStatus: 'Basic', // or whatever default you want
-                },
-            }),
+  const handleOnChange = (e) => {
+    setUser((prev) => {
+      const updatedUser = { ...prev };
+
+      if (e.target.name.includes("address.")) {
+        updatedUser.address = {
+          ...updatedUser.address,
+          [e.target.name.split(".")[1]]: e.target.value,
         };
+      } else {
+        updatedUser[e.target.name] = e.target.value;
+      }
 
-        try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', requestBody);
-            console.log('Registration Successful:', response.data);
-        } catch (error) {
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                console.error('Registration Error:', error.response.data);
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.error('No response received:', error.request);
-            } else {
-                // Something happened in setting up the request that triggered an error
-                console.error('Error:', error.message);
-            }
-        }        
-    };
+      return updatedUser;
+    });
+  };
 
-    return (
-        <div>
-            <h2>Register</h2>
-            <form onSubmit={handleSubmit}>
-                {/* Name fields */}
-                <input
-                    type="text"
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Middle Name"
-                    value={middleName}
-                    onChange={(e) => setMiddleName(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                />
+  const handleUploadImage = (e) => {
+    e.preventDefault();
+    setProfile(e.target.files[0]);
+  };
 
-                {/* Email */}
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+  const handleChangeUserType = (role) => {
+    setUser((prev) => ({
+      ...prev,
+      userType: role,
+    }));
+  };
 
-                {/* Phone Number */}
-                <input
-                    type="text"
-                    placeholder="Phone Number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                />
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
 
-                {/* Profile Image URL */}
-                <input
-                    type="text"
-                    placeholder="Profile Image URL"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                />
+      var formData = new FormData();
 
-                {/* Password */}
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+      formData.append("user", JSON.stringify(user));
+      formData.append("file", profile);
 
-                {/* Role Selection (Seeker or Owner) */}
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            value="Seeker"
-                            checked={userRole === 'Seeker'}
-                            onChange={() => setUserRole('Seeker')}
-                        />
-                        Seeker
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            value="Owners"
-                            checked={userRole === 'Owners'}
-                            onChange={() => setUserRole('Owners')}
-                        />
-                        Owners
-                    </label>
-                </div>
+      const res = await axios.post(`${API_LINK}/users/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-                {/* Owner-specific fields (conditionally rendered) */}
-                {userRole === 'Owners' && (
-                    <>
-                        <h3>Owner Details</h3>
-                        <input
-                            type="text"
-                            placeholder="House Number"
-                            value={houseNumber}
-                            onChange={(e) => setHouseNumber(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Street"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="City"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="ZIP Code"
-                            value={zip}
-                            onChange={(e) => setZip(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Business Permit URL"
-                            value={businessPermitPath}
-                            onChange={(e) => setBusinessPermitPath(e.target.value)}
-                        />
-                    </>
-                )}
+      if (res.status === 201) {
+        console.log(res.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-                <button type="submit">Register</button>
-            </form>
-        </div>
-    );
+  // console.log(user);
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <label>Username:</label>
+        <input type="text" name="username" onChange={handleOnChange} />
+        <label>Password:</label>
+        <input type="password" name="password" onChange={handleOnChange} />
+        <label>Email:</label>
+        <input type="email" name="email" onChange={handleOnChange} />
+
+        <label>First Name:</label>
+        <input type="text" name="firstName" onChange={handleOnChange} />
+        <label>Middle Name:</label>
+        <input type="text" name="middleName" onChange={handleOnChange} />
+        <label>Last Name:</label>
+        <input type="text" name="lastName" onChange={handleOnChange} />
+        <label>Phone Number:</label>
+        <input type="number" name="phoneNumber" onChange={handleOnChange} />
+
+        <label>Upload Profile:</label>
+        <input type="file" name="profile" onChange={handleUploadImage} />
+
+        {/* Role Selection (Seeker or Owner) */}
+
+        <label>
+          <input
+            type="radio"
+            value="Owners"
+            name="userType"
+            checked={user.userType === "Seeker"}
+            onChange={() => handleChangeUserType("Seeker")}
+          />
+          Seeker
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="Owners"
+            name="userType"
+            checked={user.userType === "Owner"}
+            onChange={() => handleChangeUserType("Owner")}
+          />
+          Owner
+        </label>
+
+        {user.userType === "Owner" && (
+          <>
+            <h3>Address</h3>
+            <input
+              type="text"
+              placeholder="House Number"
+              name="address.houseNumber"
+              onChange={handleOnChange}
+            />
+            <input
+              type="text"
+              placeholder="Street"
+              name="address.street"
+              onChange={handleOnChange}
+            />
+            <input
+              type="text"
+              placeholder="City"
+              name="address.city"
+              onChange={handleOnChange}
+            />
+            <input
+              type="text"
+              placeholder="ZIP Code"
+              name="address.zip"
+              onChange={handleOnChange}
+            />
+          </>
+        )}
+
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  );
 };
 
 export default Register;

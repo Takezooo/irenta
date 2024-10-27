@@ -1,306 +1,395 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      .table_component {
+        overflow: auto;
+        width: 100%;
+        margin: 0 auto;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    .table_component {
-      overflow: auto;
-      width: 100%;
-      margin: 0 auto;
-    }
+      .table_component table {
+        height: 100%;
+        width: 100%;
+        table-layout: fixed;
+        margin: 0 auto;
+        border-collapse: collapse;
+        border-spacing: 1px;
+        text-align: center;
+      }
 
-    .table_component table {
-      height: 100%;
-      width: 100%;
-      table-layout: fixed;
-      margin: 0 auto;
-      border-collapse: collapse;
-      border-spacing: 1px;
-      text-align: center;
-    }
+      .table_component th {
+        border: 2px solid #e7a600;
+        background-color: #e7a600;
+        color: #000000;
+        padding: 15px;
+        text-align: center;
+        vertical-align: middle;
+      }
 
-    .table_component th {
-      border: 2px solid #E7A600;
-      background-color: #E7A600;
-      color: #000000;
-      padding: 15px;
-      text-align: center;
-      vertical-align: middle;
-    }
+      .table_component td {
+        border: 2px solid #212121;
+        border-radius: 4px;
+        background-color: #ffffff;
+        color: #000000;
+        padding: 15px;
+        text-align: center;
+        vertical-align: middle;
+      }
 
-    .table_component td {
-      border: 2px solid #212121;
-      border-radius: 4px;
-      background-color: #ffffff;
-      color: #000000;
-      padding: 15px;
-      text-align: center;
-      vertical-align: middle;
-    }
+      .table_component table img {
+        height: fit-content;
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+      }
 
-    .table_component table img {
-      height: fit-content;
-      width: 100%;
-      max-width: 200px;
-      margin: 0 auto;
-    }
+      .table_component a {
+        padding: 15px;
+        background-color: #212121;
+        border-radius: 4px;
+        color: #ffffff;
+        text-decoration: none;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="table_component" role="region" tabindex="0">
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/NOVOMATIC-Logo-Combination_landscape_rgb.png"
+                alt="Novomatic"
+              />
+              <p>노보매틱</p>
+            </td>
+            <td>
+              <a href="https://www.novomatic.com/en">바로가기</a>
+            </td>
+          </tr>
 
-    .table_component a {
-      padding: 15px;
-      background-color: #212121;
-      border-radius: 4px;
-      color: #FFFFFF;
-      text-decoration: none;
-      margin: 0 auto;
-    }
-  </style>
-</head>
-<div class='table_component' role='region' tabindex='0'>
-  <table>
-    <tbody>
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/neteller.png' alt='Neteller'>
-          <p>넷텔러</p>
-        </td>
-        <td>
-          <a href='https://www.neteller.com/en/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/NoLimitCity.png"
+                alt="Nolimit City"
+              />
+              <p>노리밋 시티</p>
+            </td>
+            <td>
+              <a href="https://nolimitcity.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/BoletoBancario.png' alt='Boleto Bancário'>
-          <p>볼레토 뱅카리오</p>
-        </td>
-        <td>
-          <a href='https://www.pagbrasil.com/payment-methods/boleto-bancario/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/Playtech.png"
+                alt="Playtech"
+              />
+              <p>플레이텍</p>
+            </td>
+            <td>
+              <a href="https://www.playtech.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/bitcoin.png' alt='Bitcoin (BTC)'>
-          <p>비트코인 (BTC)</p>
-        </td>
-        <td>
-          <a href='https://bitcoin.org/en/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/PlaynGo.png"
+                alt="Play’n GO"
+              />
+              <p>플레이앤고(Play'n GO)</p>
+            </td>
+            <td>
+              <a href="https://www.playngo.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/astropay.png' alt='AstroPay'>
-          <p>아스트로페이</p>
-        </td>
-        <td>
-          <a href='https://www.astropay.com/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/pragmatic-play.png"
+                alt="Pragmatic Play"
+              />
+              <p>프라그매틱 플레이</p>
+            </td>
+            <td>
+              <a href="https://www.pragmaticplay.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/bitcoin-cash.png' alt='Bitcoin Cash (BCH)'>
-          <p>비트코인 캐시 (BCH)</p>
-        </td>
-        <td>
-          <a href='https://bitcoincash.org'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Quickspin.webp"
+                alt="Quickspin"
+              />
+              <p>퀵스핀</p>
+            </td>
+            <td>
+              <a href="https://quickspin.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/paytm.png' alt='Paytm'>
-          <p>페이티엠</p>
-        </td>
-        <td>
-          <a href='https://paytm.com'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/YggdrasilGaming.png"
+                alt="Yggdrasil Gaming"
+              />
+              <p>이그드라실 게이밍</p>
+            </td>
+            <td>
+              <a href="https://yggdrasilgaming.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/binance-coin.png' alt='Binance Coin (BNB)'>
-          <p>바이낸스 코인 (BNB)</p>
-        </td>
-        <td>
-          <a href='https://www.binance.com/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/BigTimeGaming.png"
+                alt="Big Time Gaming"
+              />
+              <p>빅 타임 게이밍</p>
+            </td>
+            <td>
+              <a href="https://www.bigtimegaming.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/tether.png' alt='Tether (USDT)'>
-          <p>테더 (USDT)</p>
-        </td>
-        <td>
-          <a href='https://tether.to/en/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/Habanero.png"
+                alt="Habanero"
+              />
+              <p>하바네로</p>
+            </td>
+            <td>
+              <a href="https://habanerosystems.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/tron.png' alt='Tron (TRX)'>
-          <p>트론 (TRX)</p>
-        </td>
-        <td>
-          <a href='https://tron.network/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Red-Rake-Gaming.png"
+                alt="Red Rake Gaming"
+              />
+              <p>레드 레이크 게임</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/phonepe.png' alt='PhonePe'>
-          <p>폰페</p>
-        </td>
-        <td>
-          <a href='https://www.phonepe.com'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Spinomenal_f25b7f0b42.png"
+                alt="Spinomenal"
+              />
+              <p>스피노메날</p>
+            </td>
+            <td>
+              <a href="https://spinomenal.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/ethereum.png' alt='Ethereum (ETH)'>
-          <p>이더리움 (ETH)</p>
-        </td>
-        <td>
-          <a href='https://ethereum.org/en/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/1X2Gaming.png"
+                alt="1X2 Gaming"
+              />
+              <p>1X2 게이밍</p>
+            </td>
+            <td>
+              <a href="https://www.1x2network.com/product-category/1x2gaming/"
+                >바로가기</a
+              >
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/09/litecoin.png' alt='Litecoin (LTC)'>
-          <p>라이트코인 (LTC)</p>
-        </td>
-        <td>
-          <a href='https://litecoin.org'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/irondog.webp"
+                alt="Iron Dog Studio"
+              />
+              <p>아이언 도그 스튜디오</p>
+            </td>
+            <td>
+              <a
+                href="https://www.1x2network.com/product-category/iron-dog-studio/"
+                >바로가기</a
+              >
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Pix.png' alt='PIX'>
-          <p>Pix</p>
-        </td>
-        <td>
-          <a href='https://www.bcb.gov.br/en/financialstability/pix_en'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/RelaxGaming.png"
+                alt="Relax Gaming"
+              />
+              <p>릴랙스 게이밍</p>
+            </td>
+            <td>
+              <a href="https://relax-gaming.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Sicredi.png' alt='Sicredi'>
-          <p>Sicredi</p>
-        </td>
-        <td>
-          <a href='https://www.sicredi.com.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Stake-Logic.png"
+                alt="Stakelogic"
+              />
+              <p>스테이크로직</p>
+            </td>
+            <td>
+              <a href="https://stakelogic.com/en/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/LoteriasCaixa.png' alt='Loterias Caixa'>
-          <p>Loterias Caixa</p>
-        </td>
-        <td>
-          <a href='https://www.caixa.gov.br/menu-app-loterias/paginas/menu.aspx'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/09/gamevy.png"
+                alt="Gamevy"
+              />
+              <p>게임비</p>
+            </td>
+            <td>
+              <a href="http://gamevy.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/fast-token.png' alt='FastToken'>
-          <p>패스트토큰</p>
-        </td>
-        <td>
-          <a href='https://www.fasttoken.com/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Spinberry.png"
+                alt="Spinberry"
+              />
+              <p>스핀베리</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Directa24.png' alt='Directa24'>
-          <p>Directa24</p>
-        </td>
-        <td>
-          <a href='https://www.d24.com/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Apparat-Gaming.png"
+                alt="Apparat Gaming"
+              />
+              <p>페리크스 게임</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/BancoBanrisul.png' alt='Banco Banrisul'>
-          <p>방코 반리술</p>
-        </td>
-        <td>
-          <a href='https://www.banrisul.com.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/RubyPlay-1.png"
+                alt="Ruby Play"
+              />
+              <p>루비 플레이</p>
+            </td>
+            <td>
+              <a href="https://rubyplay.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/BancoOriginal.png' alt='Banco Original'>
-          <p>기존 은행</p>
-        </td>
-        <td>
-          <a href='https://www.original.com.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Gaming-Corps.png"
+                alt="Gaming Corps"
+              />
+              <p>게이밍 코프스</p>
+            </td>
+            <td>
+              <a href="https://www.gamingcorps.com/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/BancoSafra.png' alt='Banco Safra'>
-          <p>방코 사프라</p>
-        </td>
-        <td>
-          <a href='https://www.safra.com.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Spribe-1.png"
+                alt="Spribe"
+              />
+              <p>스프라이브</p>
+            </td>
+            <td>
+              <a href="https://spribe.co/">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Bradesco.png' alt='Bradesco'>
-          <p>브래드에스코</p>
-        </td>
-        <td>
-          <a href='https://banco.bradesco/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Prospect-1.png"
+                alt="Prospect Gaming"
+              />
+              <p>프로스펙트 게이밍</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/BankOfBrazil.png' alt='Banco do Brasil'>
-          <p>브라질 은행</p>
-        </td>
-        <td>
-          <a href='https://www.bb.com.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Wizard-Games.png"
+                alt="Wizard games"
+              />
+              <p>아빠랏 게임</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Caixa.png' alt='Caixa'>
-          <p>Caixa</p>
-        </td>
-        <td>
-          <a href='https://www.caixa.gov.br/'>바로가기</a>
-        </td>
-      </tr>
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Retro-Gaming.png"
+                alt="Retro Gaming"
+              />
+              <p>레트로 게임</p>
+            </td>
+            <td>
+              <a href="">바로가기</a>
+            </td>
+          </tr>
 
-      <tr>
-        <td>
-          <img src='http://mountainbikelabs.com/wp-content/uploads/2024/10/Itau.png' alt='Itau unibanco'>
-          <p>이타우 유니뱅크</p>
-        </td>
-        <td>
-          <a href='https://www.itau.com.br/'>바로가기</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</body>
-
+          <tr>
+            <td>
+              <img
+                src="http://mountainbikelabs.com/wp-content/uploads/2024/10/Reevo-1.png"
+                alt="Reevo"
+              />
+              <p>리보</p>
+            </td>
+            <td>
+              <a href="https://reevotech.com/">바로가기</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
 </html>

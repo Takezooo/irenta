@@ -19,3 +19,4 @@ userRoutes.patch("/:id", upload.single("file"), userController.updateUser);
 userRoutes.delete("/:id", userController.deleteUser);
 
 export default userRoutes;
+//test

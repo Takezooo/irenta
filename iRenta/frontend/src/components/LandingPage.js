@@ -5,15 +5,20 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
     return (
-        <div style={{ textAlign: 'center', padding: '50px' }}>
-            <h1>Welcome to iRenta</h1>
-            <p>Please choose an option to continue</p>
-            <Link to="/login">
-                <button style={{ margin: '10px', padding: '10px 20px' }}>Login</button>
-            </Link>
-            <Link to="/register">
-                <button style={{ margin: '10px', padding: '10px 20px' }}>Register</button>
-            </Link>
+        <div className="h-screen bg-gray-100 flex justify-center items-center">
+            <div class="rounded-[10px] h-fit w-fit text-center p-[30px] bg-gray-100 text-black shadow-lg border border-gray-400">
+                <h1 class="font-extrabold text-2xl mb-2 text-blue-800">WELCOME TO iRENTA</h1>
+                <p class="text-sm">Please choose an option to continue</p>
+                <hr class="my-[20px] border border-gray-500"></hr>
+                <div class="flex flex-col gap-4">
+                    <Link to="/login">
+                        <button class="w-[100%] px-[20px] py-[10px] rounded-[10px] bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
+                    </Link>
+                    <Link to="/register">
+                        <button class="w-[100%] px-[20px] py-[10px] rounded-[10px] bg-gray-200 hover:bg-gray-400 transition ease-in duration-300">Register</button>
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,13 +1,27 @@
-// src/components/Login.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    // Google login handler
+    const handleGoogleLoginSuccess = async (credentialResponse) => {
+        const idToken = credentialResponse.credential;
+        try {
+            const response = await axios.post("http://localhost:5000/api/users/google-login", {
+                idToken,
+            });
+            // Store the session token and username
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("username", response.data.username);
+            console.log("Google Login successful", response.data.username);
+        } catch (err) {
+            console.error("Google Login failed:", err);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +32,7 @@ const Login = () => {
             });
             // Save token to localStorage or context
             localStorage.setItem("token", response.data.token);
+            console.log(response.data.token);
             console.log("Login successful");
           } catch (err) {
             console.error("Login failed:", err);
@@ -44,13 +59,11 @@ const Login = () => {
                 />
                 <button type="submit">Login</button>
                     <GoogleLogin
-                        onSuccess={credentialResponse => {
-                            console.log(credentialResponse);
-                        }}
-                        onError={() => {
-                            console.log('Login Failed');
-                        }}
-                    />;
+                    onSuccess={handleGoogleLoginSuccess}
+                    onError={() => {
+                        console.log('Google Login Failed');
+                    }}
+                />
             </form>
         </div>
     );

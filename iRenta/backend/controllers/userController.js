@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import driveService from "../utils/driveService.js";
 import { drive } from "googleapis/build/src/apis/drive/index.js";
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 dotenv.config();
 
@@ -194,6 +196,31 @@ const loginUser = async (req, res) => {
   }
 };
 
+const googleLoginUser = async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    // Verify Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const email = payload.email;
+
+    // Find user by email
+    const user = await Users.findOne({ "credentials.email": email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Create JWT token for the existing user
+    const token = jwt.sign({ id: user._id, username: user.credentials.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    res.status(200).json({ token, user: { id: user._id, username: user.credentials.username, userType: user.info.userType } });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   getAllUsers,
   getSpecificUser,
@@ -201,4 +228,5 @@ export default {
   updateUser,
   deleteUser,
   loginUser,
+  googleLoginUser,
 };

@@ -25,30 +25,30 @@ const Login = () => {
     };
 
     return (
-        <div class="h-screen bg-gray-100 flex justify-center items-center flex-col font-sans">
-            <div class=" rounded-[10px] w-[80%] sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12 2xl:w-1/6 h-fit text-center p-[24px] bg-gray-100 text-black shadow-lg border border-gray-400">
-                <h2 class="font-extrabold text-2xl text-blue-800 mb-1">LOGIN</h2>
-                <p class="text-xs mb-[30px]">Welcome to iRenta!</p>
-                <form onSubmit={handleSubmit} class="gap-4 flex justify-center items-center flex-col">
-                    <input class="w-[100%] px-[20px] py-[10px] rounded-[10px]"
+        <div className="h-screen bg-gray-100 flex justify-center items-center flex-col font-sans">
+            <div className=" rounded-[10px] w-[80%] sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12 2xl:w-1/6 h-fit text-center p-[24px] bg-gray-100 text-black shadow-lg border border-gray-400">
+                <h2 className="font-extrabold text-2xl text-blue-800 mb-1">LOGIN</h2>
+                <p className="text-xs mb-[30px]">Welcome to iRenta!</p>
+                <form onSubmit={handleSubmit} className="gap-4 flex justify-center items-center flex-col">
+                    <input className="w-[100%] px-[20px] py-[10px] rounded-[10px]"
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
-                    <input class="w-[100%] px-[20px] py-[10px] rounded-[10px] mb-1"
+                    <input className="w-[100%] px-[20px] py-[10px] rounded-[10px] mb-1"
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <button type="submit" class="my-[10px] w-[100%] px-[20px] py-[10px] rounded-[10px] bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
+                    <button type="submit" className="my-[10px] w-[100%] px-[20px] py-[10px] rounded-[10px] bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
                 </form>
             </div>
             <Link to="/register">
-                <h3 class="mt-[10px] text-sm">New to iRenta? <span class="text-blue-600 hover:underline font-bold">Register</span></h3>
+                <h3 className="mt-[10px] text-sm">New to iRenta? <span className="text-blue-600 hover:underline font-bold">Register</span></h3>
             </Link>
         </div>
     );

@@ -78,8 +78,8 @@ const Register = () => {
   // console.log(user);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center flex-col font-sans">
-      <div className="rounded-[10px] w-[80%] sm:w-10/12 md:w-8/12 lg:w-6/12 xl:w-4/12 2xl:w-3/12 h-fit text-center p-[24px] bg-gray-100 text-black shadow-lg border border-gray-400">
+    <div className="min-h-screen p-10 bg-gray-100 flex justify-center items-center flex-col font-sans">
+      <div className="rounded-[10px] w-[80%] sm:w-10/12 md:w-8/12 lg:w-6/12 2xl:w-4/12 h-fit text-center p-[24px] bg-gray-100 text-black shadow-lg border border-gray-400">
         <h2 className="font-extrabold text-2xl text-blue-800 mb-1">SIGN UP</h2>
         <p className="text-xs mb-[20px]">Create an account.</p>
         <div>
@@ -171,8 +171,8 @@ const Register = () => {
               Upload Profile:
             </label>
             <input
-              className="file:outline-none file:border-none file:py-2 file:cursor-pointer file:bg-blue-800 file:hover:bg-blue-500 file:text-white file:duration-300
-              block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+              className="file:outline-none file:border-none file:py-2 file:cursor-pointer file:bg-blue-800 file:hover:bg-blue-600 file:text-white file:duration-300
+              block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 bg-gray-200 focus:outline-none"
               type="file"
               name="profile"
               onChange={handleUploadImage}
@@ -180,9 +180,9 @@ const Register = () => {
 
             <hr className="w-full mt-2"></hr>
             {/* Role Selection (Seeker or Owner) */}
-            <div className="w-[80%] flex gap-2 mx-auto">
+            <div className="w-full flex gap-0 mx-auto">
               <div className="w-full flex justify-around mt-5">
-                <div className="flex items-center border border-gray-300 rounded-lg w-fit hover:bg-gray-300 duration-300">
+                <div className="flex items-center border border-gray-300 rounded-tl-lg rounded-bl-lg w-full hover:bg-gray-300 duration-300">
                   <input
                     id="bordered-radio-1"
                     type="radio"
@@ -195,12 +195,12 @@ const Register = () => {
                   />
                   <label
                     for="bordered-radio-1"
-                    className="w-full px-8 py-2 text-sm font-medium peer-checked:text-white rounded-lg peer-checked:bg-blue-800"
+                    className="w-full px-8 py-2 text-sm font-medium peer-checked:text-white rounded-tl-lg rounded-bl-lg peer-checked:bg-blue-800"
                   >
                     Seeker
                   </label>
                 </div>
-                <div className="flex items-center border border-gray-300 rounded-lg w-fit hover:bg-gray-300 duration-300">
+                <div className="flex items-center border border-gray-300 rounded-se-lg rounded-br-lg w-full hover:bg-gray-300 duration-300">
                   <input
                     id="bordered-radio-2"
                     type="radio"
@@ -212,18 +212,18 @@ const Register = () => {
                   />
                   <label
                     for="bordered-radio-2"
-                    className="w-full px-8 py-2 text-sm font-medium peer-checked:text-white rounded-lg peer-checked:bg-blue-800"
+                    className="w-full px-8 py-2 text-sm font-medium peer-checked:text-white rounded-se-lg rounded-br-lg peer-checked:bg-blue-800"
                   >
                     Owner
                   </label>
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2 items-start w-full">
+            <div className="flex flex-col gap-2 w-full">
               {user.userType === "Owner" && (
                 <>
                   <div>
-                    <h3 className=" ml-1 text-sm font-medium flex flex-row text-blue-800">Address:</h3>
+                    <h3 className="ml-1 mt-2 text-sm font-medium flex flex-row text-blue-800">Address:</h3>
                   </div>
                   <div>
                     <div className="flex gap-2 justify-center mb-2">

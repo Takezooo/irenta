@@ -1,9 +1,9 @@
 // src/components/Register.js
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -13,21 +13,25 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    birthDate: "",
-    gender: "",
-    phoneNumber: "",
-    userType: "Seeker",
-    address: {
-      houseNumber: "",
-      street: "",
-      city: "",
-      zip: "",
-    },
-  });
+  const location = useLocation();
+  
+    // Populate form data on component load if location state has values
+    const [user, setUser] = useState({
+      email: location.state?.email || "",
+      firstName: location.state?.firstName || "",
+      lastName: location.state?.lastName || "",
+      middleName: "",
+      birthDate: "",
+      gender: "",
+      phoneNumber: "",
+      userType: "Seeker",
+      address: {
+        houseNumber: "",
+        street: "",
+        city: "",
+        zip: "",
+      },
+    });
 
   // useEffect(() => {
   //   console.log("User state updated:", user);
@@ -48,7 +52,7 @@ const Register = () => {
       } else {
         updatedUser[e.target.name] = e.target.value;
       }
-
+      console.log(updatedUser);
       return updatedUser;
     });
   };
@@ -110,6 +114,7 @@ const Register = () => {
                   type="text"
                   placeholder="John"
                   name="firstName"
+                  value={user.firstName}
                   onChange={handleOnChange}
                   className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
                 />
@@ -122,6 +127,7 @@ const Register = () => {
                   type="text"
                   placeholder="Doe"
                   name="lastName"
+                  value={user.lastName}
                   onChange={handleOnChange}
                   className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
                 />
@@ -191,6 +197,7 @@ const Register = () => {
               type="email"
               placeholder="johndoe@email.com"
               name="email"
+              value={user.email}
               onChange={handleOnChange}
               className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
             />

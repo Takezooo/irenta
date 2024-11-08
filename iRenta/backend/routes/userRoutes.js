@@ -20,5 +20,7 @@ userRoutes.delete("/:id", userController.deleteUser);
 
 // for login purpose
 userRoutes.post("/login", userController.loginUser);
+userRoutes.post('/google-login', userController.googleLoginUser); // Google login
 
 export default userRoutes;
+//test

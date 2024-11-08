@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import driveService from "../utils/driveService.js";
 import { drive } from "googleapis/build/src/apis/drive/index.js";
 import { OAuth2Client } from 'google-auth-library';
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 dotenv.config();
@@ -200,26 +201,54 @@ const googleLoginUser = async (req, res) => {
   const { idToken } = req.body;
 
   try {
-    // Verify Google ID token
-    const ticket = await client.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    const email = payload.email;
+      // Verify the Google ID token
+      const ticket = await client.verifyIdToken({
+          idToken,
+          audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
 
-    // Find user by email
-    const user = await Users.findOne({ "credentials.email": email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+      // Extract user details from Google token payload
+      const userDetails = {
+          email: payload.email,
+          firstName: payload.given_name,
+          lastName: payload.family_name,
+      };
 
-    // Create JWT token for the existing user
-    const token = jwt.sign({ id: user._id, username: user.credentials.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      // Attempt to find the user by email
+      const user = await Users.findOne({ "credentials.email": userDetails.email });
 
-    res.status(200).json({ token, user: { id: user._id, username: user.credentials.username, userType: user.info.userType } });
+      if (user) {
+          // Existing user: generate a JWT token for authentication
+          const token = jwt.sign(
+              { id: user._id, username: user.credentials.username },
+              process.env.JWT_SECRET,
+              { expiresIn: "1h" }
+          );
+
+          // Respond with the token and user details for the authenticated session
+          res.status(200).json({
+              token,
+              user: {
+                  id: user._id,
+                  username: user.credentials.username,
+                  userType: user.info.userType,
+              },
+          });
+      } else {
+          // New user: respond with 404 and Google profile details for registration pre-fill
+          res.status(404).json({
+              unregistered: true,
+              userDetails, // Basic user info for the client to prefill registration
+          });
+      }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+      // Handle any verification or other errors
+      console.error("Google Login error:", error);
+      res.status(500).json({ message: "Google Login failed" });
   }
 };
+
 
 export default {
   getAllUsers,

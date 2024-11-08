@@ -1,24 +1,29 @@
 // src/components/Register.js
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 const API_LINK = "http://localhost:5000/api";
 
 const Register = () => {
-  const [user, setUser] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    phoneNumber: "",
-    userType: "Seeker",
-    address: {
-      houseNumber: "",
-      street: "",
-      city: "",
-      zip: "",
-    },
-  });
+  const location = useLocation();
+  
+    // Populate form data on component load if location state has values
+    const [user, setUser] = useState({
+      email: location.state?.email || "",
+      firstName: location.state?.firstName || "",
+      lastName: location.state?.lastName || "",
+      middleName: "",
+      phoneNumber: "",
+      userType: "Seeker",
+      address: {
+        houseNumber: "",
+        street: "",
+        city: "",
+        zip: "",
+      },
+    });
 
   const [profile, setProfile] = useState(null);
 
@@ -34,7 +39,7 @@ const Register = () => {
       } else {
         updatedUser[e.target.name] = e.target.value;
       }
-
+      console.log(updatedUser);
       return updatedUser;
     });
   };
@@ -84,14 +89,14 @@ const Register = () => {
         <label>Password:</label>
         <input type="password" name="password" onChange={handleOnChange} />
         <label>Email:</label>
-        <input type="email" name="email" onChange={handleOnChange} />
+        <input type="email" name="email" value={user.email} onChange={handleOnChange} />
 
         <label>First Name:</label>
-        <input type="text" name="firstName" onChange={handleOnChange} />
+        <input type="text" name="firstName" value={user.firstName} onChange={handleOnChange} />
         <label>Middle Name:</label>
         <input type="text" name="middleName" onChange={handleOnChange} />
         <label>Last Name:</label>
-        <input type="text" name="lastName" onChange={handleOnChange} />
+        <input type="text" name="lastName" value={user.lastName} onChange={handleOnChange} />
         <label>Phone Number:</label>
         <input type="number" name="phoneNumber" onChange={handleOnChange} />
 

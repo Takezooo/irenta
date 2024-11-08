@@ -1,27 +1,37 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
-
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     // Google login handler
     const handleGoogleLoginSuccess = async (credentialResponse) => {
         const idToken = credentialResponse.credential;
+    
         try {
             const response = await axios.post("http://localhost:5000/api/users/google-login", {
                 idToken,
             });
-            // Store the session token and username
+    
+            // Handle successful login
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", response.data.username);
             console.log("Google Login successful", response.data.username);
+    
         } catch (err) {
             console.error("Google Login failed:", err);
+    
+            if (err.response && err.response.data && err.response.data.unregistered) {
+                const userDetails = err.response.data.userDetails;
+                navigate("/register", { state: userDetails });
+                console.log(userDetails);
+            }
         }
-    };
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();

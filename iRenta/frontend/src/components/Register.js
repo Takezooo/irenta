@@ -12,7 +12,6 @@ const API_LINK = "http://localhost:5000/api";
 const Register = () => {
 
   const navigate = useNavigate();
-
   const location = useLocation();
   
     // Populate form data on component load if location state has values

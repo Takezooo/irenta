@@ -1,13 +1,38 @@
-// src/components/Login.js
-
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
-
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    // Google login handler
+    const handleGoogleLoginSuccess = async (credentialResponse) => {
+        const idToken = credentialResponse.credential;
+    
+        try {
+            const response = await axios.post("http://localhost:5000/api/users/google-login", {
+                idToken,
+            });
+    
+            // Handle successful login
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("username", response.data.username);
+            console.log("Google Login successful", response.data.username);
+    
+        } catch (err) {
+            console.error("Google Login failed:", err);
+    
+            if (err.response && err.response.data && err.response.data.unregistered) {
+                const userDetails = err.response.data.userDetails;
+                navigate("/register", { state: userDetails });
+                console.log(userDetails);
+            }
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,6 +43,7 @@ const Login = () => {
             });
             // Save token to localStorage or context
             localStorage.setItem("token", response.data.token);
+            console.log(response.data.token);
             console.log("Login successful");
           } catch (err) {
             console.error("Login failed:", err);
@@ -47,7 +73,13 @@ const Login = () => {
                     />
 
                     <button type="submit" className="my-[10px] w-[100%] px-[20px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
-                </form>
+                                    <GoogleLogin
+                    onSuccess={handleGoogleLoginSuccess}
+                    onError={() => {
+                        console.log('Google Login Failed');
+                    }}
+                />
+</form>
             </div>
             <Link to="/register">
                 <h3 className="mt-[10px] text-sm">New to iRenta? <span className="text-blue-600 hover:underline font-bold">Register</span></h3>

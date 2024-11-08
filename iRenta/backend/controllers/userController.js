@@ -5,6 +5,9 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import driveService from "../utils/driveService.js";
 import { drive } from "googleapis/build/src/apis/drive/index.js";
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 dotenv.config();
 
@@ -67,6 +70,8 @@ const createUser = async (req, res) => {
         firstName: user.firstName,
         middleName: user.middleName,
         lastName: user.lastName,
+        birthDate: user.birthDate,
+        gender: user.gender,
         phoneNumber: user.phoneNumber,
         profile: userProfile,
         userType: user.userType,
@@ -125,6 +130,8 @@ const updateUser = async (req, res) => {
             firstName: user.info.firstName,
             middleName: user.info.middleName,
             lastName: user.info.lastName,
+            birthDate: user.birthDate,
+            gender: user.gender,
             phoneNumber: user.info.phoneNumber,
             profile: userProfile.hasOwnProperty("id")
               ? userProfile
@@ -194,6 +201,59 @@ const loginUser = async (req, res) => {
   }
 };
 
+const googleLoginUser = async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+      // Verify the Google ID token
+      const ticket = await client.verifyIdToken({
+          idToken,
+          audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+
+      // Extract user details from Google token payload
+      const userDetails = {
+          email: payload.email,
+          firstName: payload.given_name,
+          lastName: payload.family_name,
+      };
+
+      // Attempt to find the user by email
+      const user = await Users.findOne({ "credentials.email": userDetails.email });
+
+      if (user) {
+          // Existing user: generate a JWT token for authentication
+          const token = jwt.sign(
+              { id: user._id, username: user.credentials.username },
+              process.env.JWT_SECRET,
+              { expiresIn: "1h" }
+          );
+
+          // Respond with the token and user details for the authenticated session
+          res.status(200).json({
+              token,
+              user: {
+                  id: user._id,
+                  username: user.credentials.username,
+                  userType: user.info.userType,
+              },
+          });
+      } else {
+          // New user: respond with 404 and Google profile details for registration pre-fill
+          res.status(404).json({
+              unregistered: true,
+              userDetails, // Basic user info for the client to prefill registration
+          });
+      }
+  } catch (error) {
+      // Handle any verification or other errors
+      console.error("Google Login error:", error);
+      res.status(500).json({ message: "Google Login failed" });
+  }
+};
+
+
 export default {
   getAllUsers,
   getSpecificUser,
@@ -201,4 +261,5 @@ export default {
   updateUser,
   deleteUser,
   loginUser,
+  googleLoginUser,
 };

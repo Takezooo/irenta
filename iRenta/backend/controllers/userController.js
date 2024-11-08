@@ -70,6 +70,8 @@ const createUser = async (req, res) => {
         firstName: user.firstName,
         middleName: user.middleName,
         lastName: user.lastName,
+        birthDate: user.birthDate,
+        gender: user.gender,
         phoneNumber: user.phoneNumber,
         profile: userProfile,
         userType: user.userType,
@@ -128,6 +130,8 @@ const updateUser = async (req, res) => {
             firstName: user.info.firstName,
             middleName: user.info.middleName,
             lastName: user.info.lastName,
+            birthDate: user.birthDate,
+            gender: user.gender,
             phoneNumber: user.info.phoneNumber,
             profile: userProfile.hasOwnProperty("id")
               ? userProfile

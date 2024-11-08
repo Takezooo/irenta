@@ -1,16 +1,24 @@
 // src/components/Register.js
 
 import React, { useState } from "react";
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const API_LINK = "http://localhost:5000/api";
 
 const Register = () => {
+
+  const navigate = useNavigate();
+
   const [user, setUser] = useState({
     firstName: "",
     middleName: "",
     lastName: "",
+    birthDate: "",
+    gender: "",
     phoneNumber: "",
     userType: "Seeker",
     address: {
@@ -20,6 +28,11 @@ const Register = () => {
       zip: "",
     },
   });
+
+  // useEffect(() => {
+  //   console.log("User state updated:", user);
+  // }, [user]);
+  
 
   const [profile, setProfile] = useState(null);
 
@@ -67,15 +80,16 @@ const Register = () => {
         },
       });
 
-      if (res.status === 201) {
+      if (res.status === 200) {
+        toast.success("Registration Succesful!.");
+        navigate("/login");
         console.log(res.data);
       }
     } catch (err) {
+      toast.error(`Error: ${err.message}`);
       console.log(err);
     }
   };
-
-  // console.log(user);
 
   return (
     <div className="min-h-screen p-10 bg-gray-100 flex justify-center items-center flex-col font-sans">
@@ -126,6 +140,30 @@ const Register = () => {
               </div>
             </div>
             <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
+              Birth Date:
+            </label>
+            <input
+              type="date"
+              placeholder="DD/MM/YYYY"
+              name="birthDate"
+              onChange={handleOnChange}
+              className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
+            />
+            <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
+              Gender:
+            </label>
+            <select
+              name="gender"
+              onChange={handleOnChange}
+              placeholder="Choose gender"
+              className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
+            >
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Non-binary">Non-binary</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+            <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
               Phone Number:
             </label>
             <input
@@ -156,7 +194,7 @@ const Register = () => {
               onChange={handleOnChange}
               className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
             />
-             <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
+            <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
               Password:
             </label>
             <input
@@ -223,7 +261,9 @@ const Register = () => {
               {user.userType === "Owner" && (
                 <>
                   <div>
-                    <h3 className="ml-1 mt-2 text-sm font-medium flex flex-row text-blue-800">Address:</h3>
+                    <h3 className="ml-1 mt-2 text-sm font-medium flex flex-row text-blue-800">
+                      Address:
+                    </h3>
                   </div>
                   <div>
                     <div className="flex gap-2 justify-center mb-2">
@@ -272,7 +312,12 @@ const Register = () => {
         </div>
       </div>
       <Link to="/login">
-        <h3 className="mt-[10px] text-sm">Already have an account? <span className="text-blue-600 hover:underline font-bold">Log In</span></h3>
+        <h3 className="mt-[10px] text-sm">
+          Already have an account?{" "}
+          <span className="text-blue-600 hover:underline font-bold">
+            Log In
+          </span>
+        </h3>
       </Link>
     </div>
   );

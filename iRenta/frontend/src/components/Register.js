@@ -12,7 +12,6 @@ const API_LINK = "http://localhost:5000/api";
 const Register = () => {
 
   const navigate = useNavigate();
-
   const location = useLocation();
   
     // Populate form data on component load if location state has values
@@ -22,7 +21,7 @@ const Register = () => {
       lastName: location.state?.lastName || "",
       middleName: "",
       birthDate: "",
-      gender: "",
+      gender: "Male",
       phoneNumber: "",
       userType: "Seeker",
       address: {
@@ -161,7 +160,7 @@ const Register = () => {
             <select
               name="gender"
               onChange={handleOnChange}
-              placeholder="Choose gender"
+              value={user.gender}
               className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
             >
               <option value="Male">Male</option>

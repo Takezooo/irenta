@@ -149,10 +149,10 @@ const Register = () => {
             </label>
             <input
               type="date"
-              placeholder="DD/MM/YYYY"
+              placeholder="MM/DD/YYYY"
               name="birthDate"
               onChange={handleOnChange}
-              className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
+              className="focus:text-black text-gray-400 w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300 cursor-pointer"
             />
             <label className="ml-1 mt-1 text-sm font-medium flex flex-row text-blue-800">
               Gender:
@@ -161,8 +161,9 @@ const Register = () => {
               name="gender"
               onChange={handleOnChange}
               value={user.gender}
-              className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
+              className="focus:text-black w-full px-[20px] py-[10px] rounded-lg border text-gray-400 border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300 cursor-pointer"
             >
+              <option selected>Please choose</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Non-binary">Non-binary</option>
@@ -172,12 +173,14 @@ const Register = () => {
               Phone Number:
             </label>
             <input
-              type="number"
-              placeholder="09XX-XXX-XXXX"
+              type="tel"
+              placeholder="09XXXXXXXXX"
               name="phoneNumber"
               onChange={handleOnChange}
+              aria-describedby="helper-text-explanation"
               className="w-full px-[20px] py-[10px] rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300"
             />
+            <p id="helper-text-explanation" class="px-[20px] mt-1 text-sm text-gray-500 dark:text-gray-400">Select a phone number that matches the format. Must be in 11 digits.</p>
             <hr className="w-full my-2"></hr>
             <label className="ml-1 text-sm font-medium flex flex-row text-blue-800">
               Username:

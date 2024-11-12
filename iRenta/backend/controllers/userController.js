@@ -4,7 +4,7 @@ import BCrypt from "../config/BCrypt.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import driveService from "../utils/driveService.js";
-import { drive } from "googleapis/build/src/apis/drive/index.js";
+import { Client, Account, ID } from "appwrite";
 import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -36,6 +36,13 @@ const getSpecificUser = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+
+const appwriteClient = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1') // Appwrite API Endpoint
+    .setProject(process.env.APPWRITE_PROJECT_ID);                 // Your project ID
+
+const account = new Account(appwriteClient);
 
 // function for creating a new user
 const createUser = async (req, res) => {
@@ -78,7 +85,14 @@ const createUser = async (req, res) => {
         address: user.address,
       },
     });
-  
+
+    const appwriteUser = await account.create(
+      ID.unique(), 
+      user.email, 
+      user.password,
+      user.firstName,
+    );
+
     res.status(200).json(result);
   } catch (err) {
     res.status(400).json({ message: err.message });

@@ -84,7 +84,7 @@ const Register = () => {
       });
 
       if (res.status === 200) {
-        toast.success("Registration Succesful!.");
+        toast.success("Succesful");
         navigate("/login");
         console.log(res.data);
       }

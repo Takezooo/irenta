@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import "react-toastify/dist/ReactToastify.css";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
@@ -21,13 +23,17 @@ const Login = () => {
             // Handle successful login
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", response.data.username);
+            toast.success(`Google Login successful, ${response.data.username}`);
             console.log("Google Login successful", response.data.username);
+            navigate("/chat");
     
         } catch (err) {
+            toast.error(`Google Login failed:, ${err}`);
             console.error("Google Login failed:", err);
     
             if (err.response && err.response.data && err.response.data.unregistered) {
                 const userDetails = err.response.data.userDetails;
+                toast.error('Email not registered');
                 navigate("/register", { state: userDetails });
                 console.log(userDetails);
             }
@@ -43,9 +49,13 @@ const Login = () => {
             });
             // Save token to localStorage or context
             localStorage.setItem("token", response.data.token);
+            toast.success('Login successful');
+            navigate("/chat");
             console.log(response.data.token);
             console.log("Login successful");
+
           } catch (err) {
+            toast.error(`Login failed: ${err}`);
             console.error("Login failed:", err);
           }
     };

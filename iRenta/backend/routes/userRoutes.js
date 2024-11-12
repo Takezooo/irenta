@@ -1,5 +1,4 @@
 import express from "express";
-
 import userController from "../controllers/userController.js";
 import upload from "../config/Multer.js";
 
@@ -23,4 +22,3 @@ userRoutes.post("/login", userController.loginUser);
 userRoutes.post('/google-login', userController.googleLoginUser); // Google login
 
 export default userRoutes;
-//test

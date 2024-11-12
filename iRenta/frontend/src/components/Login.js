@@ -82,17 +82,18 @@ const Login = () => {
                         required
                     />
 
-                    <button type="submit" className="my-[10px] w-[100%] px-[20px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
-                                    <GoogleLogin
+                    <button type="submit" className="mt-[10px] w-[100%] px-[20px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">Log in</button>
+                    <hr className="w-full"></hr>
+                    <GoogleLogin
                     onSuccess={handleGoogleLoginSuccess}
                     onError={() => {
                         console.log('Google Login Failed');
                     }}
-                />
+                    />
 </form>
             </div>
             <Link to="/register">
-                <h3 className="mt-[10px] text-sm">New to iRenta? <span className="text-blue-600 hover:underline font-bold">Register</span></h3>
+                <h3 className="mt-[10px] text-sm">New to iRenta? <span className="text-blue-600 hover:underline font-bold">Sign Up</span></h3>
             </Link>
         </div>
     );

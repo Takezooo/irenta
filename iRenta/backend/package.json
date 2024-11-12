@@ -12,7 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
     "@react-oauth/google": "^0.12.1",
+=======
+    "appwrite": "^16.0.2",
+>>>>>>> 9082e0867b0e2de00c9b9f90320773d74e91b654
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",

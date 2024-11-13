@@ -1,6 +1,7 @@
 import express from "express";
 import userController from "../controllers/userController.js";
 import upload from "../config/Multer.js";
+import { authenticateToken } from '../config/auth.js';
 
 const userRoutes = express.Router();
 
@@ -17,8 +18,13 @@ userRoutes.patch("/:id", upload.single("file"), userController.updateUser);
 
 userRoutes.delete("/:id", userController.deleteUser);
 
+//  for checking if the user is authenticated
+userRoutes.get('/auth-check', authenticateToken, userController.authCheck);
+
 // for login purpose
 userRoutes.post("/login", userController.loginUser);
-userRoutes.post('/google-login', userController.googleLoginUser); // Google login
+
+// Google login
+userRoutes.post('/google-login', userController.googleLoginUser);
 
 export default userRoutes;

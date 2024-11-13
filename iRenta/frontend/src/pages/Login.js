@@ -6,59 +6,55 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
+const API_LINK = "http://localhost:5000/api";
+
 const Login = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     // Google login handler
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post(`${API_LINK}/users/login`, { username, password });
+            
+            // Store the token in localStorage
+            localStorage.setItem('token', response.data.token);
+            console.log('Stored token:', localStorage.getItem('token'));
+    
+            toast.success('Login successful');
+    
+            // Introduce a slight delay to ensure the token is stored
+            setTimeout(() => {
+                navigate('/chat');
+            }, 100); // Adjust the delay if needed
+        } catch (err) {
+            toast.error(`Login failed: ${err}`);
+            console.error("Login failed:", err);
+        }
+    };
+    
     const handleGoogleLoginSuccess = async (credentialResponse) => {
         const idToken = credentialResponse.credential;
     
         try {
-            const response = await axios.post("http://localhost:5000/api/users/google-login", {
-                idToken,
-            });
-    
-            // Handle successful login
+            const response = await axios.post(`${API_LINK}/users/google-login/`, { idToken });
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", response.data.username);
-            toast.success(`Google Login successful, ${response.data.username}`);
-            console.log("Google Login successful", response.data.username);
-            navigate("/chat");
     
+            toast.success(`Google Login successful, ${response.data.username}`);
+            setTimeout(() => navigate('/chat'), 100);
         } catch (err) {
-            toast.error(`Google Login failed:, ${err}`);
+            toast.error(`Google Login failed: ${err}`);
             console.error("Google Login failed:", err);
     
             if (err.response && err.response.data && err.response.data.unregistered) {
                 const userDetails = err.response.data.userDetails;
-                toast.error('Email not registered');
                 navigate("/register", { state: userDetails });
-                console.log(userDetails);
             }
         }
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post("http://localhost:5000/api/users/login", {
-              username,
-              password,
-            });
-            // Save token to localStorage or context
-            localStorage.setItem("token", response.data.token);
-            toast.success('Login successful');
-            navigate("/chat");
-            console.log(response.data.token);
-            console.log("Login successful");
-
-          } catch (err) {
-            toast.error(`Login failed: ${err}`);
-            console.error("Login failed:", err);
-          }
-    };
+    };    
 
     return (
         <div className="h-screen bg-gray-100 flex justify-center items-center flex-col font-sans">

@@ -267,6 +267,38 @@ const googleLoginUser = async (req, res) => {
   }
 };
 
+// Function to check if the user is authenticated
+const authCheck = async (req, res) => {
+  try {
+    console.log("Auth Check - Decoded User from Token:", req.user);
+
+    // Ensure req.user is not null or undefined
+    if (!req.user || !req.user.id) {
+      return res.status(400).json({ message: 'Invalid request. No user ID found.' });
+    }
+
+    // Fetch the user from the database using the decoded user ID
+    const user = await Users.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Send the authenticated user data
+    res.status(200).json({
+      loggedIn: true,
+      user: {
+        id: user._id,
+        username: user.credentials.username,
+        userType: user.info.userType,
+      },
+    });
+  } catch (error) {
+    console.error('Auth check error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 
 export default {
   getAllUsers,
@@ -276,4 +308,5 @@ export default {
   deleteUser,
   loginUser,
   googleLoginUser,
+  authCheck,
 };

@@ -40,14 +40,14 @@ const getSpecificUser = async (req, res) => {
 
 const appwriteClient = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1') // Appwrite API Endpoint
-    .setProject(process.env.APPWRITE_PROJECT_ID);                 // Your project ID
+    .setProject(process.env.APPWRITE_PROJECT_ID); // Your project ID
 
 const account = new Account(appwriteClient);
 
 // function for creating a new user
 const createUser = async (req, res) => {
+  
   try {
-
     const { body, file } = req;
     const user = JSON.parse(body.user);
 
@@ -266,7 +266,6 @@ const googleLoginUser = async (req, res) => {
       res.status(500).json({ message: "Google Login failed" });
   }
 };
-
 
 export default {
   getAllUsers,

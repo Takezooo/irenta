@@ -1,13 +1,12 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const OwnerDashboard = () => {
+const Topbar = () => {
     return (
         <div>
-            <p>OwnerDashboard</p>
+            Topbar
         </div>
-    );
-};
+    )
+}
 
-export default OwnerDashboard;
+export default Topbar;

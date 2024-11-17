@@ -14,12 +14,15 @@ const userSchema = new mongoose.Schema({
     email: {
       type: String,
       required: true,
+      unique: true,
     },
   },
   info: {
     firstName: { type: String, required: true },
     middleName: { type: String, required: false },
     lastName: { type: String, required: true },
+    birthDate: { type: Date, required: true},
+    gender: { type: String, required: true },
     phoneNumber: { type: Number, required: true },
     profile: {
         id: { type: String },

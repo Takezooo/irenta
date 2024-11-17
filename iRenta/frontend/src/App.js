@@ -10,7 +10,8 @@ import { ToastContainer } from 'react-toastify';
 import OwnerDashboard from './scenes/dashboard/OwnerDashboard';
 
 const App = () => {
-    return (
+  
+    return ( 
         <>
             <Router>
                 <Routes>

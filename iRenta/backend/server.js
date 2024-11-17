@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
+import listingRoutes from './routes/listingRoutes.js'
 
 dotenv.config();
 connectDB();
@@ -21,6 +22,9 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/users", userRoutes);
+
+app.use(express.json());
+app.use("/listings", listingRoutes);
 
 // app.get('/', (req, res) => {
 //     res.send('API is running...');

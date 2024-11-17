@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import driveService from "../utils/driveService.js";
 import { Client, Account, ID } from "appwrite";
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -37,17 +37,15 @@ const getSpecificUser = async (req, res) => {
   }
 };
 
-
 const appwriteClient = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1') // Appwrite API Endpoint
-    .setProject(process.env.APPWRITE_PROJECT_ID);                 // Your project ID
+  .setEndpoint("https://cloud.appwrite.io/v1") // Appwrite API Endpoint
+  .setProject(process.env.APPWRITE_PROJECT_ID); // Your project ID
 
 const account = new Account(appwriteClient);
 
 // function for creating a new user
 const createUser = async (req, res) => {
   try {
-
     const { body, file } = req;
     const user = JSON.parse(body.user);
 
@@ -87,10 +85,10 @@ const createUser = async (req, res) => {
     });
 
     const appwriteUser = await account.create(
-      ID.unique(), 
-      user.email, 
+      ID.unique(),
+      user.email,
       user.password,
-      user.firstName,
+      user.firstName
     );
 
     res.status(200).json(result);
@@ -102,14 +100,12 @@ const createUser = async (req, res) => {
 // function for updating user info
 const updateUser = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const { body, file } = req;
     const user = JSON.parse(body.user);
 
     let userProfile = {};
-
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid Id!" });
@@ -167,7 +163,6 @@ const updateUser = async (req, res) => {
 // function for deleting user
 const deleteUser = async (req, res) => {
   try {
-
     const { id } = req.params;
     // const user = JSON.parse(body.user);
 
@@ -187,7 +182,6 @@ const deleteUser = async (req, res) => {
     const result = await Users.findByIdAndDelete(user._id);
     res.status(200).json(result);
     console.log("Deleted Successfully");
-
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -203,13 +197,30 @@ const loginUser = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Compare passwords
-    const isPasswordCorrect = await BCrypt.compare(password, user.credentials.password);
-    if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid credentials" });
+    const isPasswordCorrect = await BCrypt.compare(
+      password,
+      user.credentials.password
+    );
+    if (!isPasswordCorrect)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Create JWT token
-    const token = jwt.sign({ id: user._id, username: user.credentials.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(
+      { id: user._id, username: user.credentials.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    res.status(200).json({ token, user: { id: user._id, username: user.credentials.username, userType: user.info.userType } });
+    res
+      .status(200)
+      .json({
+        token,
+        user: {
+          id: user._id,
+          username: user.credentials.username,
+          userType: user.info.userType,
+        },
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -219,54 +230,55 @@ const googleLoginUser = async (req, res) => {
   const { idToken } = req.body;
 
   try {
-      // Verify the Google ID token
-      const ticket = await client.verifyIdToken({
-          idToken,
-          audience: process.env.GOOGLE_CLIENT_ID,
+    // Verify the Google ID token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    // Extract user details from Google token payload
+    const userDetails = {
+      email: payload.email,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+    };
+
+    // Attempt to find the user by email
+    const user = await Users.findOne({
+      "credentials.email": userDetails.email,
+    });
+
+    if (user) {
+      // Existing user: generate a JWT token for authentication
+      const token = jwt.sign(
+        { id: user._id, username: user.credentials.username },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      // Respond with the token and user details for the authenticated session
+      res.status(200).json({
+        token,
+        user: {
+          id: user._id,
+          username: user.credentials.username,
+          userType: user.info.userType,
+        },
       });
-      const payload = ticket.getPayload();
-
-      // Extract user details from Google token payload
-      const userDetails = {
-          email: payload.email,
-          firstName: payload.given_name,
-          lastName: payload.family_name,
-      };
-
-      // Attempt to find the user by email
-      const user = await Users.findOne({ "credentials.email": userDetails.email });
-
-      if (user) {
-          // Existing user: generate a JWT token for authentication
-          const token = jwt.sign(
-              { id: user._id, username: user.credentials.username },
-              process.env.JWT_SECRET,
-              { expiresIn: "1h" }
-          );
-
-          // Respond with the token and user details for the authenticated session
-          res.status(200).json({
-              token,
-              user: {
-                  id: user._id,
-                  username: user.credentials.username,
-                  userType: user.info.userType,
-              },
-          });
-      } else {
-          // New user: respond with 404 and Google profile details for registration pre-fill
-          res.status(404).json({
-              unregistered: true,
-              userDetails, // Basic user info for the client to prefill registration
-          });
-      }
+    } else {
+      // New user: respond with 404 and Google profile details for registration pre-fill
+      res.status(404).json({
+        unregistered: true,
+        userDetails, // Basic user info for the client to prefill registration
+      });
+    }
   } catch (error) {
-      // Handle any verification or other errors
-      console.error("Google Login error:", error);
-      res.status(500).json({ message: "Google Login failed" });
+    // Handle any verification or other errors
+    console.error("Google Login error:", error);
+    res.status(500).json({ message: "Google Login failed" });
   }
 };
-
 
 export default {
   getAllUsers,

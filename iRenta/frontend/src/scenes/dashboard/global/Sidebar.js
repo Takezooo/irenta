@@ -9,8 +9,8 @@ const Sidebar = ({ isOpen }) => {
 
   return (
     <div className="flex">
-        <aside className={`fixed top-12 left-0 w-64 h-full text-white transform transition-transform duration-300 ${isOpen ? "-translate-x-full" : "translate-x-0"}`}>
-            <div className="h-full px-3 py-4 overflow-y-auto bg-gray-100">
+        <aside className={`absolute h-full flex items-center text-white transform transition-transform duration-300 ease-in-out ${isOpen ? "-translate-x-full" : "translate-x-0"}`}>
+            <div className="h-fit rounded-e-3xl flex items-center self-center px-3 py-4 w-18 overflow-y-auto overflow-x-auto bg-gray-100 transition duration-75 ease-in-out">
                 <ul className="space-y-2 font-medium">
                 <li>
                     <a
@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen }) => {
                     className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-200 group"
                     >
                     <IoHome className="text-2xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
-                    <span className="ms-3">Owner Dashboard</span>
+                    <span className="transition=transform transform duration-700 ease-in-out absolute ml-10 bg-gray-500 p-1 opacity-90 text-sm font-normal text-white ms-3 whitespace-nowrap invisible group-hover:visible">Owner Dashboard</span>
                     </a>
                 </li>
                 <li>
@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen }) => {
                     className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-200 group"
                     >
                     <TbLayoutListFilled className="text-2xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
-                    <span className="flex-1 ms-3 whitespace-nowrap">
+                    <span className="absolute ml-10 bg-gray-500 p-1 opacity-90 text-sm font-normal text-white flex-1 ms-3 whitespace-nowrap invisible group-hover:visible">
                         Property Listings
                     </span>
                     </a>
@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen }) => {
                     className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-200 group"
                     >
                     <FaPeopleRoof className="text-2xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
-                    <span className="flex-1 ms-3 whitespace-nowrap">Tenants</span>
+                    <span className="absolute flex-1 ml-10 bg-gray-500 p-1 opacity-90 text-sm font-normal text-white ms-3 whitespace-nowrap invisible group-hover:visible">Tenants</span>
                     </a>
                 </li>
                 <li>
@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen }) => {
                     >
                     <button className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-200 group">
                         <FaSignOutAlt className="text-2xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
-                        <span className="flex-1 ms-3 whitespace-nowrap">Sign Out</span>
+                        <span className="absolute flex-1 ml-10 bg-gray-500 p-1 opacity-90 text-sm font-normal text-white ms-3 whitespace-nowrap invisible group-hover:visible">Sign Out</span>
                     </button>
                     </Link>
                 </li>

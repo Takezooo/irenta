@@ -5,7 +5,7 @@ import { CgSidebarOpen } from "react-icons/cg";
 const Topbar = ({ toggleSidebar, isOpen }) => {
 
   return (
-      <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200">
+      <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200 shadow">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start rtl:justify-end">
@@ -27,7 +27,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 </span>
             </button>
               <a href="" className="flex ms-2 md:me-24">
-                <img
+                <img 
                   src="../assets/images/iRenta.png"
                   className="h-8 me-3"
                   alt="iRenta Logo"

@@ -19,7 +19,7 @@ const OwnerDashboard = () => {
 
       <Sidebar isOpen={isOpen}/>
 
-      <div className="w-screen pt-20 pl-4 sm:ml-64 overflow-x-hidden">
+      <div className={`w-full h-full bg-gray-500 mt-12 ${isOpen ? "ml-2" : "ml-64"}`}>
         <h1 className="font-bold text-2xl">OWNER DASHBOARD</h1>
       </div>
     </div>

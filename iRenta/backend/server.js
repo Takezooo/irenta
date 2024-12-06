@@ -22,8 +22,6 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/users", userRoutes);
-
-app.use(express.json());
 app.use("/listings", listingRoutes);
 
 // app.get('/', (req, res) => {

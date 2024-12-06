@@ -39,6 +39,20 @@ const Register = () => {
 
   const [profile, setProfile] = useState(null);
 
+  const handleInputCorrectness = async (user) => {
+    try {
+      if (user.password.length >= 8) {
+        return true;
+      }else { 
+        toast.error("Password length must be 8");
+        return false;
+      }
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
   const handleOnChange = (e) => {
     setUser((prev) => {
       const updatedUser = { ...prev };
@@ -77,17 +91,29 @@ const Register = () => {
       formData.append("user", JSON.stringify(user));
       formData.append("file", profile);
 
-      const res = await axios.post(`${API_LINK}/users/`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
 
+<<<<<<< HEAD:iRenta/frontend/src/components/Register.js
       if (res.status === 200) {
         toast.success("Succesful");
         navigate("/login");
         // console.log(res.data);
       }
+=======
+      if (isCorrect){ // check fields if information is correct
+        const res = await axios.post(`${API_LINK}/users/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+  
+        if (res.status === 200) {
+          toast.success("Succesful");
+          navigate("/login");
+          console.log(res.data);
+        }
+      } 
+>>>>>>> develop:iRenta/frontend/src/pages/Register.js
     } catch (err) {
       toast.error(`Error: ${err.message}`);
       console.log(err);

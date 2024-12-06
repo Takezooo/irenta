@@ -10,5 +10,8 @@ listingRoutes.post('/', authenticate, listingController.createListing);
 // Route to update a listing (only for owners)
 listingRoutes.put('/:id', authenticate, listingController.updateListing);
 
+// Route to delete a listing (only for owners)
+listingRoutes.delete('/:id', authenticate, listingController.deleteListing);
+
 
 export default listingRoutes;

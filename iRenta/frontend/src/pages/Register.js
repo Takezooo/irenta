@@ -93,13 +93,6 @@ const Register = () => {
 
       const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
 
-<<<<<<< HEAD:iRenta/frontend/src/components/Register.js
-      if (res.status === 200) {
-        toast.success("Succesful");
-        navigate("/login");
-        // console.log(res.data);
-      }
-=======
       if (isCorrect){ // check fields if information is correct
         const res = await axios.post(`${API_LINK}/users/`, formData, {
           headers: {
@@ -113,7 +106,6 @@ const Register = () => {
           console.log(res.data);
         }
       } 
->>>>>>> develop:iRenta/frontend/src/pages/Register.js
     } catch (err) {
       toast.error(`Error: ${err.message}`);
       console.log(err);

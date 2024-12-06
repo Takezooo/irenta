@@ -16,13 +16,13 @@ const authenticate = (req, res, next) => {
 
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    console.log("Decoded JWT Payload:", decoded);
     // Attach user data to the request
     req.user = {
       id: decoded.id,
       userType: decoded.userType, // Attach only relevant user data
     };
-
+    ;
     next(); // Pass control to the next middleware or route handler
   } catch (err) {
     // Handle specific JWT errors

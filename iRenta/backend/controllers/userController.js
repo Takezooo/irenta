@@ -207,11 +207,11 @@ const loginUser = async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { id: user._id, username: user.credentials.username },
+      { id: user._id, username: user.credentials.username, userType: user.info.userType},
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-
+    console.log(jwt)
     res
       .status(200)
       .json({
@@ -257,7 +257,7 @@ const googleLoginUser = async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
-
+      console.log(token);
       // Respond with the token and user details for the authenticated session
       res.status(200).json({
         token,

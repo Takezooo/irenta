@@ -1,5 +1,14 @@
 import Listing from '../models/Listings.js';
 
+export const getAllListings = async (req, res) => {
+  try{
+    const listings = await Listing.find();
+    res.status(200).json(listings);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 export const createListing = async (req, res) => {
   try {
     // Check if the logged-in user is an "owner"
@@ -67,7 +76,8 @@ export const deleteListing = async (req, res) => {
 };
 
 export default {
-    createListing,
-    updateListing,
-    deleteListing,
+  getAllListings,
+  createListing,
+  updateListing,
+  deleteListing,
 };

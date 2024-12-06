@@ -4,6 +4,8 @@ import authenticate from '../middlewares/authenticate.js';
 
 const listingRoutes = express.Router();
 
+listingRoutes.get("/", listingController.getAllListings);
+
 // Route to create a listing (only for owners)
 listingRoutes.post('/', authenticate, listingController.createListing);
 

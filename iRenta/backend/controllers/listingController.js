@@ -1,13 +1,18 @@
 import Listing from '../models/Listings.js';
 
 export const getAllListings = async (req, res) => {
-  try{
-    const listings = await Listing.find();
+  try {
+    const ownerId = req.user.id; // Get the owner's ID from the decoded token (authenticate middleware)
+    
+    // Fetch only listings created by this owner
+    const listings = await Listing.find({ userId: ownerId });
+
     res.status(200).json(listings);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 export const createListing = async (req, res) => {
   try {

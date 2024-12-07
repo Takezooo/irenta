@@ -2,7 +2,7 @@ import React from 'react'
 
 const MainDashboard = () => {
   return (
-    <div className="pt-20 pb-4 flex flex-col gap-2 sm:ml-56">
+    <div className="pt-20 pb-4 flex flex-col gap-2 sm:ml-64">
       <div className="flex gap-2">
         <div className="flex justify-between p-4 w-full h-full bg-blue-900 text-white rounded-md shadow overflow-hidden">
           <div> 

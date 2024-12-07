@@ -38,13 +38,14 @@ const getSpecificUser = async (req, res) => {
 };
 
 const appwriteClient = new Client()
-  .setEndpoint("https://cloud.appwrite.io/v1") // Appwrite API Endpoint
-  .setProject(process.env.APPWRITE_PROJECT_ID); // Your project ID
+    .setEndpoint('https://cloud.appwrite.io/v1') // Appwrite API Endpoint
+    .setProject(process.env.APPWRITE_PROJECT_ID);                 // Your project ID
 
 const account = new Account(appwriteClient);
 
 // function for creating a new user
 const createUser = async (req, res) => {
+  
   try {
     const { body, file } = req;
     const user = JSON.parse(body.user);
@@ -206,11 +207,11 @@ const loginUser = async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { id: user._id, username: user.credentials.username },
+      { id: user._id, username: user.credentials.username, userType: user.info.userType},
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-
+    console.log(jwt)
     res
       .status(200)
       .json({
@@ -256,7 +257,7 @@ const googleLoginUser = async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
-
+      console.log(token);
       // Respond with the token and user details for the authenticated session
       res.status(200).json({
         token,

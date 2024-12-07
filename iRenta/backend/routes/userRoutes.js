@@ -1,11 +1,13 @@
 import express from "express";
 import userController from "../controllers/userController.js";
 import upload from "../config/Multer.js";
+import authenticate from "../middlewares/authenticate.js";
 
 const userRoutes = express.Router();
 
 // routes for allusers and specificuser, add user, update user, and delete user
 userRoutes.get("/", userController.getAllUsers);
+userRoutes.get('/users', authenticate, userController.getAllUsers);
 
 userRoutes.get("/:id", userController.getSpecificUser);
 

@@ -2,20 +2,9 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   credentials: {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
   },
   info: {
     firstName: { type: String, required: true },
@@ -28,7 +17,7 @@ const userSchema = new mongoose.Schema({
         id: { type: String },
         name: { type: String },
         link: { type: String},
-      },
+    },
     userType: { type: String, enum: ["Seeker", "Owner"], required: true },
     address: {
       houseNumber: { type: String },
@@ -37,6 +26,7 @@ const userSchema = new mongoose.Schema({
       zip: { type: String },
     },
   },
+//   listings: [{ type: Types.ObjectId, ref: 'listings' }]
 });
 
 const User = mongoose.model("User", userSchema);

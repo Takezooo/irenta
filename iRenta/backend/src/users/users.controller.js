@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import Users from "../models/Users.js";
-import BCrypt from "../config/BCrypt.js";
+import Users from "../users/users.model.js";
+import BCrypt from "../../global/config/BCrypt.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import driveService from "../utils/driveService.js";
-import { Client, Account, ID } from "appwrite";
+import driveService from "../../global/utils/Drive.js";
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -12,7 +11,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 dotenv.config();
 
 // function for geting all users
-const getAllUsers = async (req, res) => {
+const GetAllUsers = async (req, res) => {
   try {
     const users = await Users.find();
     res.status(200).json(users);
@@ -22,7 +21,7 @@ const getAllUsers = async (req, res) => {
 };
 
 // function for getting a specific user
-const getSpecificUser = async (req, res) => {
+const GetSpecificUser = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -37,14 +36,8 @@ const getSpecificUser = async (req, res) => {
   }
 };
 
-const appwriteClient = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1') // Appwrite API Endpoint
-    .setProject(process.env.APPWRITE_PROJECT_ID);                 // Your project ID
-
-const account = new Account(appwriteClient);
-
 // function for creating a new user
-const createUser = async (req, res) => {
+const CreateUser = async (req, res) => {
   
   try {
     const { body, file } = req;
@@ -85,13 +78,6 @@ const createUser = async (req, res) => {
       },
     });
 
-    const appwriteUser = await account.create(
-      ID.unique(),
-      user.email,
-      user.password,
-      user.firstName
-    );
-
     res.status(200).json(result);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -99,7 +85,7 @@ const createUser = async (req, res) => {
 };
 
 // function for updating user info
-const updateUser = async (req, res) => {
+const UpdateUser = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -162,7 +148,7 @@ const updateUser = async (req, res) => {
 };
 
 // function for deleting user
-const deleteUser = async (req, res) => {
+const DeleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     // const user = JSON.parse(body.user);
@@ -189,7 +175,7 @@ const deleteUser = async (req, res) => {
 };
 
 // login function
-const loginUser = async (req, res) => {
+const LoginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -227,7 +213,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-const googleLoginUser = async (req, res) => {
+const GoogleLoginUser = async (req, res) => {
   const { idToken } = req.body;
 
   try {
@@ -282,11 +268,11 @@ const googleLoginUser = async (req, res) => {
 };
 
 export default {
-  getAllUsers,
-  getSpecificUser,
-  createUser,
-  updateUser,
-  deleteUser,
-  loginUser,
-  googleLoginUser,
+  GetAllUsers,
+  GetSpecificUser,
+  CreateUser,
+  UpdateUser,
+  DeleteUser,
+  LoginUser,
+  GoogleLoginUser,
 };

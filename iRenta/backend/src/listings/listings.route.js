@@ -1,6 +1,6 @@
 import express from 'express';
 import listingController from '../controllers/listingController.js';
-import authenticate from '../middlewares/authenticate.js';
+import authenticate from '../global/middlewares/authenticate.js';
 
 const listingRoutes = express.Router();
 

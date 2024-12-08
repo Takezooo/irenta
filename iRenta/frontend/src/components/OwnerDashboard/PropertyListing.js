@@ -24,7 +24,7 @@ export const PropertyListing = () => {
   }, []); // Empty dependency array means this runs once when the component mounts
 
   return (
-    <div className="pt-20 pb-4 sm:ml-64">
+    <div className="pt-20 pb-4 mx-4 sm:ml-64">
       <div className="w-full h-full overflow-hidden">
         {/* <div className="fixed">
             <button className="bg-blue-500 text-gray-100 px-4 py-2 rounded-md shadow hover:bg-blue-600">Add Property</button>
@@ -46,12 +46,12 @@ export const PropertyListing = () => {
               key={listing._id} 
               className="mb-8 flex justify-center items-center"
             >
-              <div className="bg-white rounded-lg shadow-md p-6 border w-full max-w-5xl">
+              <div className="bg-white rounded-lg shadow-md p-6 border w-full lg:w-fit">
                 {/* Main Content */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                <div className="flex flex-col lg:flex-row gap-6">
                   {/* Image Section */}
                   <div className="col-span-2">
-                    <div className="relative">
+                    <div className="relative mx-auto">
                       <div className="h-72 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
                         <span className="text-gray-500">Main Image</span>
                       </div>

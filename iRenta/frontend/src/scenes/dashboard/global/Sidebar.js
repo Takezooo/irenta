@@ -15,7 +15,7 @@ const Sidebar = ({ isOpen }) => {
 
   return (
     <div className="flex w-screen">
-      <aside className={`fixed ml-4 top-0 left-0 z-40 w-56 h-screen pt-20 transform transition-transform duration-300 ease-in-out ${isOpen ? "-translate-x-full" : "translate-x-0"}`}>
+      <aside className={`fixed top-0 left-0 z-40 w-56 h-screen pt-20 transform transition-transform duration-300 ease-in-out ${isOpen ? "-translate-x-full ml-0" : "translate-x-0 ml-4"}`}>
         <div className="flex flex-col justify-between items-center w-full h-[95%] rounded-lg py-3 overflow-y-auto overflow-hidden bg-gray-100 transition duration-75 ease-in-out">
           <div className="w-full mx-auto space-y-2 font-medium">
             <button
@@ -91,7 +91,7 @@ const Sidebar = ({ isOpen }) => {
         </div>
       </aside>
 
-      <div className="w-full mr-4">
+      <div className="w-full">
         {activeContent === 'content1' && (
           <MainDashboard />
         )}

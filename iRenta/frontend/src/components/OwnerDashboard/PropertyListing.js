@@ -55,6 +55,11 @@ export const PropertyListing = () => {
   return (
     <div className="pt-20 pb-4 mx-4 sm:ml-64">
       <div className="w-full h-full overflow-hidden">
+        <div className="mb-4 flex justify-center items-center">
+          <div className="bg-white rounded-lg shadow-md p-4 border w-full sm:w-11/12 lg:w-10/12 xl:w-8/12 2xl:w-6/12">
+            <h1 className="font-bold text-xl text-blue-600">Your listings</h1>
+          </div>
+        </div>
         {error && <div className="text-red-500">{error}</div>} {/* Display error if any */}
 
         <div className="flex flex-col">
@@ -63,14 +68,14 @@ export const PropertyListing = () => {
               key={listing._id} 
               className="mb-8 flex justify-center items-center"
             >
-              <div className="bg-white rounded-lg shadow-md p-6 border w-full lg:w-fit">
+              <div className="bg-white rounded-lg shadow-md p-6 border w-full sm:w-11/12 lg:w-10/12 xl:w-8/12 2xl:w-6/12">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="col-span-2">
                     <div className="relative mx-auto">
                       <div className="h-72 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
                         <span className="text-gray-500">Main Image</span>
                       </div>
-                      <div className="flex justify-between space-x-2 overflow-x-auto scrollbar-hide">
+                      <div className="flex justify-around space-x-2 overflow-x-auto scrollbar-hide">
                         <div className="h-20 w-20 bg-gray-300 rounded-md"></div>
                         <div className="h-20 w-20 bg-gray-300 rounded-md"></div>
                         <div className="h-20 w-20 bg-gray-300 rounded-md"></div>

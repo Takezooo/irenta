@@ -23,6 +23,22 @@ export const PropertyListing = () => {
     fetchListings();
   }, []); // Empty dependency array means this runs once when the component mounts
 
+  const handleDelete = async (id) => {
+    try {
+      // Call the delete endpoint
+      await axios.delete(`http://localhost:5000/listings/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+  
+      // Update the UI by removing the deleted listing
+      setListings(listings.filter((listing) => listing._id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || "Error deleting listing");
+    }
+  };
+
   return (
     <div className="pt-20 pb-4 sm:ml-64">
       <div className="w-full h-full overflow-hidden">
@@ -105,7 +121,12 @@ export const PropertyListing = () => {
                   </div>
                 </div>
                 <div className="flex justify-end gap-4 mt-4">
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Remove</button>
+                  <button
+                      className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
+                      onClick={() => handleDelete(listing._id)} // Pass the listing ID
+                    >
+                      Remove
+                  </button>
                   <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">Edit</button>
                 </div>
               </div>

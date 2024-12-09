@@ -208,6 +208,7 @@ const LoginUser = async (req, res) => {
       .status(200)
       .json({
         token,
+        refreshToken,
         user: {
           id: user._id,
           username: user.credentials.username,
@@ -244,15 +245,18 @@ const GoogleLoginUser = async (req, res) => {
 
     if (user) {
       // Existing user: generate a JWT token for authentication
-      const token = jwt.sign(
-        { id: user._id, username: user.credentials.username },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-      console.log(token);
+      const token = GenerateToken({
+        id: user._id,
+        username: user.credentials.username,
+        userType: user.info.userType,
+      });
+      const refreshToken = GenerateRefreshToken({ id: user._id });
+      console.log(`Google Generated Token ${token}`);
+      console.log(`Google Refresh Token: ${refreshToken}`);
       // Respond with the token and user details for the authenticated session
       res.status(200).json({
         token,
+        refreshToken,
         user: {
           id: user._id,
           username: user.credentials.username,

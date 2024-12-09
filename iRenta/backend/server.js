@@ -18,6 +18,8 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*", credentials: true, optionSuccessStatus: 200 }));
 app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH");
     res.header(
@@ -40,7 +42,7 @@ app.get("/", (req, res) => {
 mongoose.connection.once("open", () => {
     console.log("Database connected.");
 
-    app.listen(process.env.PORT, () => console.log(`Server running on port ${PORT}`));
+    app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
     // server.listen(process.env.PORT, () =>
     //     console.log(`Server started on port ${process.env.PORT}`)
     // );

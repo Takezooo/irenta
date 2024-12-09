@@ -4,8 +4,8 @@ import {
     CreateListing,
     UpdateListing,
     DeleteListing
-} from '../controllers/listingController.js';
-import authenticate from '../global/middlewares/authenticate.js';
+} from './listings.controller.js';
+import authenticate from '../../global/middlewares/RequireAuth.js';
 
 const router = express.Router();
 

@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
 import { TbLayoutListFilled } from "react-icons/tb";
 import { FaCalendar, FaPeopleRoof, FaPowerOff } from "react-icons/fa6";
-import MainDashboard from "../../../components/OwnerDashboard/MainDashboard";
-import { PropertyListing } from "../../../components/OwnerDashboard/PropertyListing";
-import { ManageTenants } from "../../../components/OwnerDashboard/ManageTenants";
-import { Calendar } from "../../../components/OwnerDashboard/Calendar";
+import MainDashboard from "../../components/OwnerDashboard/MainDashboard.js";
+import { PropertyListing } from "../../components/OwnerDashboard/PropertyListing";
+import { ManageTenants } from "../../components/OwnerDashboard/ManageTenants";
+import { Calendar } from "../../components/OwnerDashboard/Calendar";
 
 const Sidebar = ({ isOpen }) => {
   const [activeContent, setActiveContent] = useState("");

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "./global/Sidebar";
-import Topbar from "./global/Topbar";
-import MainDashboard from "../../components/OwnerDashboard/MainDashboard";
+import Sidebar from "../scenes/global/Sidebar.js";
+import Topbar from "../scenes/global/Topbar.js";
+import MainDashboard from "../components/OwnerDashboard/MainDashboard";
 
 const OwnerDashboard = () => {
 

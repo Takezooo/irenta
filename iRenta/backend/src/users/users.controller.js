@@ -277,7 +277,7 @@ const GoogleLoginUser = async (req, res) => {
   }
 };
 
-export default {
+export {
   GetAllUsers,
   GetSpecificUser,
   CreateUser,

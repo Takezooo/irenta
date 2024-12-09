@@ -1,6 +1,6 @@
 import Listing from '../models/Listings.js';
 
-export const getAllListings = async (req, res) => {
+export const GetAllListings = async (req, res) => {
   try {
     const ownerId = req.user.id; // Get the owner's ID from the decoded token (authenticate middleware)
     
@@ -14,7 +14,7 @@ export const getAllListings = async (req, res) => {
 };
 
 
-export const createListing = async (req, res) => {
+export const CreateListing = async (req, res) => {
   try {
     // Check if the logged-in user is an "owner"
     if (req.user.userType !== 'Owner') {
@@ -37,7 +37,7 @@ export const createListing = async (req, res) => {
   }
 };
 
-export const updateListing = async (req, res) => {
+export const UpdateListing = async (req, res) => {
   try {
     const listingId = req.params.id; // Get the listing ID from the route
     const { title, description, price } = req.body;
@@ -60,7 +60,7 @@ export const updateListing = async (req, res) => {
   }
 };
 
-export const deleteListing = async (req, res) => {
+export const DeleteListing = async (req, res) => {
   try {
     const listingId = req.params.id;
 
@@ -81,8 +81,8 @@ export const deleteListing = async (req, res) => {
 };
 
 export default {
-  getAllListings,
-  createListing,
-  updateListing,
-  deleteListing,
+  GetAllListings,
+  CreateListing,
+  UpdateListing,
+  DeleteListing,
 };

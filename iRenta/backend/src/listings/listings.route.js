@@ -1,19 +1,24 @@
 import express from 'express';
-import listingController from '../controllers/listingController.js';
+import {
+    GetAllListings,
+    CreateListing,
+    UpdateListing,
+    DeleteListing
+} from '../controllers/listingController.js';
 import authenticate from '../global/middlewares/authenticate.js';
 
-const listingRoutes = express.Router();
+const router = express.Router();
 
-listingRoutes.get("/", authenticate, listingController.getAllListings);
+router.get("/", authenticate, GetAllListings);
 
 // Route to create a listing (only for owners)
-listingRoutes.post('/', authenticate, listingController.createListing);
+router.post('/', authenticate, CreateListing);
 
 // Route to update a listing (only for owners)
-listingRoutes.put('/:id', authenticate, listingController.updateListing);
+router.put('/:id', authenticate, UpdateListing);
 
 // Route to delete a listing (only for owners)
-listingRoutes.delete('/:id', authenticate, listingController.deleteListing);
+router.delete('/:id', authenticate, DeleteListing);
 
 
-export default listingRoutes;
+export default router;

@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import driveService from "../../global/utils/Drive.js";
 import { OAuth2Client } from "google-auth-library";
+import { GenerateToken } from "../../global/utils/GenerateToken.js";
+import { GenerateRefreshToken } from "../../global/utils/GenerateRefreshToken.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -192,12 +194,16 @@ const LoginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     // Create JWT token
-    const token = jwt.sign(
-      { id: user._id, username: user.credentials.username, userType: user.info.userType},
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    console.log(jwt)
+    const token = GenerateToken({
+      id: user._id,
+      username: user.credentials.username,
+      userType: user.info.userType,
+    });
+    const refreshToken = GenerateRefreshToken({ id: user._id });
+    // remove after debugging
+    console.log(`Generated Token ${token}`);
+    console.log(`Refresh Token: ${refreshToken}`);
+
     res
       .status(200)
       .json({

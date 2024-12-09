@@ -1,26 +1,19 @@
-import jwt from "jsonwebtoken"
-import User from "../../src/users/users.model.js"
+import jwt from "jsonwebtoken";
 
-const RequireAuth = async (req, res, next) => {
-    // verify user is authenticated
-    const { authorization } = req.headers
+const RequireAuth = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
 
-    if (!authorization) {
-        return res.status(401).json({ error: 'Authorization token required' })
-    }
+  if (!token) {
+    return res.status(401).json({ message: "Authorization token missing" });
+  }
 
-    const token = authorization.split(' ')[1]
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user info to the request
+    next();
+  } catch (err) {
+    res.status(403).json({ message: "Invalid or expired token" });
+  }
+};
 
-    try {
-        const { _id } = jwt.verify(token, process.env.SECRET)
-
-        req.user = await User.findOne({ _id }).select('_id')
-        next()
-
-    } catch (error) {
-        console.log(error)
-        res.status(401).json({ error: 'Request is not authorized' })
-    }
-}
-
-export default RequireAuth
+export default RequireAuth;

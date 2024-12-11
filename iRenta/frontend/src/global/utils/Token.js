@@ -19,14 +19,16 @@ export const SaveToken = (token) => {
   
   // Save refresh token (if applicable)
   export const SaveRefreshToken = (refreshToken) => {
-    document.cookie = `refreshToken=${refreshToken}; path=/; secure; SameSite=Strict; max-age=3600`;
+    document.cookie = `refreshToken=${refreshToken}; path=/; secure; SameSite=Strict; max-age=604800`; // 7 days
   };
   
   // Retrieve refresh token
   export const GetRefreshToken = () => {
     const cookies = document.cookie.split("; ");
     const refreshTokenCookie = cookies.find((cookie) => cookie.startsWith("refreshToken="));
-    return refreshTokenCookie ? refreshTokenCookie.split("=")[1] : null;
+    const refreshToken = refreshTokenCookie ? refreshTokenCookie.split("=")[1] : null;
+    console.log("Retrieved Refresh Token:", refreshToken); // Debugging log
+    return refreshToken;
   };
   
   // Remove refresh token

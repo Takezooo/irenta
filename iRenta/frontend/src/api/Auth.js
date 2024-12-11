@@ -17,7 +17,7 @@ export const loginUser = async (username, password) => {
       username,
       password,
     });
-    const { token, user, refreshToken } = response.data;
+    const { token, refreshToken, user } = response.data;
 
     // Save tokens
     SaveToken(token);
@@ -55,7 +55,7 @@ export const googleLogin = async (idToken) => {
       };
     }
 
-    return { token, user };
+    return { token, refreshToken, user };
   } catch (err) {
     console.error("Google Login error:", err.response || err.message);
 
@@ -86,6 +86,7 @@ export const refreshAccessToken = async () => {
   const refreshToken = GetRefreshToken();
 
   if (!refreshToken) {
+    console.error("No refresh token available");
     throw new Error("No refresh token available");
   }
 
@@ -95,13 +96,10 @@ export const refreshAccessToken = async () => {
     });
     const { token } = response.data;
 
-    // Save new access token
-    SaveToken(token);
+    SaveToken(token); // Save new access token
     return token;
   } catch (error) {
-    throw new Error(
-      error.response?.data?.message || "Failed to refresh access token"
-    );
+    throw new Error(error.response?.data?.message || "Failed to refresh access token");
   }
 };
 

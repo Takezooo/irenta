@@ -297,6 +297,38 @@ const GoogleLoginUser = async (req, res) => {
   }
 };
 
+// Refresh token function
+const RefreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token is required" });
+  }
+
+  try {
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Find user by ID
+    const user = await Users.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate a new access token
+    const newToken = GenerateToken({
+      id: user._id,
+      username: user.credentials.username,
+      userType: user.info.userType, // Include userType
+    });
+
+    res.status(200).json({ token: newToken });
+  } catch (error) {
+    console.error("Refresh token error:", error.message || error);
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
 export {
   GetAllUsers,
   GetSpecificUser,
@@ -305,4 +337,5 @@ export {
   DeleteUser,
   LoginUser,
   GoogleLoginUser,
+  RefreshToken,
 };

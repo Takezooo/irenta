@@ -7,6 +7,7 @@ import {
     DeleteUser,
     LoginUser,
     GoogleLoginUser,
+    RefreshToken,
 } from "./users.controller.js";
 import upload from "../../global/config/Multer.js";
 import RequireAuth from "../../global/middlewares/RequireAuth.js";
@@ -30,5 +31,7 @@ router.delete("/:id", RequireAuth, DeleteUser);
 // for login purpose
 router.post("/login", LoginUser);
 router.post('/google-login', GoogleLoginUser); // Google login
+
+router.post("/refresh-token", RefreshToken);
 
 export default router;

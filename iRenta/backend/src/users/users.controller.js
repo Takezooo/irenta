@@ -40,7 +40,6 @@ const GetSpecificUser = async (req, res) => {
 
 // function for creating a new user
 const CreateUser = async (req, res) => {
-  
   try {
     const { body, file } = req;
     const user = JSON.parse(body.user);
@@ -204,32 +203,35 @@ const LoginUser = async (req, res) => {
     console.log(`Generated Token ${token}`);
     console.log(`Refresh Token: ${refreshToken}`);
 
-    res
-      .status(200)
-      .json({
-        token,
-        refreshToken,
-        user: {
-          id: user._id,
-          username: user.credentials.username,
-          userType: user.info.userType,
-        },
-      });
+    res.status(200).json({
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        username: user.credentials.username,
+        userType: user.info.userType,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 const GoogleLoginUser = async (req, res) => {
-  const { idToken } = req.body;
-
   try {
+    const { idToken } = req.body;
+    console.log("Received idToken:", idToken);
     // Verify the Google ID token
     const ticket = await client.verifyIdToken({
       idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
+    console.log("Google user payload:", payload);
+
+    if (!payload) {
+      return res.status(400).json({ error: "Invalid Google token" });
+    }
 
     // Extract user details from Google token payload
     const userDetails = {
@@ -251,6 +253,24 @@ const GoogleLoginUser = async (req, res) => {
         userType: user.info.userType,
       });
       const refreshToken = GenerateRefreshToken({ id: user._id });
+
+      // Set cookies
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+        maxAge: 3600000, // 1 hour
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 3600000, // 7 days
+      });
+
+      // res.json({ success: true });
+
       console.log(`Google Generated Token ${token}`);
       console.log(`Google Refresh Token: ${refreshToken}`);
       // Respond with the token and user details for the authenticated session
@@ -264,8 +284,8 @@ const GoogleLoginUser = async (req, res) => {
         },
       });
     } else {
-      // New user: respond with 404 and Google profile details for registration pre-fill
-      res.status(404).json({
+      // New user: respond with 200 and Google profile details for registration pre-fill
+      res.status(200).json({
         unregistered: true,
         userDetails, // Basic user info for the client to prefill registration
       });

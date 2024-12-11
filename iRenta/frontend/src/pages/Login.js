@@ -14,10 +14,14 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Google login handler
-  const handleGoogleLoginSuccess = async (idToken) => {
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    const idToken = credentialResponse.credential; // Extract only the credential
+
     try {
-      const response = await googleLogin(idToken);
+      console.log("Google ID token received:", idToken);
+      const response = await googleLogin(idToken, navigate); // Pass only the token
+      console.log("Unregistered?:", response.unregistered);
+      console.log("Google login result:", response);
 
       if (response.unregistered) {
         // If user is unregistered, navigate to registration page
@@ -25,25 +29,26 @@ const Login = () => {
         navigate("/register", { state: response.userDetails });
         return;
       }
-
+      // Handle successful login
+      toast.success("Google Login successful");
+      console.log("User successfully logged in:", response.user);
       // Save user and token in AuthContext
       const { token, user } = response;
       login(user, token);
-
       // Redirect based on user role
-      navigateBasedOnRole(user.userType);
-
-      toast.success("Google Login successful");
+      navigateBasedOnRole(response.user.userType);
+      
     } catch (err) {
       toast.error("Google Login failed");
       console.error("Google Login error:", err);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const { token, user } = await loginUser( username, password ); // Call API
+      const { token, user } = await loginUser(username, password); // Call API
       login(user, token); // Update context
 
       // Redirect based on user role

@@ -16,11 +16,18 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "*", credentials: true, optionSuccessStatus: 200 }));
+
+app.use(
+    cors({
+      origin: "http://localhost:3000", // Frontend URL
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      credentials: true,
+    })
+);
 app.use((req, res, next) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-    res.header("Access-Control-Allow-Origin", "*");
+    // res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    // res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+    // res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH");
     res.header(
         "Access-Control-Allow-Headers",

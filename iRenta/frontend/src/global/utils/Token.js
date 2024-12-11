@@ -2,7 +2,7 @@
 
 // Save token to cookies (or localStorage, if you prefer)
 export const SaveToken = (token) => {
-    document.cookie = `authToken=${token}; path=/; secure; HttpOnly; SameSite=Strict`;
+    document.cookie = `authToken=${token}; path=/; secure; SameSite=Strict; max-age=3600`;
   };
   
   // Retrieve token from cookies
@@ -19,7 +19,7 @@ export const SaveToken = (token) => {
   
   // Save refresh token (if applicable)
   export const SaveRefreshToken = (refreshToken) => {
-    document.cookie = `refreshToken=${refreshToken}; path=/; secure; HttpOnly; SameSite=Strict`;
+    document.cookie = `refreshToken=${refreshToken}; path=/; secure; SameSite=Strict; max-age=3600`;
   };
   
   // Retrieve refresh token

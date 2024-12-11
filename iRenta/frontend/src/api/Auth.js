@@ -22,8 +22,8 @@ export const loginUser = async (username, password) => {
     // Save tokens
     SaveToken(token);
     SaveRefreshToken(refreshToken);
-    
-    return response.data;// Return user details for use in the app
+
+    return response.data; // Return user details for use in the app
   } catch (error) {
     throw new Error(error.response?.data?.message || "Login failed");
   }
@@ -32,31 +32,45 @@ export const loginUser = async (username, password) => {
 // Google Login API call
 export const googleLogin = async (idToken) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/google-login`, {
-      idToken,
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/google-login`,
+      { idToken },
+      { withCredentials: true }
+    );
 
-    // Extract token and user details
-    const { token, refreshToken, user, userDetails, unregistered } = response.data;
+    console.log("Received response from backend:", response.data);
+
+    const { token, refreshToken, user, userDetails, unregistered } =
+      response.data;
 
     // Save tokens
     SaveToken(token);
     SaveRefreshToken(refreshToken);
 
-    // Handle unregistered user scenario
-    if (unregistered) {
+    if (unregistered === true) {
+      console.warn("Unregistered user detected:", userDetails);
       return {
         unregistered: true,
         userDetails,
       };
     }
 
-    // Return token and user
     return { token, user };
   } catch (err) {
-    // Handle and rethrow errors for calling function to handle
-    console.error("Google Login failed:", err);
-    throw err;
+    console.error("Google Login error:", err.response || err.message);
+
+    // Display user-friendly error message
+    if (err.response?.status === 500) {
+      alert(
+        "Server error occurred during Google login. Please try again later."
+      );
+    } else if (err.response?.status === 400) {
+      alert("Invalid Google token. Please try again.");
+    } else {
+      alert("Google login failed. Check your connection and try again.");
+    }
+
+    throw err.response?.data || { error: "Google login failed" };
   }
 };
 

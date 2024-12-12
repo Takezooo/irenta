@@ -13,10 +13,10 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       const storedToken = GetToken();
       const storedRefreshToken = GetRefreshToken();
-
+  
       if (storedToken) {
+        // Decode token to extract user info
         try {
-          // Decode JWT payload to extract user info
           const storedUser = JSON.parse(atob(storedToken.split(".")[1]));
           setUser(storedUser);
           setToken(storedToken);
@@ -24,8 +24,8 @@ export const AuthProvider = ({ children }) => {
           console.error("Invalid token format:", err);
         }
       } else if (storedRefreshToken) {
+        // Attempt to refresh the authToken
         try {
-          // Attempt to refresh the token
           const newToken = await refreshAccessToken();
           const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
           setUser(refreshedUser);
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         }
       }
     };
-
+  
     initializeAuth();
   }, []);
   

@@ -46,6 +46,7 @@ export const googleLogin = async (idToken) => {
     // Save tokens
     SaveToken(token);
     SaveRefreshToken(refreshToken);
+    console.log("Saved Refresh Token:", refreshToken);
 
     if (unregistered === true) {
       console.warn("Unregistered user detected:", userDetails);
@@ -91,9 +92,10 @@ export const refreshAccessToken = async () => {
   }
 
   try {
-    const response = await axios.post(`${API_BASE_URL}/refresh-token`, {
-      refreshToken,
-    });
+    const response = await axios.post(`${API_BASE_URL}/refresh-token`, 
+      {refreshToken}, // Empty body, as the refreshToken is in cookies
+      { withCredentials: true } // Ensures cookies are included in the request
+    );
     const { token } = response.data;
 
     SaveToken(token); // Save new access token

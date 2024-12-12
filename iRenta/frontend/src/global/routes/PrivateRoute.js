@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext.js";
 import { refreshAccessToken } from "../../api/Auth.js";
+import { GetRefreshToken } from "../utils/Token.js";
 
 const PrivateRoute = ({ children, allowedRoles }) => {
   const { user, token, login, logout } = useContext(AuthContext);
@@ -9,22 +10,23 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 
   useEffect(() => {
     const validateToken = async () => {
-      if (!token) {
-        console.log("Token missing. Attempting to refresh...");
+      console.log("Validating token...");
+      const refreshToken = GetRefreshToken();
+      console.log("Retrieved Refresh Token:", refreshToken);
+  
+      if (!token && refreshToken) {
         try {
           const newToken = await refreshAccessToken();
-          const refreshedUser = JSON.parse(atob(newToken.split(".")[1])); // Decode user info from token
-          console.log("Refreshed User:", refreshedUser);
-          login(refreshedUser, newToken); // Restore user and token in AuthContext
-          console.log("Token refreshed successfully");
+          const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
+          login(refreshedUser, newToken);
         } catch (err) {
           console.error("Failed to refresh token:", err.message || err);
-          logout(); // Clear context and redirect to login
+          logout(); // Redirect to login if refresh fails
         }
       }
-      setIsLoading(false); // Stop loading after validation
+      setIsLoading(false);
     };
-
+  
     validateToken();
   }, [token, login, logout]);
 

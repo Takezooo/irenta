@@ -256,16 +256,16 @@ const GoogleLoginUser = async (req, res) => {
 
       // Set cookies
       res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        httpOnly: false, // Allow frontend access
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+        sameSite: "Lax", // Lax for compatibility across subdomains
         maxAge: 3600000, // 1 hour
       });
-
+      
       res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
+        httpOnly: false, // Secure against XSS attacks
         secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
+        sameSite: "Lax", // Adjust for compatibility
         maxAge: 7 * 24 * 3600000, // 7 days
       });
 
@@ -320,6 +320,13 @@ const RefreshToken = async (req, res) => {
       id: user._id,
       username: user.credentials.username,
       userType: user.info.userType, // Include userType
+    });
+
+    res.cookie("authToken", newToken, {
+      httpOnly: false, // Allows frontend access
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 3600000, // 1 hour
     });
 
     res.status(200).json({ token: newToken });

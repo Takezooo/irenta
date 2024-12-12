@@ -8,8 +8,8 @@ export const SaveToken = (token) => {
   // Retrieve token from cookies
   export const GetToken = () => {
     const cookies = document.cookie.split("; ");
-    const tokenCookie = cookies.find((cookie) => cookie.startsWith("authToken="));
-    return tokenCookie ? tokenCookie.split("=")[1] : null;
+    const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith("authToken="));
+    return tokenCookie ? decodeURIComponent(tokenCookie.split("=")[1]) : null;
   };
   
   // Remove token from cookies
@@ -25,10 +25,13 @@ export const SaveToken = (token) => {
   // Retrieve refresh token
   export const GetRefreshToken = () => {
     const cookies = document.cookie.split("; ");
-    const refreshTokenCookie = cookies.find((cookie) => cookie.startsWith("refreshToken="));
-    const refreshToken = refreshTokenCookie ? refreshTokenCookie.split("=")[1] : null;
-    console.log("Retrieved Refresh Token:", refreshToken); // Debugging log
-    return refreshToken;
+    const refreshTokenCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("refreshToken=")
+    );
+    console.log("Retrieved Refresh Token:", refreshTokenCookie); // Debugging log
+    return refreshTokenCookie
+    ? decodeURIComponent(refreshTokenCookie.split("=")[1])
+    : null;
   };
   
   // Remove refresh token

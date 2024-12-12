@@ -2,9 +2,9 @@
 
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Topbar from '../scenes/dashboard/global/Topbar';
+import Topbar from '../components/global/Topbar.js';
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { Footer } from '../scenes/dashboard/global/Footer';
+import { Footer } from '../components/global/Footer.js';
 
 const LandingPage = () => {
 

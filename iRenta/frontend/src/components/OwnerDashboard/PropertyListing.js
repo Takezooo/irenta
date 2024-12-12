@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import { GetToken, SaveToken, RemoveToken, GetRefreshToken  } from "../../global/utils/Token.js"; // Import utilities
 export const PropertyListing = () => {
   const [listings, setListings] = useState([]); // State to store listings
   const [error, setError] = useState(null); // State for error handling
   const [showModal, setShowModal] = useState(false); // State for showing the modal
   const [deleteId, setDeleteId] = useState(null); // ID of the listing to delete
   const [expandedListings, setExpandedListings] = useState({}); // State to track expanded listings
-
+  const storedToken = GetToken();
   useEffect(() => {
     // Fetch listings from the backend
     const fetchListings = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/listings", {
+        const response = await axios.get("http://localhost:5000/api/listings", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${storedToken}`,
           },
         });
         setListings(response.data); // Update state with fetched listings
@@ -29,9 +29,9 @@ export const PropertyListing = () => {
   const handleDelete = async (id) => {
     try {
       // Call the delete endpoint
-      await axios.delete(`http://localhost:5000/listings/${id}`, {
+      await axios.delete(`http://localhost:5000/api/listings/${id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${storedToken}`,
         },
       });
 

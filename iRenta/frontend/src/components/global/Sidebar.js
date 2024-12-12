@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
 import { TbLayoutListFilled } from "react-icons/tb";
 import { FaCalendar, FaPeopleRoof, FaPowerOff } from "react-icons/fa6";
-import MainDashboard from "../../components/OwnerDashboard/MainDashboard.js";
-import { PropertyListing } from "../../components/OwnerDashboard/PropertyListing";
-import { ManageTenants } from "../../components/OwnerDashboard/ManageTenants";
-import { Calendar } from "../../components/OwnerDashboard/Calendar";
+import MainDashboard from "../OwnerDashboard/MainDashboard.js";
+import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
+import { ManageTenants } from "../OwnerDashboard/ManageTenants.js";
+import { Calendar } from "../OwnerDashboard/Calendar.js";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
 
 const Sidebar = ({ isOpen }) => {
   const [activeContent, setActiveContent] = useState("");
+  const { logout } = useContext(AuthContext);
 
   const isActive = (content) => activeContent === content;
 
@@ -76,17 +78,14 @@ const Sidebar = ({ isOpen }) => {
           </div>
           <div>
               <hr className="w-full my-2"></hr>
-              <Link
-                to="/login"
-                className="w-full flex items-center text-gray-900 hover:bg-gray-200 group"
-              >
-                <button className="flex items-center py-2 px-16 text-gray-900 hover:bg-gray-200 group">
+                <button 
+                 onClick={() => logout()}
+                  className="flex items-center py-2 px-16 text-gray-900 hover:bg-gray-200 group">
                   <FaPowerOff className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
                   <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
                     Sign Out
                   </span>
                 </button>
-              </Link>
           </div>
         </div>
       </aside>

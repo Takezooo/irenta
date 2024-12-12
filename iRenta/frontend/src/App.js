@@ -1,21 +1,20 @@
 // src/App.js
 
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import LandingPage from './pages/LandingPage.js';
-import Login from './pages/Login.js';
-import Register from './pages/Register.js';
-import OwnerDashboard from './pages/OwnerDashboard.js';
-import NotAuthorized from './pages/unauthorized/NotAuthorized.js'
+import LandingPage from "./pages/LandingPage.js";
+import Login from "./pages/Login.js";
+import Register from "./pages/Register.js";
+import OwnerDashboard from "./pages/OwnerDashboard.js";
+import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 
-import { AuthProvider } from './global/contexts/AuthContext.js'
-import PrivateRoute from './global/routes/PrivateRoute.js'
+import { AuthProvider } from "./global/contexts/AuthContext.js";
+import PrivateRoute from "./global/routes/PrivateRoute.js";
+import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
-import { ToastContainer } from 'react-toastify';
-
-
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
@@ -24,8 +23,22 @@ const App = () => {
         <Router>
           <Routes>
             {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
             <Route path="/not-authorized" element={<NotAuthorized />} />
 
             {/* Owner Routes */}

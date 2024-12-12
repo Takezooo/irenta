@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { GetToken, SaveToken, RemoveToken, GetRefreshToken  } from "../utils/Token.js"; // Import utilities
+import { GetToken, SaveToken, RemoveToken, GetRefreshToken, RemoveRefreshToken  } from "../utils/Token.js"; // Import utilities
 import { refreshAccessToken } from "../../api/Auth.js";
 
 export const AuthContext = createContext();
@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     RemoveToken(); // Remove token using `token.js`
+    RemoveRefreshToken();
   };
 
   return (

@@ -95,7 +95,7 @@ const LandingPage = () => {
                 </div>
             </div>
 
-            <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
+            <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex lg:flex-row flex-col items-center justify-evenly p-8 lg:py-14 lg:px-24 relative">
                 <div className="h-28 w-28 p-2 bg-gray-100 rounded-lg flex items-center justify-center shadow-md mr-6">
                     <img
                     src="../assets/images/iRenta.png"
@@ -103,7 +103,7 @@ const LandingPage = () => {
                     alt="iRenta Logo"
                     />
                 </div>
-                <div className="w-[40%]">
+                <div className="w-full lg:w-[40%]">
                     <div>
                         <h3 className="text-3xl font-bold">iRenta</h3>
                     </div>

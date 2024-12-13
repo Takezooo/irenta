@@ -1,66 +1,77 @@
 // src/components/LandingPage.js
 
-import React, { useRef, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Topbar from "../components/global/Topbar.js";
 import { Footer } from "../components/global/Footer.js";
 import { AuthContext } from "../global/contexts/AuthContext.js";
-
+import { fetchListings } from "../api/Listings.js";
 const LandingPage = () => {
   const { user } = useContext(AuthContext);
-  const cards = [
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-    {
-      title: "Live Good Dormitory",
-      location: "Ermita, Manila",
-      price: "₱2,000 - ₱8,000",
-    },
-  ];
+  const [listings, setListings] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchListings();
+      setListings(data); // assuming fetchListings returns an array
+    };
+  
+    fetchData();
+  }, []);
+
+//   const cards = [
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//     {
+//       title: "Live Good Dormitory",
+//       location: "Ermita, Manila",
+//       price: "₱2,000 - ₱8,000",
+//     },
+//   ];
 
   const scrollContainerRef = useRef(null);
 
@@ -136,16 +147,16 @@ const LandingPage = () => {
             ref={scrollContainerRef}
             className="flex overflow-x-hidden space-x-4 px-10"
           >
-            {cards.map((card, index) => (
+            {listings.map((listing) => (
               <div
-                key={index}
+                key={listing._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}
-                <h3 className="text-lg font-semibold">{card.title}</h3>
-                <p className="text-gray-500 text-sm">{card.location}</p>
-                <p className="text-gray-700 mt-2 font-bold">{card.price}</p>
+                <h3 className="text-lg font-semibold">{listing.title}</h3>
+                <p className="text-gray-500 text-sm">{listing.description}</p>
+                <p className="text-gray-700 mt-2 font-bold">{listing.price}</p>
               </div>
             ))}
           </div>

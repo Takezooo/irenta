@@ -12,7 +12,7 @@ export const PropertyListing = () => {
     // Fetch listings from the backend
     const fetchListings = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/listings", {
+        const response = await axios.get("http://localhost:5000/api/listings/", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },

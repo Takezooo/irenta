@@ -13,6 +13,16 @@ export const GetAllListings = async (req, res) => {
   }
 };
 
+export const DisplayListings = async (req, res) => {
+  try {
+    // Fetch all listings (no authentication required)
+    const listings = await Listing.find({}); // Optionally, add filters like `{ status: 'public' }` if needed
+    res.status(200).json(listings);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 
 export const CreateListing = async (req, res) => {
   try {
@@ -85,4 +95,5 @@ export default {
   CreateListing,
   UpdateListing,
   DeleteListing,
+  DisplayListings,
 };

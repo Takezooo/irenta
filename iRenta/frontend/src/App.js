@@ -39,7 +39,7 @@ const App = () => {
                 </PublicRoute>
               }
             />
-            <Route path="/not-authorized" element={<NotAuthorized />} />
+            <Route path="/" element={<LandingPage />} />
 
             {/* Owner Routes */}
             <Route
@@ -53,9 +53,9 @@ const App = () => {
 
             {/* Seeker Routes */}
             <Route
-              path="/landing"
+              path="/"
               element={
-                <PrivateRoute allowedRoles={["Seeker"]}>
+                <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                   <LandingPage />
                 </PrivateRoute>
               }

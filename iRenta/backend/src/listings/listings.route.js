@@ -3,11 +3,15 @@ import {
     GetAllListings,
     CreateListing,
     UpdateListing,
-    DeleteListing
+    DeleteListing,
+    DisplayListings
 } from './listings.controller.js';
 import authenticate from '../../global/middlewares/RequireAuth.js';
 
 const router = express.Router();
+
+// Route to display the listing
+router.get("/", DisplayListings);
 
 router.get("/", authenticate, GetAllListings);
 

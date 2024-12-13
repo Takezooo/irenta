@@ -8,7 +8,7 @@ const PublicRoute = ({ children }) => {
   if (user) {
     if (user.userType === "Seeker") {
       // Redirect to a default logged-in page if user is authenticated
-      return <Navigate to="/landing" />;
+      return <Navigate to="/" />;
     }
     else if (user.userType === "Owner") { 
       return <Navigate to="/owner-dashboard" />;

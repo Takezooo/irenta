@@ -10,6 +10,7 @@ import Register from "./pages/Register.js";
 import OwnerDashboard from "./pages/OwnerDashboard.js";
 import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
+import AddListing from "./components/OwnerDashboard/AddListing.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 
@@ -18,7 +19,7 @@ import PrivateRoute from "./global/routes/PrivateRoute.js";
 import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify"
 
 const App = () => {
   return (
@@ -43,6 +44,7 @@ const App = () => {
                 </PublicRoute>
               }
             />
+            <Route path="/add-listing" element={<AddListing />} />
             <Route path="/visit-listing" element={<ViewListing />} />
             <Route path="/" element={<LandingPage />} />
 

@@ -13,7 +13,7 @@ const router = express.Router();
 // Route to display the listing
 router.get("/", DisplayListings);
 
-router.get("/", authenticate, GetAllListings);
+router.get("/user", authenticate, GetAllListings);
 
 // Route to create a listing (only for owners)
 router.post('/', authenticate, CreateListing);

@@ -9,6 +9,14 @@ const listingSchema = new mongoose.Schema({
     ref: 'User', // Reference the User model
     required: true,
   },
+  address: {
+    houseNumber: { type: String, required: true },
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    zip: { type: String },
+    long: { type: String },
+    lat: { type: String },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

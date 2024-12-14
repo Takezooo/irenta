@@ -12,7 +12,7 @@ export const PropertyListing = () => {
     // Fetch listings from the backend
     const fetchListings = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/listings/", {
+        const response = await axios.get("http://localhost:5000/api/listings/user", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
@@ -24,7 +24,7 @@ export const PropertyListing = () => {
     };
 
     fetchListings();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, [storedToken]); // Empty dependency array means this runs once when the component mounts
 
   const handleDelete = async (id) => {
     try {

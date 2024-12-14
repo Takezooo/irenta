@@ -10,6 +10,7 @@ import Register from "./pages/Register.js";
 import OwnerDashboard from "./pages/OwnerDashboard.js";
 import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
+import AddListing from "./components/OwnerDashboard/AddListing.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 
@@ -51,6 +52,14 @@ const App = () => {
               element={
                 <PrivateRoute allowedRoles={["Owner"]}>
                   <OwnerDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/create-list"
+              element={
+                <PrivateRoute allowedRoles={["Owner"]}>
+                  <AddListing />
                 </PrivateRoute>
               }
             />

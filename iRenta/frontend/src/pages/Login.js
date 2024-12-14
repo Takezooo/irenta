@@ -1,66 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { loginUser, googleLogin } from "../api/Auth.js";
+import { AuthContext } from "../global/contexts/AuthContext.js";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // From context
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // Google login handler
   const handleGoogleLoginSuccess = async (credentialResponse) => {
-    const idToken = credentialResponse.credential;
+    const idToken = credentialResponse.credential; // Extract only the credential
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users/google-login",
-        {
-          idToken,
-        }
-      );
+      console.log("Google ID token received:", idToken);
+      const response = await googleLogin(idToken, navigate); // Pass only the token
+      console.log("Unregistered?:", response.unregistered);
+      console.log("Google login result:", response);
 
-      // Handle successful login
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("username", response.data.username);
-      toast.success(`Google Login successful, ${response.data.username}`);
-      console.log("Google Login successful", response.data.username);
-      navigate("/chat");
-    } catch (err) {
-      toast.error(`Google Login failed:, ${err}`);
-      console.error("Google Login failed:", err);
-
-      if (err.response && err.response.data && err.response.data.unregistered) {
-        const userDetails = err.response.data.userDetails;
+      if (response.unregistered) {
+        // If user is unregistered, navigate to registration page
         toast.error("Email not registered");
-        navigate("/register", { state: userDetails });
-        console.log(userDetails);
+        navigate("/register", { state: response.userDetails });
+        return;
       }
+      // Handle successful login
+      toast.success("Google Login successful");
+      console.log("User successfully logged in:", response.user);
+      // Save user and token in AuthContext
+      const { token, user } = response;
+      login(user, token);
+      // Redirect based on user role
+      navigateBasedOnRole(response.user.userType);
+      
+    } catch (err) {
+      toast.error("Google Login failed");
+      console.error("Google Login error:", err);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users/login",
-        {
-          username,
-          password,
-        }
-      );
-      // Save token to localStorage or context
-      localStorage.setItem("token", response.data.token);
+      const { token, user } = await loginUser(username, password); // Call API
+      login(user, token); // Update context
+
+      // Redirect based on user role
+      navigateBasedOnRole(user.userType);
+
       toast.success("Login successful");
-      navigate("/chat");
-      console.log(response.data.token);
-      console.log("Login successful");
     } catch (err) {
-      toast.error(`Login failed: ${err}`);
-      console.error("Login failed:", err);
+      toast.error("Login failed");
+      console.error(err);
+    }
+  };
+
+  const navigateBasedOnRole = (role) => {
+    if (role === "Owner") {
+      navigate("/owner-dashboard");
+    } else if (role === "Seeker") {
+      navigate("/landing");
+    } else {
+      navigate("/register");
     }
   };
 

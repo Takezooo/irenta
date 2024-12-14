@@ -1,39 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { GetToken, SaveToken, RemoveToken, GetRefreshToken  } from "../../global/utils/Token.js"; // Import utilities
+import React, { useState, useEffect, useContext } from 'react';
+import { GetToken } from '../../global/utils/Token.js'; // Import utilities
+import { fetchOwnerListings, deleteList } from '../../api/Listings.js';
+import { fetchUserData } from '../../api/Users.js';
+import { AuthContext } from '../../global/contexts/AuthContext.js';
 export const PropertyListing = () => {
   const [listings, setListings] = useState([]); // State to store listings
   const [error, setError] = useState(null); // State for error handling
   const [showModal, setShowModal] = useState(false); // State for showing the modal
   const [deleteId, setDeleteId] = useState(null); // ID of the listing to delete
   const [expandedListings, setExpandedListings] = useState({}); // State to track expanded listings
+  const [userProfile, setUserProfile] = useState({
+    info: {
+      firstName: "",
+      lastName: "",
+      profile: { link: "" },
+    },
+  });
+
   const storedToken = GetToken();
+  const { user } = useContext(AuthContext);
+  //   // Fetch listings from the backend
+  //   const fetchListings = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:5000/api/listings/user", {
+  //         headers: {
+  //           Authorization: `Bearer ${storedToken}`,
+  //         },
+  //       });
+  //       setListings(response.data); // Update state with fetched listings
+  //     } catch (err) {
+  //       setError(err.response?.data?.message || "Error fetching listings");
+  //     }
+  //   };
+
+  //   fetchListings();
+  // }, [storedToken]); // Empty dependency array means this runs once when the component mounts
+
   useEffect(() => {
-    // Fetch listings from the backend
-    const fetchListings = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/listings/user", {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        });
-        setListings(response.data); // Update state with fetched listings
-      } catch (err) {
-        setError(err.response?.data?.message || "Error fetching listings");
+    const fetchUser = async () => {
+      if (user?.id) {
+        try {
+          const user_data = await fetchUserData(user.id, storedToken);
+          setUserProfile(user_data);
+        } catch (err) {
+          console.error("Failed to fetch user data:", err);
+          setError("Failed to fetch user data");
+        }
       }
     };
-
+  
+    const fetchListings = async () => {
+      try {
+        const data = await fetchOwnerListings();
+        setListings(data);
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+        setError("Failed to fetch listings");
+      }
+    };
+  
     fetchListings();
-  }, [storedToken]); // Empty dependency array means this runs once when the component mounts
+    fetchUser();
+  }, [user, storedToken]); // Only re-run when `user` or `storedToken` changes
 
   const handleDelete = async (id) => {
     try {
       // Call the delete endpoint
-      await axios.delete(`http://localhost:5000/api/listings/${id}`, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
+      deleteList(id);
 
       // Update the UI by removing the deleted listing
       setListings(listings.filter((listing) => listing._id !== id));
@@ -72,12 +105,13 @@ export const PropertyListing = () => {
           {/* Hide on smaller screens (less than sm) */}
             <div className="flex flex-col items-center">
               {/* Profile Picture */}
-              <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                <span className="text-gray-500">Profile Pic</span>
+              <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+                {/* <span className="text-gray-500">Profile Pic</span> */}
+                <img src={userProfile.info.profile.link} alt="Girl in a jacket" className="h-full w-full object-cover" />
               </div>
               {/* User Info */}
-              <h3 className="text-lg font-bold text-gray-800">User Name</h3>
-              <p className="text-sm text-gray-500 mt-1">4 active listings</p>
+              <h3 className="text-lg font-bold text-gray-800">{userProfile.info.firstName}</h3>
+              <p className="text-sm text-gray-500 mt-1">{listings.length} active listings</p>
             </div>
             {/* Create New Listing Button (Visible only on larger screens) */}
             <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block hidden">

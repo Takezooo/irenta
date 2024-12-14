@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Topbar from '../components/global/Topbar';
 import { AiOutlineClose } from "react-icons/ai";
 
 export const ViewListing = () => {
 
+    const [location, setLocation] = useState("Bacoor"); //temporary
     const handleClose = () => {
         alert("Container closed!");
       };
@@ -96,7 +97,7 @@ export const ViewListing = () => {
                     <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
                     <iframe
                         className="w-full h-full border-none"
-                        src="https://maps.google.com/maps?q=Manila&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                        src={`https://maps.google.com/maps?q=${location}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                         allowFullScreen
                         title="Pinned Location Map"
                     ></iframe>

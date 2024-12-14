@@ -15,8 +15,8 @@ const app = express();
 // const server = SocketIO(app)
 
 // Middleware
-app.use(express.json());
-
+app.use(express.json()); 
+ 
 app.use(
     cors({
       origin: "http://localhost:3000", // Frontend URL

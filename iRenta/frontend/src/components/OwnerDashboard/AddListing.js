@@ -1,10 +1,14 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 
 const AddListing = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName, setFileName] = useState("No file chosen");
+
+
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -32,6 +36,9 @@ const AddListing = () => {
           <div className="p-6 bg-gray-50 border-b">
             <button
                 className="fixed right-10 bg-gray-200 rounded-full p-2 text-gray-400 hover:bg-gray-400 hover:text-gray-600 transition"
+                onClick={() => {
+                  navigate("/owner-dashboard");
+                }}
             >
                 <AiOutlineClose className="w-6 h-6" />
             </button>

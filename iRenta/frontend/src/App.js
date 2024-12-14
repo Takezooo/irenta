@@ -65,14 +65,14 @@ const App = () => {
             />
 
             {/* Seeker and Owner Routes */}
-            <Route
+            {/* <Route
               path="/"
               element={
                 <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                   <LandingPage />
                 </PrivateRoute>
               }
-            />
+            /> */}
 
             <Route
               path="/property"

@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { GetToken } from '../../global/utils/Token.js'; // Import utilities
-import { fetchOwnerListings, deleteList } from '../../api/Listings.js';
-import { fetchUserData } from '../../api/Users.js';
-import { AuthContext } from '../../global/contexts/AuthContext.js';
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { GetToken } from "../../global/utils/Token.js"; // Import utilities
+import { fetchOwnerListings, deleteList } from "../../api/Listings.js";
+import { fetchUserData } from "../../api/Users.js";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
+
 export const PropertyListing = () => {
   const [listings, setListings] = useState([]); // State to store listings
   const [error, setError] = useState(null); // State for error handling
@@ -17,25 +19,10 @@ export const PropertyListing = () => {
     },
   });
 
+  const navigate = useNavigate();
   const storedToken = GetToken();
   const { user } = useContext(AuthContext);
-  //   // Fetch listings from the backend
-  //   const fetchListings = async () => {
-  //     try {
-  //       const response = await axios.get("http://localhost:5000/api/listings/user", {
-  //         headers: {
-  //           Authorization: `Bearer ${storedToken}`,
-  //         },
-  //       });
-  //       setListings(response.data); // Update state with fetched listings
-  //     } catch (err) {
-  //       setError(err.response?.data?.message || "Error fetching listings");
-  //     }
-  //   };
-
-  //   fetchListings();
-  // }, [storedToken]); // Empty dependency array means this runs once when the component mounts
-
+  
   useEffect(() => {
     const fetchUser = async () => {
       if (user?.id) {
@@ -48,7 +35,7 @@ export const PropertyListing = () => {
         }
       }
     };
-  
+
     const fetchListings = async () => {
       try {
         const data = await fetchOwnerListings();
@@ -58,7 +45,7 @@ export const PropertyListing = () => {
         setError("Failed to fetch listings");
       }
     };
-  
+
     fetchListings();
     fetchUser();
   }, [user, storedToken]); // Only re-run when `user` or `storedToken` changes
@@ -98,25 +85,40 @@ export const PropertyListing = () => {
       {/* Right Side: Profile */}
       <div className="justify-end w-full xl:w-1/4 pb-4 xl:px-4">
         {/* Show only on smaller screens (less than sm) */}
-        <button className="w-full bg-blue-500 text-white font-medium py-4 rounded-md shadow-md hover:bg-blue-600 sm:hidden">
-          + Create new listing
-        </button>
+          <button className="w-full bg-blue-500 text-white font-medium py-4 rounded-md shadow-md hover:bg-blue-600 sm:hidden"
+            onClick={() => {
+              navigate("/create-list");
+            }}
+          >
+            + Create new listing
+          </button>
         <div className="hidden sm:block bg-white rounded-lg shadow-md border p-6">
           {/* Hide on smaller screens (less than sm) */}
-            <div className="flex flex-col items-center">
-              {/* Profile Picture */}
-              <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
-                {/* <span className="text-gray-500">Profile Pic</span> */}
-                <img src={userProfile.info.profile.link} alt="Girl in a jacket" className="h-full w-full object-cover" />
-              </div>
-              {/* User Info */}
-              <h3 className="text-lg font-bold text-gray-800">{userProfile.info.firstName}</h3>
-              <p className="text-sm text-gray-500 mt-1">{listings.length} active listings</p>
+          <div className="flex flex-col items-center">
+            {/* Profile Picture */}
+            <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+              {/* <span className="text-gray-500">Profile Pic</span> */}
+              <img
+                src={userProfile.info.profile.link}
+                alt="Girl in a jacket"
+                className="h-full w-full object-cover"
+              />
             </div>
-            {/* Create New Listing Button (Visible only on larger screens) */}
-            <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block hidden">
-              + Create new listing
-            </button>
+            {/* User Info */}
+            <h3 className="text-lg font-bold text-gray-800">
+              {userProfile.info.firstName}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {listings.length} active listings
+            </p>
+          </div>
+          {/* Create New Listing Button (Visible only on larger screens) */}
+          <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block hidden"
+                      onClick={() => {
+                        navigate("/create-list");
+                      }}>
+            + Create new listing
+          </button>
         </div>
       </div>
 
@@ -126,12 +128,12 @@ export const PropertyListing = () => {
             <h1 className="font-bold text-xl text-blue-600">Your listings</h1>
           </div>
         </div>
-        {error && <div className="text-red-500">{error}</div>} {/* Display error if any */}
-
+        {error && <div className="text-red-500">{error}</div>}{" "}
+        {/* Display error if any */}
         <div className="flex flex-col">
           {listings.map((listing) => (
-            <div 
-              key={listing._id} 
+            <div
+              key={listing._id}
               className="mb-8 flex justify-center items-center"
             >
               <div className="bg-white rounded-lg shadow-md p-6 border w-full xl:w-3/4">
@@ -152,18 +154,27 @@ export const PropertyListing = () => {
 
                   <div className="col-span-3 flex flex-col justify-between">
                     <div className="flex justify-between items-center border-b pb-4 mb-4">
-                      <h2 className="text-lg text-blue-600 font-semibold">{listing.title}</h2>
+                      <h2 className="text-lg text-blue-600 font-semibold">
+                        {listing.title}
+                      </h2>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">₱4,000 /head /month</h3>
+                      <h3 className="text-xl font-semibold">
+                        ₱4,000 /head /month
+                      </h3>
                       <p className="text-gray-600 mt-1">Ermita, Manila</p>
                     </div>
                     <div className="mt-6 border border-gray-300 rounded-lg p-4">
-                      <h4 className="font-semibold mb-2">{listing.description}</h4>
-                      {expandedListings[listing._id] || window.innerWidth > 1280 ? (
+                      <h4 className="font-semibold mb-2">
+                        {listing.description}
+                      </h4>
+                      {expandedListings[listing._id] ||
+                      window.innerWidth > 1280 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="font-semibold text-gray-800 mb-2">Amenities</h4>
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                              Amenities
+                            </h4>
                             <ul className="text-gray-600 space-y-1">
                               <li>Fully Furnished</li>
                               <li>6 Bed and Bedframe</li>
@@ -175,7 +186,9 @@ export const PropertyListing = () => {
                           </div>
 
                           <div>
-                            <h4 className="font-semibold text-gray-800 mb-2">Payment Terms</h4>
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                              Payment Terms
+                            </h4>
                             <ul className="text-gray-600 space-y-1">
                               <li>Advance Payment: 1 month</li>
                               <li>Lease Term: 6 months</li>
@@ -189,7 +202,9 @@ export const PropertyListing = () => {
                           className="mt-4 text-blue-500 underline"
                           onClick={() => toggleSeeMore(listing._id)}
                         >
-                          {expandedListings[listing._id] ? 'See Less' : 'See More'}
+                          {expandedListings[listing._id]
+                            ? "See Less"
+                            : "See More"}
                         </button>
                       )}
                     </div>
@@ -202,13 +217,14 @@ export const PropertyListing = () => {
                   >
                     Remove
                   </button>
-                  <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">Edit</button>
+                  <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">
+                    Edit
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
-
         {showModal && (
           <>
             {/* Remove listing confirmation */}

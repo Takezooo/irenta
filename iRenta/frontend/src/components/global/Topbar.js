@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../global/contexts/AuthContext";
 
@@ -27,18 +27,15 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 {isOpen ? "Open Sidebar" : "Close Sidebar"}
               </span>
             </button>
-            <Link to="/">
-            <a className="flex ms-2 md:me-24">
+            <Link to="/" className="flex ms-2 md:me-24">
               <img
                 src="../assets/images/iRenta.png"
                 className="h-8 me-3"
                 alt="iRenta Logo"
               />
-              
               <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
                 iRenta
               </span>
-            </a>
             </Link>
           </div>
 

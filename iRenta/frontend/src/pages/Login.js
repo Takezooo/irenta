@@ -64,7 +64,7 @@ const Login = () => {
     if (role === "Owner") {
       navigate("/owner-dashboard");
     } else if (role === "Seeker") {
-      navigate("/landing");
+      navigate("/");
     } else {
       navigate("/register");
     }

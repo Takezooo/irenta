@@ -1,13 +1,21 @@
 import React, {useState} from 'react';
 import Topbar from '../components/global/Topbar';
 import { AiOutlineClose } from "react-icons/ai";
+import { useNavigate } from "react-router-dom"; // Import React Router hook
+import RequestOcularVisit from '../components/Listing/RequestOcularVisit';
 
 export const ViewListing = () => {
 
     const [location, setLocation] = useState("Bacoor"); //temporary
     const handleClose = () => {
-        alert("Container closed!");
+        navigate(-1); // Go back to the previous page
       };
+
+    const navigate = useNavigate(); // React Router navigation hook
+
+    const handleRequestVisit = () => {
+        navigate("/request-ocular"); // Route to the Request Visit Page
+    };
 
   return (
     <div>
@@ -52,7 +60,9 @@ export const ViewListing = () => {
                     <div className="border-b pb-4 mb-2">
                         <h3 className="text-lg sm:text-2xl font-semibold mb-4">₱4,000 / head / month</h3>
                         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
+                        <button 
+                        onClick={handleRequestVisit}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
                             Request Visit
                         </button>
                         <button className="border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100">

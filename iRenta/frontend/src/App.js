@@ -11,6 +11,7 @@ import OwnerDashboard from "./pages/OwnerDashboard.js";
 import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
+import RequestOcularVisit from "./components/Listing/RequestOcularVisit.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 
@@ -20,6 +21,7 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
+import BrowseListing from "./pages/BrowseListing.js";
 
 const App = () => {
   return (
@@ -45,6 +47,9 @@ const App = () => {
               }
             />
             <Route path="/" element={<LandingPage />} />
+            <Route path="/view-listing" element={<ViewListing />} />
+            <Route path="/request-ocular" element={<RequestOcularVisit />} />
+            <Route path="/browse-listing" element={<BrowseListing />} />
 
             {/* Owner Routes */}
             <Route

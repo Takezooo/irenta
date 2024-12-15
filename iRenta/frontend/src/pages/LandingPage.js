@@ -7,6 +7,9 @@ import Topbar from "../components/global/Topbar.js";
 import { Footer } from "../components/global/Footer.js";
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { fetchListings } from "../api/Listings.js";
+import { useNavigate } from "react-router-dom"; // Import React Router hook
+import BrowseListing from "./BrowseListing.js";
+
 const LandingPage = () => {
   const { user } = useContext(AuthContext);
   const [listings, setListings] = useState([]);
@@ -19,6 +22,12 @@ const LandingPage = () => {
   
     fetchData();
   }, []);
+
+  const navigate = useNavigate(); // React Router navigation hook
+
+  const handleBrowseListing = () => {
+      navigate("/browse-listing"); // Route to the Request Visit Page
+  };
 
 //   const cards = [
 //     {
@@ -135,7 +144,12 @@ const LandingPage = () => {
         )}
       </div>
       <div className="mx-auto flex align-center flex-col rounded-xl mt-16 w-[90%]">
-        <h2 className="text-xl font-bold mb-4">Dormitories</h2>
+        <div className="flex flex-row w-full items-center justify-between">
+          <h2 className="text-xl font-bold mb-4">Dormitories</h2>
+          <button onClick={handleBrowseListing} className="mt-4 inline-block text-black underline">
+            See more  
+          </button>
+        </div>
         <div className="relative">
           <button
             onClick={scrollLeft}
@@ -194,7 +208,8 @@ const LandingPage = () => {
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <a href="#" className="mt-4 inline-block text-black underline">
+            <a
+              className="mt-4 inline-block text-black underline">
               See more
             </a>
           </div>

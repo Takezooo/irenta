@@ -29,58 +29,9 @@ const LandingPage = () => {
       navigate("/browse-listing"); // Route to the Request Visit Page
   };
 
-//   const cards = [
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//   ];
+  const handleClick = (property) => {
+    navigate("/view-listing", { state: property });
+  };
 
   const scrollContainerRef = useRef(null);
 
@@ -161,16 +112,17 @@ const LandingPage = () => {
             ref={scrollContainerRef}
             className="flex overflow-x-hidden space-x-4 px-10"
           >
-            {listings.map((listing) => (
+            {listings.map((property) => (
               <div
-                key={listing._id}
+                key={property._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
+                onClick={() => handleClick(property)}
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}
-                <h3 className="text-lg font-semibold">{listing.title}</h3>
-                <p className="text-gray-500 text-sm">{listing.description}</p>
-                <p className="text-gray-700 mt-2 font-bold">{listing.price}</p>
+                <h3 className="text-lg font-semibold">{property.title}</h3>
+                <p className="text-gray-500 text-sm">{property.description}</p>
+                <p className="text-gray-700 mt-2 font-bold">{property.price}</p>
               </div>
             ))}
           </div>

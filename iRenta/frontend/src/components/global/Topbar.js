@@ -7,7 +7,7 @@ import { CgSidebar } from "react-icons/cg";
 import { CgSidebarOpen } from "react-icons/cg";
 import { FaPowerOff } from "react-icons/fa6";
 const Topbar = ({ toggleSidebar, isOpen }) => {
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   return (
     <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200 shadow">
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
@@ -51,17 +51,23 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
           </div>
 
           {/* Additional Items (if needed) */}
-          <div className="ml-4 flex items-center">
-            <button
-              onClick={() => logout()}
-              className="flex items-center py-2 px-4 text-gray-900 bg-gray-200 group rounded-full hover:bg-blue-500"
-            >
-              <FaPowerOff className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-200" />
-              <span className="ml-1 p-1 text-sm font-medium text-black ms-3 group-hover:text-white whitespace-nowrap">
-                Sign Out
-              </span>
-            </button>
-          </div>
+          {user ? (
+            <>
+              <div className="ml-4 flex items-center">
+                <button
+                  onClick={() => logout()}
+                  className="flex items-center py-2 px-4 text-gray-900 bg-gray-200 group rounded-full hover:bg-blue-500"
+                >
+                  <FaPowerOff className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-200" />
+                  <span className="ml-1 p-1 text-sm font-medium text-black ms-3 group-hover:text-white whitespace-nowrap">
+                    Sign Out
+                  </span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </nav>

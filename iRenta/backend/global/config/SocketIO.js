@@ -1,37 +1,42 @@
-import http from http
 import { Server } from "socket.io";
 
-const SocketIO = (app) => {
-    const server = http.createServer(app);
-    const io = new Server(server, {
-        pingTimeout: 60000,
-        cors: {
-            // origin: [
-            //     "sample url"
-            // ],
-            origin: "*",
-        },
+const socketIO = (server) => {
+  const io = new Server(server, {
+    cors: {
+      origin: "*", // Allow all origins
+      methods: ["GET", "POST"],
+    },
+  });
+
+  // Store connected users
+  let users = [];
+
+  // When a user connects
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
+
+    // Store the user ID and their socket ID when they join
+    socket.on("joinRoom", (userId) => {
+      users.push({ userId, socketId: socket.id });
+      console.log(`User ${userId} joined room ${socket.id}`);
     });
 
-    io.on("connection", (socket) => {
-        console.log("Connected to Socket.io");
-
-        socket.on("setup", (userData) => {
-            socket.join(userData._id);
-            socket.emit("connected");
-        });
-
-        socket.on("disconnect", () => {
-            console.log("Disconnected from Socket.io");
-        });
-
-        // SENDING EVENT APPLICATIONS
-        socket.on("send-event-appli", (obj) => {
-            io.emit("receive-event-appli", obj);
-        });
+    // Send a message
+    socket.on("sendMessage", ({ senderId, receiverId, message }) => {
+      const receiver = users.find((user) => user.userId === receiverId);
+      if (receiver) {
+        io.to(receiver.socketId).emit("receiveMessage", { senderId, message });
+      }
     });
 
-    return server;
+    // When a user disconnects
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+      users = users.filter((user) => user.socketId !== socket.id);
+    });
+  });
+
+  return io;
 };
 
-export default SocketIO;
+export default socketIO;

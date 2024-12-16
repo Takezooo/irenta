@@ -3,10 +3,13 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import connectDB from './global/config/DB.js';
+import http from "http";
+import socketIO from './global/config/SocketIO.js'; // Import the Socket.io setup
 // import SocketIO from './global/config/SocketIO';
 
 import userRoutes from './src/users/users.route.js';
 import listingRoutes from './src/listings/listings.route.js';
+import chatRoutes from './src/chats/chat.route.js';
 
 dotenv.config();
 connectDB();
@@ -39,6 +42,7 @@ app.use((req, res, next) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/listings", listingRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.get("/", (req, res) => {
     res.status(200).json({

@@ -49,7 +49,6 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/view-listing" element={<ViewListing />} />
             <Route path="/request-ocular" element={<RequestOcularVisit />} />
-            <Route path="/browse-listing" element={<BrowseListing />} />
 
             {/* Owner Routes */}
             <Route
@@ -84,6 +83,15 @@ const App = () => {
               element={
                 <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                   <ViewListing />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/browse-listing"
+              element={
+                <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                  <BrowseListing />
                 </PrivateRoute>
               }
             />

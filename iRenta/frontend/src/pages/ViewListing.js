@@ -3,6 +3,7 @@ import Topbar from "../components/global/Topbar";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate, useLocation } from "react-router-dom"; // Import React Router hook
 import RequestOcularVisit from "../components/Listing/RequestOcularVisit";
+import { Footer } from "../components/global/Footer";
 
 export const ViewListing = () => {
  // const [location, setLocation] = useState("Bacoor"); //temporary
@@ -143,18 +144,6 @@ export const ViewListing = () => {
 
             {/* Details Section */}
             <div className="w-full lg:w-1/3 flex flex-col gap-6">
-              {/* Reviews Section */}
-              <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-semibold mb-4">Reviews</h2>
-                <div className="text-blue-500 text-xl font-bold">
-                  8.9/10 Excellent
-                </div>
-                <blockquote className="text-gray-600 italic mt-2">
-                  “Love this website! User-friendly interface and detailed
-                  listings made my dorm search stress-free.”
-                </blockquote>
-              </div>
-
               {/* Nearby Establishments Section */}
               <div className="bg-white rounded-lg shadow-md p-4">
                 <h2 className="text-lg font-semibold mb-4">
@@ -167,10 +156,50 @@ export const ViewListing = () => {
                   {/* Add more items here */}
                 </ul>
               </div>
+
+              {/* Property Owner Messaging Section */}
+              <div className="sm:block bg-white rounded-lg shadow-md border p-6 h-full">
+                {/* Hide on smaller screens (less than sm) */}
+                <div className="flex flex-col items-center">
+                  {/* Profile Picture */}
+                  <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mb-4">
+                    {/* <span className="text-gray-500">Profile Pic</span> */}
+                    <img
+                      src=""
+                      alt="Girl in a jacket"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  {/* User Info */}
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Property Owner Name
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Property Owner
+                  </p>
+                </div>
+                {/* Create New Listing Button (Visible only on larger screens) */}
+                <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block">
+                  Send a message
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Reviews Section */}
+          <div className= "w-full lg:w-3/4 bg-white rounded-lg shadow-md p-4">
+            <h2 className="text-lg font-semibold mb-4">Reviews</h2>
+            <div className="text-blue-500 text-xl font-bold">
+              8.9/10 Excellent
+            </div>
+            <blockquote className="text-gray-600 italic mt-2">
+              “Love this website! User-friendly interface and detailed
+              listings made my dorm search stress-free.”
+            </blockquote>
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

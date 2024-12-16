@@ -15,22 +15,7 @@ export const ViewListing = () => {
 
   const navigate = useNavigate(); // React Router navigation hook
 
-  const property = location.state || {
-    title: "No property selected",
-    description: "",
-    price: 0,
-    userId: "",
-    address: {
-      houseNumber: "",
-      street: "",
-      city: "",
-      zip: "",
-      long: "",
-      lat: "",
-    },
-    reviews: "No reviews available",
-    createdAt: Date.now,
-  };
+  const { listings } = location.state || {}; 
 
   const handleRequestVisit = () => {
     navigate("/request-ocular"); // Route to the Request Visit Page
@@ -73,9 +58,9 @@ export const ViewListing = () => {
               <div className="w-full xl:w-1/2 flex flex-col">
                 <div className="border-b pb-4 mb-4">
                   <h2 className="text-xl sm:text-2xl font-bold text-blue-600">
-                    {property.title}
+                    {listings?.title}
                   </h2>
-                  <p className="text-gray-600 mt-2">{property.address}</p>
+                  <p className="text-gray-600 mt-2">{listings?.address?.city}</p>
                 </div>
 
                 <div className="border-b pb-4 mb-2">

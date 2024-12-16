@@ -13,6 +13,23 @@ export const GetAllListings = async (req, res) => {
   }
 };
 
+export const GetListingById = async (req, res) => {
+  try {
+    const listingId = req.params.listingId; // Get the listing ID from URL params
+
+    // Fetch the specific listing by ID
+    const listing = await Listing.findById(listingId);
+
+    if (!listing) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    res.status(200).json(listing);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 export const DisplayListings = async (req, res) => {
   try {
     // Fetch all listings (no authentication required)
@@ -96,4 +113,5 @@ export default {
   UpdateListing,
   DeleteListing,
   DisplayListings,
+  GetListingById,
 };

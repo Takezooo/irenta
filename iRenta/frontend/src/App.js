@@ -47,7 +47,7 @@ const App = () => {
               }
             />
             <Route path="/" element={<LandingPage />} />
-            <Route path="/view-listing" element={<ViewListing />} />
+            {/* <Route path="/view-listing" element={<ViewListing />} /> */}
             <Route path="/request-ocular" element={<RequestOcularVisit />} />
 
             {/* Owner Routes */}

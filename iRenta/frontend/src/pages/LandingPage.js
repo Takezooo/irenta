@@ -1,16 +1,17 @@
 // src/components/LandingPage.js
 
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { Link } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Topbar from "../components/global/Topbar.js";
 import { Footer } from "../components/global/Footer.js";
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { fetchListings } from "../api/Listings.js";
-import { useNavigate } from "react-router-dom"; // Import React Router hook
+import { Link, useNavigate } from "react-router-dom"; // Import React Router hook
 import BrowseListing from "./BrowseListing.js";
 
 const LandingPage = () => {
+  const navigate = useNavigate(); // React Router navigation hook
+
   const { user } = useContext(AuthContext);
   const [listings, setListings] = useState([]);
 
@@ -19,18 +20,16 @@ const LandingPage = () => {
       const data = await fetchListings();
       setListings(data); // assuming fetchListings returns an array
     };
-  
+
     fetchData();
   }, []);
 
-  const navigate = useNavigate(); // React Router navigation hook
-
   const handleBrowseListing = () => {
-      navigate("/browse-listing"); // Route to the Request Visit Page
+    navigate("/browse-listing"); // Route to the Request Visit Page
   };
 
-  const handleClick = (property) => {
-    navigate("/view-listing", { state: property });
+  const handleViewProperty = (listings) => {
+    navigate("/property", { state: { listings } });
   };
 
   const scrollContainerRef = useRef(null);
@@ -97,8 +96,11 @@ const LandingPage = () => {
       <div className="mx-auto flex align-center flex-col rounded-xl mt-16 w-[90%]">
         <div className="flex flex-row w-full items-center justify-between">
           <h2 className="text-xl font-bold mb-4">Dormitories</h2>
-          <button onClick={handleBrowseListing} className="mt-4 inline-block text-black underline">
-            See more  
+          <button
+            onClick={handleBrowseListing}
+            className="mt-4 inline-block text-black underline"
+          >
+            See more
           </button>
         </div>
         <div className="relative">
@@ -112,17 +114,17 @@ const LandingPage = () => {
             ref={scrollContainerRef}
             className="flex overflow-x-hidden space-x-4 px-10"
           >
-            {listings.map((property) => (
+            {listings.map((listing) => (
               <div
-                key={property._id}
+                key={listing._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
-                onClick={() => handleClick(property)}
+                onClick={() => handleViewProperty(listing)}
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}
-                <h3 className="text-lg font-semibold">{property.title}</h3>
-                <p className="text-gray-500 text-sm">{property.description}</p>
-                <p className="text-gray-700 mt-2 font-bold">{property.price}</p>
+                <h3 className="text-lg font-semibold">{listing.title}</h3>
+                <p className="text-gray-500 text-sm">{listing.description}</p>
+                <p className="text-gray-700 mt-2 font-bold">{listing.price}</p>
               </div>
             ))}
           </div>
@@ -160,10 +162,7 @@ const LandingPage = () => {
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <a
-              className="mt-4 inline-block text-black underline">
-              See more
-            </a>
+            <a className="mt-4 inline-block text-black underline">See more</a>
           </div>
         </div>
       </div>

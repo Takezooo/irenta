@@ -11,6 +11,15 @@ export const fetchListings = async () => {
   }
 };
 
+export const fetchSpecificList = async (id) => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/${id}`);
+    return data;
+  } catch (err) {
+    console.error("Failed to fetch listings:", err);
+  }
+};
+
 export const fetchOwnerListings = async () => {
   const authToken = GetToken();
   try {

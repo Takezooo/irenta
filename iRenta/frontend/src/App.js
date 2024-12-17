@@ -13,7 +13,7 @@ import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import RequestOcularVisit from "./components/Listing/RequestOcularVisit.js";
 import BrowseListing from "./pages/BrowseListing.js";
-import ChatRoom from "./components/Chat/ChatRoom.js";
+import ChatPage from "./pages/ChatPage.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 
@@ -89,11 +89,20 @@ const App = () => {
               }
             />
 
+<Route
+              path="/chat/"
+              element={
+                <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                  <ChatPage />
+                </PrivateRoute>
+              }
+            />
+
             <Route
               path="/chat/:chatId"
               element={
                 <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                  <ChatRoom />
+                  <ChatPage />
                 </PrivateRoute>
               }
             />

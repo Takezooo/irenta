@@ -23,18 +23,18 @@ export const ViewListing = () => {
     navigate("/request-ocular"); // Route to the Request Visit Page
   };
 
-  const handleChatClick = async (ownerId) => {
+  const handleChatClick = async (ownerId, listingId) => {
     console.log("Owner ID (recipientId):", ownerId); // Debug
+    console.log("Listing ID:", listingId);          // Debug
+  
     try {
-      const chat = await getOrCreateChat(ownerId);
-      console.log("Chat ID:", chat._id); // Ensure this returns a valid ID
+      const chat = await getOrCreateChat(ownerId, listingId);
+      console.log("Chat created or fetched:", chat);
       navigate(`/chat/${chat._id}`, { state: { userId: user.id } });
     } catch (err) {
-      console.error("Failed to navigate to chat", err);
+      console.error("Failed to create or navigate to chat", err);
     }
   };
-  
-  
 
   return (
     <div>
@@ -180,7 +180,7 @@ export const ViewListing = () => {
                 </div>
                 {/* Create New Listing Button (Visible only on larger screens) */}
                 <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block"
-                    onClick={() => handleChatClick(listings.userId)}>
+                    onClick={() => handleChatClick(listings.userId, listings._id)}>
                   Send a message
                 </button>
               </div>

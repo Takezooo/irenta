@@ -1,19 +1,31 @@
 // src/components/LandingPage.js
 
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Topbar from "../components/global/Topbar.js";
-import { Footer } from "../components/global/Footer.js";
-import { AuthContext } from "../global/contexts/AuthContext.js";
-import { fetchListings } from "../api/Listings.js";
 import { Link, useNavigate } from "react-router-dom"; // Import React Router hook
+
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+import Topbar from "../components/global/Topbar.js";
+import Sidebar from "../components/global/Sidebar.js";
+import { Footer } from "../components/global/Footer.js";
+
 import BrowseListing from "./BrowseListing.js";
 
-const LandingPage = () => {
-  const navigate = useNavigate(); // React Router navigation hook
+import { AuthContext } from "../global/contexts/AuthContext.js";
+import { fetchListings } from "../api/Listings.js";
 
-  const { user } = useContext(AuthContext);
+const LandingPage = () => {
+
+  const [isOpen, setIsOpen] = useState(false);
   const [listings, setListings] = useState([]);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const navigate = useNavigate(); // React Router navigation hook
+  const { user } = useContext(AuthContext);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +60,9 @@ const LandingPage = () => {
 
   return (
     <div>
-      <Topbar />
+      <Topbar toggleSidebar={toggleSidebar} isOpen={isOpen} />
+
+      <Sidebar isOpen={isOpen} />
 
       <div className="mx-auto mt-36 flex align-center flex-col p-5 rounded-xl w-[90%] from-blue-950 bg-gradient-to-r to-gray-800 overflow-hidden">
         {/* <div className="absolute z-[-1] w-full h-full overflow-hidden">

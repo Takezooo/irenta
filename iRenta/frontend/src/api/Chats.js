@@ -18,24 +18,24 @@ export const fetchUserChats = async () => {
   }
 };
 
-export const getOrCreateChat = async (recipientId) => {
-    const authToken = GetToken();
-    try {
-      const { data } = await axios.post(
-        `${API_BASE_URL}`,
-        { recipientId }, // Ensure this matches backend expectations
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }
-      );
-      return data;
-    } catch (err) {
-      console.error("Failed to create or fetch chat", err.response?.data);
-      throw err;
-    }
-  };
+export const getOrCreateChat = async (recipientId, listingId) => {
+  const authToken = GetToken(); // Retrieve the user's auth token
+  try {
+    const { data } = await axios.post(
+      `${API_BASE_URL}`, // Correct endpoint
+      { recipientId, listingId }, // Pass recipientId and listingId
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
+    return data; // Returns the chat object
+  } catch (err) {
+    console.error("Failed to create or fetch chat", err.response?.data);
+    throw err;
+  }
+};
   
 export const sendMessage = async (chatId, message) => {
   const authToken = GetToken();

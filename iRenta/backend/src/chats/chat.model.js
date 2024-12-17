@@ -26,6 +26,11 @@ const chatSchema = new mongoose.Schema(
         },
       },
     ],
+    listing: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Listing", // Reference to the Listing model
+      required: false, // Make this optional
+    },
   },
   { timestamps: true } // Adds createdAt and updatedAt fields
 );

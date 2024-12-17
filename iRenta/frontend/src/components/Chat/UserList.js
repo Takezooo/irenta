@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
-// import { AuthContext } from "../contexts/AuthContext";
-import { fetchUserChats } from "../../api/Chat.js";
+import React, { useState, useEffect, useContext } from "react";
+import { fetchUserChats } from "../../api/Chats.js";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
 
-const UserList = () => {
+const UserList = ({ onSelectChat, selectedChatId }) => {
+
   const [chats, setChats] = useState([]);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchChats = async () => {
       try {
         const data = await fetchUserChats();
-        setChats(data); // Update state with fetched chats
+        setChats(data);
       } catch (err) {
         console.error("Failed to fetch chats", err);
       }
@@ -19,17 +21,46 @@ const UserList = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Your Chats</h2>
-      <ul>
-        {chats.map((chat) => (
-          <li key={chat._id}>
-            Chat with{" "}
-            {chat.participants.map((user) => user.username).join(", ")}
+    <ul className="p-4">
+      {chats.map((chat) => {
+        // Filter out the current user to get the other participant
+        const otherParticipant = chat.participants.find(
+          (user) => user._id !== user.id
+        );
+
+        return (
+          <li
+            key={chat._id}
+            onClick={() => onSelectChat(chat)}
+            style={{
+              cursor: "pointer",
+              backgroundColor:
+                chat._id === selectedChatId ? "#ddd" : "transparent",
+              padding: "10px",
+              borderRadius: "8px",
+              marginBottom: "8px",
+            }}
+            className="hover:bg-gray-200 transition duration-300"
+          >
+            {/* Display Other Participant's Name */}
+            <div>
+              <strong>
+                {otherParticipant
+                  ? `${otherParticipant.info.firstName} ${otherParticipant.info.lastName}`
+                  : "Unknown User"}
+              </strong>
+            </div>
+
+            {/* Conditionally Display Property Title */}
+            {chat.listing && (
+              <div className="text-sm text-gray-600">
+                Property: {chat.listing.title}
+              </div>
+            )}
           </li>
-        ))}
-      </ul>
-    </div>
+        );
+      })}
+    </ul>
   );
 };
 

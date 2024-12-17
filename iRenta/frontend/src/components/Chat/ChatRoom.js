@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom"; // Import useParams
+import React, { useState, useEffect, useContext } from "react";
+import { useParams } from "react-router-dom"; // Import useParams
 import { io } from "socket.io-client";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { GetToken } from "../../global/utils/Token.js";
 
 const ChatRoom = () => {
   const { chatId } = useParams(); // Extract chatId from URL params
-  const location = useLocation();
+  const { user } = useContext(AuthContext); // Access the user context
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
-  
-  const userId = location.state?.userId; // Retrieve userId from location state
 
   const authToken = GetToken();
 
@@ -52,7 +51,7 @@ const ChatRoom = () => {
       socket.emit("sendMessage", { chatId, message });
       setMessage("");
     }
-    console.log("Current User ID:", userId);
+    console.log("Current User ID:", user.id);
   };
 
   return (
@@ -60,7 +59,7 @@ const ChatRoom = () => {
       <div>
         {messages.map((msg, index) => (
           <p key={index}>
-            <strong>{(msg.senderId === userId || msg.sender._id === userId) ? "You" : "Other User"}:</strong>{" "}
+            <strong>{(msg.senderId === user.id || msg.sender?._id === user.id) ? "You" : `${msg.info.firstName}`}:</strong>{" "}
             {msg.content || msg.message}
           </p>
         ))}

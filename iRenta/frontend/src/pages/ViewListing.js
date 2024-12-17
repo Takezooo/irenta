@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Topbar from "../components/global/Topbar";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate, useLocation } from "react-router-dom"; // Import React Router hook
 import RequestOcularVisit from "../components/Listing/RequestOcularVisit";
 import { Footer } from "../components/global/Footer";
+import { AuthContext } from "../global/contexts/AuthContext";
+import { getOrCreateChat } from "../api/Chats";
 
 export const ViewListing = () => {
  // const [location, setLocation] = useState("Bacoor"); //temporary
   const location = useLocation();
-  
+  const { user } = useContext(AuthContext);
   const handleClose = () => {
     navigate(-1 || "/"); // Go back to the previous page if no history
   };
@@ -20,6 +22,19 @@ export const ViewListing = () => {
   const handleRequestVisit = () => {
     navigate("/request-ocular"); // Route to the Request Visit Page
   };
+
+  const handleChatClick = async (ownerId) => {
+    console.log("Owner ID (recipientId):", ownerId); // Debug
+    try {
+      const chat = await getOrCreateChat(ownerId);
+      console.log("Chat ID:", chat._id); // Ensure this returns a valid ID
+      navigate(`/chat/${chat._id}`, { state: { userId: user.id } });
+    } catch (err) {
+      console.error("Failed to navigate to chat", err);
+    }
+  };
+  
+  
 
   return (
     <div>
@@ -164,7 +179,8 @@ export const ViewListing = () => {
                   </p>
                 </div>
                 {/* Create New Listing Button (Visible only on larger screens) */}
-                <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block">
+                <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block"
+                    onClick={() => handleChatClick(listings.userId)}>
                   Send a message
                 </button>
               </div>

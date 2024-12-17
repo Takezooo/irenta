@@ -28,8 +28,8 @@ const LandingPage = () => {
     navigate("/browse-listing"); // Route to the Request Visit Page
   };
 
-  const handleViewProperty = (listings) => {
-    navigate("/property", { state: { listings } });
+  const handleViewProperty = (listings, listingId) => {
+    navigate(`/${listingId}`, { state: { listings } });
   };
 
   const scrollContainerRef = useRef(null);
@@ -118,7 +118,7 @@ const LandingPage = () => {
               <div
                 key={listing._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
-                onClick={() => handleViewProperty(listing)}
+                onClick={() => handleViewProperty(listing, listing._id)}
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}

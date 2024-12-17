@@ -1,23 +1,12 @@
-// useEffect(() => {
-//     const fetchChats = async () => {
-//       const response = await fetch("/api/chats", {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       const data = await response.json();
-//       setChats(data);
-//     };
-
-//     fetchChats();
-//   }, []);
-
 import axios from "axios";
+import { GetToken } from "../global/utils/Token.js";
 
-const API_BASE_URL = "http://localhost:5000/api/users"; // Update with your backend API endpoint
+const API_BASE_URL = "http://localhost:5000/api/chats"; // Update with your backend API endpoint
 
 export const fetchUserChats = async () => {
   const authToken = GetToken();
   try {
-    const { data } = await axios.get(`${API_BASE_URL}/chats`, {
+    const { data } = await axios.get(`${API_BASE_URL}`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -30,31 +19,29 @@ export const fetchUserChats = async () => {
 };
 
 export const getOrCreateChat = async (recipientId) => {
-  const authToken = GetToken();
-  try {
-    const { data } = await axios.post(
-      `${API_BASE_URL}/chats`,
-      { recipientId }, // Send the recipient's user ID in the request body
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
-    );
-    return data; // This will return the chat object
-  } catch (err) {
-    console.error(
-      err.response?.data?.message || "Error creating or fetching chat"
-    );
-    throw err;
-  }
-};
-
+    const authToken = GetToken();
+    try {
+      const { data } = await axios.post(
+        `${API_BASE_URL}`,
+        { recipientId }, // Ensure this matches backend expectations
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      return data;
+    } catch (err) {
+      console.error("Failed to create or fetch chat", err.response?.data);
+      throw err;
+    }
+  };
+  
 export const sendMessage = async (chatId, message) => {
   const authToken = GetToken();
   try {
     const { data } = await axios.post(
-      `${API_BASE_URL}/chats/send`,
+      `${API_BASE_URL}/send`,
       { chatId, message }, // Send the chat ID and message content
       {
         headers: {

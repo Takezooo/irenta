@@ -12,6 +12,8 @@ import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import RequestOcularVisit from "./components/Listing/RequestOcularVisit.js";
+import BrowseListing from "./pages/BrowseListing.js";
+import ChatRoom from "./components/Chat/ChatRoom.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 
@@ -21,7 +23,6 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
-import BrowseListing from "./pages/BrowseListing.js";
 
 const App = () => {
   return (
@@ -69,17 +70,18 @@ const App = () => {
             />
 
             {/* Seeker and Owner Routes */}
-            {/* <Route
-              path="/"
-              element={
-                <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                  <LandingPage />
-                </PrivateRoute>
-              }
-            /> */}
 
             <Route
-              path="/property"
+              path="/browse-listing"
+              element={
+                <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                  <BrowseListing />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/:propertyId"
               element={
                 <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                   <ViewListing />
@@ -88,10 +90,10 @@ const App = () => {
             />
 
             <Route
-              path="/browse-listing"
+              path="/chat/:chatId"
               element={
                 <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                  <BrowseListing />
+                  <ChatRoom />
                 </PrivateRoute>
               }
             />

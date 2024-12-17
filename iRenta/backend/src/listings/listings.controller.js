@@ -48,14 +48,23 @@ export const CreateListing = async (req, res) => {
       return res.status(403).json({ message: "Only owners can create listings." });
     }
 
-    const { title, description, price } = req.body;
+    // Destructure necessary fields from the request body
+    const { title, description, price, address } = req.body;
 
-    // Create the listing with the logged-in user's ID
+    // Check if the address object is present and has required fields
+    if (!address || !address.houseNumber || !address.street || !address.city) {
+      return res.status(400).json({
+        message: "Address is incomplete. Ensure houseNumber, street, and city are provided."
+      });
+    }
+
+    // Create the listing with the logged-in user's ID and the address
     const newListing = await Listing.create({
       title,
       description,
       price,
       userId: req.user.id, // Associate with the logged-in owner
+      address, // Pass the address directly
     });
 
     res.status(201).json(newListing);

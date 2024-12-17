@@ -24,10 +24,10 @@
         "http": "^0.0.1-security",
         "jsonwebtoken": "^9.0.2",
         "jwt-decode": "^4.0.0",
-        "mongodb": "^6.11.0",
-        "mongoose": "^8.8.4",
+        "mongodb": "^6.12.0",
+        "mongoose": "^8.9.1",
         "multer": "^1.4.5-lts.1",
-        "nodemon": "^3.1.7",
+        "nodemon": "^3.1.9",
         "socket.io": "^4.8.1"
     }
 }

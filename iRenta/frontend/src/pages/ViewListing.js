@@ -19,10 +19,10 @@ export const ViewListing = () => {
 
   const { listings } = location.state || {}; 
 
-  const handleRequestVisit = () => {
-    navigate("/request-ocular"); // Route to the Request Visit Page
-  };
-
+  // const handleRequestVisit = () => {
+  //   navigate('/request-ocular', { state: { propertyId: listings._id } });
+  // };
+  
   const handleChatClick = async (ownerId, listingId) => {
     console.log("Owner ID (recipientId):", ownerId); // Debug
     console.log("Listing ID:", listingId);          // Debug
@@ -34,6 +34,16 @@ export const ViewListing = () => {
     } catch (err) {
       console.error("Failed to create or navigate to chat", err);
     }
+  };
+
+  const [showOcularPopup, setShowOcularPopup] = useState(false);
+
+  const handleRequestVisit = () => {
+    setShowOcularPopup(true);
+  };
+
+  const closePopup = () => {
+    setShowOcularPopup(false);
   };
 
   return (
@@ -200,6 +210,14 @@ export const ViewListing = () => {
           </div>
         </div>
       </div>
+
+      {showOcularPopup && (
+        <RequestOcularVisit
+          propertyId={listings?._id}
+          onClose={closePopup}
+        />
+      )}
+
       <Footer />
     </div>
   );

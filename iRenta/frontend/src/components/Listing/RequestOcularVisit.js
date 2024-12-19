@@ -1,171 +1,76 @@
-import React, { useState } from "react";
-import { IoCloseCircleOutline } from "react-icons/io5"; // Import React Icons
-import { useNavigate } from "react-router-dom"; // React Router hook for navigation
+import React, { useState, useEffect } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import axios from "axios";
+import { GetToken } from "../../global/utils/Token";
+const RequestOcularVisit = ({ propertyId, onClose }) => {
+  const [reservedDates, setReservedDates] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-const RequestOcularVisit = () => {
-  const navigate = useNavigate(); // For navigation to previous page
-  const [formData, setFormData] = useState({
-    visitorName: "",
-    visitDate: "",
-    visitTime: "",
-    propertyName: "",
-  });
+  useEffect(() => {
+    const fetchReservedDates = async () => {
+      const token = GetToken(); // Ensure token is retrieved
+      try {
+        const response = await axios.get(`/api/ocular/reserved-dates/${propertyId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setReservedDates(response.data.map((date) => new Date(date)));
+      } catch (err) {
+        console.error("Failed to fetch reserved dates:", err);
+      }
+    };
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState("");
+    if (propertyId) fetchReservedDates();
+  }, [propertyId]);
 
-  // Handle Input Change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setError(""); // Clear error message when user interacts
-  };
-
-  // Handle Form Submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { visitDate, visitTime } = formData;
-    const currentDateTime = new Date();
-    const selectedDateTime = new Date(`${visitDate}T${visitTime}`);
-
-    if (selectedDateTime < currentDateTime) {
-      setError("Date and time of visit cannot be in the past.");
-      return;
+  const handleSubmit = async () => {
+    const token = GetToken();
+    try {
+      await axios.post(
+        "/api/ocular/schedule",
+        { propertyId, date: selectedDate },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Ocular visit scheduled successfully!");
+      setReservedDates([...reservedDates, selectedDate]);
+      onClose(); // Close the modal
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to schedule ocular visit");
     }
-
-    setError("");
-    console.log("Request Submitted:", formData);
-    setIsSubmitted(true);
   };
 
-  // Handle Back/Close Action
-  const handleClose = () => {
-    navigate(-1); // Go back to the previous page
-  };
+  const tileDisabled = ({ date }) =>
+    reservedDates.some((reservedDate) => reservedDate.toDateString() === date.toDateString());
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md relative">
-        {/* Close/Back Button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition"
-        >
-          <IoCloseCircleOutline size={28} />
-        </button>
-
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Request for Visit
-        </h1>
-
-        {isSubmitted ? (
-          <div className="text-center">
-            <h2 className="text-green-600 font-semibold text-lg">
-              Request Submitted Successfully!
-            </h2>
-            <p className="text-gray-700 mt-2">
-              We will confirm your visit soon. Thank you for your interest!
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Visitor Name */}
-            <div>
-              <label
-                htmlFor="visitorName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Visitor Name
-              </label>
-              <input
-                type="text"
-                id="visitorName"
-                name="visitorName"
-                placeholder="Enter your full name"
-                value={formData.visitorName}
-                onChange={handleChange}
-                required
-                className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Date of Visit */}
-            <div>
-              <label
-                htmlFor="visitDate"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Date of Visit
-              </label>
-              <input
-                type="date"
-                id="visitDate"
-                name="visitDate"
-                value={formData.visitDate}
-                onChange={handleChange}
-                required
-                className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Time of Visit */}
-            <div>
-              <label
-                htmlFor="visitTime"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Time of Visit
-              </label>
-              <input
-                type="time"
-                id="visitTime"
-                name="visitTime"
-                value={formData.visitTime}
-                onChange={handleChange}
-                required
-                className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Property Name or Address */}
-            <div>
-              <label
-                htmlFor="propertyName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Property Name or Address
-              </label>
-              <input
-                type="text"
-                id="propertyName"
-                name="propertyName"
-                placeholder="Enter the property name or address"
-                value={formData.propertyName}
-                onChange={handleChange}
-                required
-                className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="text-red-500 text-sm font-semibold mt-2">
-                {error}
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                Submit Request
-              </button>
-            </div>
-          </form>
-        )}
+    <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+        <h2 className="text-xl font-bold mb-4">Schedule Ocular Visit</h2>
+        <Calendar
+          onChange={setSelectedDate}
+          tileDisabled={tileDisabled}
+          value={selectedDate}
+        />
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
   );

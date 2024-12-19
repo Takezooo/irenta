@@ -29,7 +29,7 @@ const socketIO = (server) => {
     socket.on("joinRoom", async ({ chatId }) => {
       try {
         socket.join(chatId);
-        console.log(`User ${socket.user._id} joined room ${chatId}`);
+        console.log(`User ${socket.user.id} joined room ${chatId}`);
 
         // Fetch chat history from the database
         const chat = await Chat.findById(chatId).populate(

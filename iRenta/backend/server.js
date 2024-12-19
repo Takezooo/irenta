@@ -23,11 +23,17 @@ app.use(cors({
 // Import routes
 import userRoutes from './src/users/users.route.js';
 import listingRoutes from './src/listings/listings.route.js';
+import ocularRoutes from './src/ocular/ocular.route.js';
 import chatRoutes from './src/chats/chat.route.js';
 
 app.use("/api/users", userRoutes);
+
+// anything related to litings
 app.use("/api/listings", listingRoutes);
+
+// anything related to interactions with owners
 app.use("/api/chats", chatRoutes);
+app.use('/api/ocular', ocularRoutes);
 
 app.get("/", (req, res) => {
     res.status(200).json({

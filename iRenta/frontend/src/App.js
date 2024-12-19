@@ -11,7 +11,6 @@ import OwnerDashboard from "./pages/OwnerDashboard.js";
 import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
-import RequestOcularVisit from "./components/Listing/RequestOcularVisit.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ChatPage from "./pages/ChatPage.js";
 
@@ -48,8 +47,6 @@ const App = () => {
               }
             />
             <Route path="/" element={<LandingPage />} />
-            {/* <Route path="/view-listing" element={<ViewListing />} /> */}
-            <Route path="/request-ocular" element={<RequestOcularVisit />} />
 
             {/* Owner Routes */}
             <Route

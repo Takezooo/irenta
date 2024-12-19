@@ -12,7 +12,10 @@ export const getChatsForUser = async (req, res) => {
         select: "info.firstName info.lastName", // Select firstName and lastName only
       })
       .populate("listing", "title") // Populate listing details
-      .populate("messages.sender", "info.firstName info.lastName")
+      .populate({
+        path: "messages.sender", // Populate sender in messages
+        select: "info.firstName info.lastName", // Get sender's first and last name
+      })
       .sort({ updatedAt: -1 })
       .lean(); // Convert documents to plain JS objects
 

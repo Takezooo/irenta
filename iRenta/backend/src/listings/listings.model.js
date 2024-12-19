@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const listingSchema = new mongoose.Schema({
-title: { type: String, required: true },
+  title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -15,7 +15,7 @@ title: { type: String, required: true },
   },
   visitAvailability: {
     startTime: { type: String }, // e.g., "09:00"
-    endTime: { type: String },   // e.g., "18:00"
+    endTime: { type: String }, // e.g., "18:00"
   },
   createdAt: { type: Date, default: Date.now },
 });

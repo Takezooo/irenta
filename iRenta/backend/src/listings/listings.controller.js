@@ -1,4 +1,5 @@
 import Listing from './listings.model.js';
+import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 
 export const GetAllListings = async (req, res) => {
   try {
@@ -44,27 +45,43 @@ export const DisplayListings = async (req, res) => {
 export const CreateListing = async (req, res) => {
   try {
     // Check if the logged-in user is an "owner"
-    if (req.user.userType !== 'Owner') {
+    if (req.user.userType !== "Owner") {
       return res.status(403).json({ message: "Only owners can create listings." });
     }
 
     // Destructure necessary fields from the request body
-    const { title, description, price, address } = req.body;
+    const { title, description, price, address, visitAvailability } = req.body;
 
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {
       return res.status(400).json({
-        message: "Address is incomplete. Ensure houseNumber, street, and city are provided."
+        message: "Address is incomplete. Ensure houseNumber, street, and city are provided.",
       });
     }
 
-    // Create the listing with the logged-in user's ID and the address
+    // Validate visitAvailability
+    if (visitAvailability) {
+      const { startTime, endTime } = visitAvailability;
+
+      // Ensure both times are provided
+      if (!startTime || !endTime) {
+        return res.status(400).json({ message: "Visit availability requires both startTime and endTime." });
+      }
+
+      // Ensure startTime is earlier than endTime
+      if (moment(startTime, "HH:mm").isSameOrAfter(moment(endTime, "HH:mm"))) {
+        return res.status(400).json({ message: "Start time must be earlier than end time." });
+      }
+    }
+
+    // Create the listing with the logged-in user's ID, address, and visitAvailability
     const newListing = await Listing.create({
       title,
       description,
       price,
       userId: req.user.id, // Associate with the logged-in owner
-      address, // Pass the address directly
+      address,
+      visitAvailability, // Include validated visit availability
     });
 
     res.status(201).json(newListing);

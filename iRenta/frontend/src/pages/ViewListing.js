@@ -1,27 +1,26 @@
 import React, { useState, useContext } from "react";
 import Topbar from "../components/global/Topbar";
 import { AiOutlineClose } from "react-icons/ai";
-import { useNavigate, useLocation } from "react-router-dom"; // Import React Router hook
+import { useNavigate } from "react-router-dom"; // Import React Router hook
 import RequestOcularVisit from "../components/Listing/RequestOcularVisit";
 import { Footer } from "../components/global/Footer";
+
 import { AuthContext } from "../global/contexts/AuthContext";
+import { useProperty } from "../global/contexts/PropertyContext";
+
 import { getOrCreateChat } from "../api/Chats";
 
 export const ViewListing = () => {
- // const [location, setLocation] = useState("Bacoor"); //temporary
-  const location = useLocation();
+ const [location, setLocation] = useState("Bacoor"); //temporary
+
   const { user } = useContext(AuthContext);
+  const { selectedProperty } = useProperty();
+
   const handleClose = () => {
     navigate(-1 || "/"); // Go back to the previous page if no history
   };
 
   const navigate = useNavigate(); // React Router navigation hook
-
-  const { listings } = location.state || {}; 
-
-  // const handleRequestVisit = () => {
-  //   navigate('/request-ocular', { state: { propertyId: listings._id } });
-  // };
   
   const handleChatClick = async (ownerId, listingId) => {
     console.log("Owner ID (recipientId):", ownerId); // Debug
@@ -83,9 +82,9 @@ export const ViewListing = () => {
               <div className="w-full xl:w-1/2 flex flex-col">
                 <div className="border-b pb-4 mb-4">
                   <h2 className="text-xl sm:text-2xl font-bold text-blue-600">
-                    {listings?.title}
+                    {selectedProperty?.title}
                   </h2>
-                  <p className="text-gray-600 mt-2">{listings?.address?.city}</p>
+                  <p className="text-gray-600 mt-2">{selectedProperty?.address?.city}</p>
                 </div>
 
                 <div className="border-b pb-4 mb-2">
@@ -190,7 +189,7 @@ export const ViewListing = () => {
                 </div>
                 {/* Create New Listing Button (Visible only on larger screens) */}
                 <button className="mt-6 w-full bg-blue-500 text-white font-medium py-2 rounded-md shadow-md hover:bg-blue-600 sm:block"
-                    onClick={() => handleChatClick(listings.userId, listings._id)}>
+                    onClick={() => handleChatClick(selectedProperty.userId, selectedProperty._id)}>
                   Send a message
                 </button>
               </div>
@@ -213,7 +212,7 @@ export const ViewListing = () => {
 
       {showOcularPopup && (
         <RequestOcularVisit
-          propertyId={listings?._id}
+          propertyDetails={selectedProperty} // Pass selected property details
           onClose={closePopup}
         />
       )}

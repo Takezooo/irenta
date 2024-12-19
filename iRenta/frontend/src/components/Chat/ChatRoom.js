@@ -52,7 +52,6 @@ const ChatRoom = () => {
       setMessage("");
     }
     console.log("Current User ID:", user.id);
-    console.log(message.sender.info.firstName);
   };
 
   return (
@@ -60,7 +59,7 @@ const ChatRoom = () => {
       <div>
         {messages.map((msg, index) => (
           <p key={index}>
-            <strong>{msg.sender?._id === user.id ? "You" : `${msg.sender?.info?.firstName || "Unknown"} ${msg.sender?.info?.lastName || "User"}`}:</strong>{" "}
+            <strong>{msg.sender?._id === user.id ? "You" : "Other User"}:</strong>{" "}
             {msg.content || msg.message}
           </p>
         ))}

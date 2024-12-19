@@ -12,6 +12,8 @@ import { Footer } from "../components/global/Footer.js";
 import BrowseListing from "./BrowseListing.js";
 
 import { AuthContext } from "../global/contexts/AuthContext.js";
+import { useProperty } from "../global/contexts/PropertyContext";
+
 import { fetchListings } from "../api/Listings.js";
 
 const LandingPage = () => {
@@ -19,13 +21,14 @@ const LandingPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [listings, setListings] = useState([]);
 
+  const { user } = useContext(AuthContext);
+  const { setSelectedProperty } = useProperty();
+
+  const navigate = useNavigate(); // React Router navigation hook
+  
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
-  const navigate = useNavigate(); // React Router navigation hook
-  const { user } = useContext(AuthContext);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,8 +43,9 @@ const LandingPage = () => {
     navigate("/browse-listing"); // Route to the Request Visit Page
   };
 
-  const handleViewProperty = (listings, listingId) => {
-    navigate(`/${listingId}`, { state: { listings } });
+  const handleViewProperty = (listings) => {
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
   };
 
   const scrollContainerRef = useRef(null);
@@ -132,7 +136,7 @@ const LandingPage = () => {
               <div
                 key={listing._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
-                onClick={() => handleViewProperty(listing, listing._id)}
+                onClick={() => handleViewProperty(listing)}
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}

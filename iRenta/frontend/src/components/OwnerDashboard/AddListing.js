@@ -2,10 +2,74 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
+import axios from "axios";
+import { GetToken } from "../../global/utils/Token.js";
+
+const API_LINK = "http://localhost:5000/api";
 
 const AddListing = () => {
+
+  const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName, setFileName] = useState("No file chosen");
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [type, setType] = useState("");
+  const [bedroomNumber, setBedroomNumber] = useState("");
+  const [bathroomNumber, setBathroomNumber] = useState("");
+  const [propertySize, setPropertySize] = useState("");
+  const [address, setAddress] = useState({
+    houseNumber: "12",
+    street: "rw",
+    city: "rw",
+    zip: "r",
+    long: "r",
+    lat: "r",
+  });
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault(); 
+    // Ensure that required fields are filled out
+    if (!title || !address.houseNumber || !address.street || !address.city) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+
+    try {
+      const newListing = {
+        title,
+        description,
+        price,
+        type,
+        bedroomNumber,
+        bathroomNumber,
+        propertySize,
+        address,
+      };
+
+      // Send a POST request to the backend API
+      const response = await axios.post(
+        `${API_LINK}/listings`,
+        newListing,
+        {
+          headers: {
+            Authorization: `Bearer ${storedToken}`, // Include the token here
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        // Successfully created the listing
+        alert("Listing created successfully!");
+        navigate("/owner-dashboard"); // Navigate to the owner dashboard
+      }
+    } catch (error) {
+      console.error("Error creating listing:", error);
+      alert("An error occurred while creating the listing.");
+    }
+  };
 
 
   const navigate = useNavigate();
@@ -109,6 +173,7 @@ const AddListing = () => {
                 <input
                   type="text"
                   placeholder="Enter property name"
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -118,7 +183,10 @@ const AddListing = () => {
                 <label className="block text-sm font-medium mb-1 text-gray-700">
                   Rental Type
                 </label>
-                <select className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select 
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
                   <option value="">Select rental type</option>
                   <option value="apartment">Apartment</option>
                   <option value="house">House</option>
@@ -134,6 +202,7 @@ const AddListing = () => {
                 <input
                   type="number"
                   placeholder="Enter number of bedrooms"
+                  onChange={(e) => setBedroomNumber(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -146,6 +215,7 @@ const AddListing = () => {
                 <input
                   type="number"
                   placeholder="Enter number of bathrooms"
+                  onChange={(e) => setBathroomNumber(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -158,6 +228,7 @@ const AddListing = () => {
                 <input
                   type="text"
                   placeholder="Enter price per month"
+                  onChange={(e) => setPrice(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -170,6 +241,7 @@ const AddListing = () => {
                 <input
                   type="text"
                   placeholder="Enter property size in square feet"
+                  onChange={(e) => setPropertySize(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -182,6 +254,7 @@ const AddListing = () => {
                 <textarea
                   placeholder="Enter a description of the rental"
                   rows={4}
+                  onChange={(e) => setDescription(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
@@ -230,7 +303,10 @@ const AddListing = () => {
 
           {/* Fixed Footer */}
           <div className="p-6 bg-gray-50 border-t">
-            <button className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">
+            <button 
+              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"
+              onClick={handleFormSubmit}
+            >
               Add Listing
             </button>
           </div>

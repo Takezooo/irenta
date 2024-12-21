@@ -50,7 +50,7 @@ const App = () => {
                 }
               />
               <Route path="/" element={<LandingPage />} />
-              <Route path="/view-contract" element={<ViewContract />} />
+              
 
               {/* Owner Routes */}
               <Route
@@ -107,6 +107,14 @@ const App = () => {
                   </PrivateRoute>
                 }
               />
+
+              <Route 
+                path="/view-contract"
+                element={
+                  <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                    <ViewContract />
+                  </PrivateRoute>
+                } />
 
               {/* Fallback Route */}
               <Route path="*" element={<NotAuthorized />} />

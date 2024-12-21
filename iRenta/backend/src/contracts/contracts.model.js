@@ -38,14 +38,8 @@ const contractSchema = new mongoose.Schema({
     enum: ["Pending", "Active", "Terminated", "Completed"],
     default: "Pending",
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 const Contract = mongoose.model("Contract", contractSchema);

@@ -1,17 +1,9 @@
-<<<<<<< Updated upstream
-import mongoose from "mongoose";
-
-=======
 import mongoose from 'mongoose';
 //change the listing model
->>>>>>> Stashed changes
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
-<<<<<<< Updated upstream
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-=======
   type: { type: String, required: true },
   bedroomNumber: { type: Number},
   bathroomNumber: { type: Number},
@@ -21,7 +13,6 @@ const listingSchema = new mongoose.Schema({
     ref: 'User', // Reference the User model
     required: true,
   },
->>>>>>> Stashed changes
   address: {
     houseNumber: { type: String, required: true },
     street: { type: String, required: true },

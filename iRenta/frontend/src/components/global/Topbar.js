@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { GetToken } from "../../global/utils/Token.js"; // Import utilities
 import { fetchUserData } from "../../api/Users.js";
@@ -6,11 +6,13 @@ import { AuthContext } from "../../global/contexts/AuthContext";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle } from "react-icons/fa";
+import { FaPowerOff, FaUserCircle, FaBell, FaCommentAlt } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",
@@ -20,6 +22,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
   });
 
   const storedToken = GetToken();
+
+  const chatRef = useRef(null);
+  const notifRef = useRef(null);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,6 +42,48 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
     fetchUser();
   }, [user, storedToken]);
 
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        chatRef.current &&
+        !chatRef.current.contains(event.target) &&
+        notifRef.current &&
+        !notifRef.current.contains(event.target) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setChatOpen(false);
+        setNotifOpen(false);
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Close other dropdowns when clicking a button
+  const handleChatToggle = () => {
+    setChatOpen(!chatOpen);
+    setNotifOpen(false);
+    setDropdownOpen(false);
+  };
+
+  const handleNotifToggle = () => {
+    setNotifOpen(!notifOpen);
+    setChatOpen(false);
+    setDropdownOpen(false);
+  };
+
+  const handleProfileToggle = () => {
+    setDropdownOpen(!dropdownOpen);
+    setChatOpen(false);
+    setNotifOpen(false);
+  };
+
   const location = useLocation(); // Get the current route
 
   // Check if current route is OwnerDashboard
@@ -43,7 +91,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
   return (
     <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200 shadow">
-      <div className="px-3 py-3 lg:px-5 lg:pl-3">
+      <div className="px-6 py-3 lg:px-10 lg:pl-3">
         <div className="flex items-center justify-between">
           {/* Sidebar Toggle and Logo */}
           <div className="flex items-center justify-start rtl:justify-end">
@@ -86,46 +134,112 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
           </div>
 
           {/* User Section */}
-          {user ? (
-            <div className="relative">
+          <div className="flex items-center gap-3">
+            {/* Chat Button */}
+            <div className="relative" ref={chatRef}>
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 py-2 px-4 bg-gray-200 rounded-full hover:bg-blue-500 transition-all"
+                onClick={handleChatToggle}
+                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
               >
-                <div className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={userProfile.info.profile.link || "https://via.placeholder.com/150"}
-                    alt="Profile"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <h3 className="text-md font-semibold text-gray-800">
-                  {userProfile.info.firstName}
-                </h3>
+                <FaCommentAlt className="text-md" />
               </button>
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
+              {chatOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
                   <ul className="py-2">
-                    <li>
-                      <button
-                        onClick={logout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
+                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      No new messages
                     </li>
                   </ul>
                 </div>
               )}
             </div>
-          ) : (
-            <Link
-              to="/login"
-              className="ml-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 transition"
+
+            {/* Notification Button */}
+            <div className="relative" ref={notifRef}>
+            <button
+              onClick={handleNotifToggle}
+              className="h-10 w-10 bg-gray-200 hover:bg-gray-300  rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
             >
-              Login
-            </Link>
-          )}
+              <FaBell className="text-lg" />
+            </button>
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
+                  <ul className="py-2">
+                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      View Contract
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Button */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={handleProfileToggle}
+                className="flex items-center gap-2 rounded-full hover:ring-blue-500 hover:ring-4 transition-all"
+              >
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  {user ? (
+                    <img
+                      src={userProfile.info.profile.link || "https://via.placeholder.com/150"}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <FaUserCircle className="text-blue-500 text-xl" />
+                  )}
+                </div>
+              </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
+                  {user ? (
+                    // Logged-in Dropdown
+                    <ul className="py-2">
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={userProfile.info.profile.link || "https://via.placeholder.com/150"}
+                            alt="Profile"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          {userProfile.info.firstName}
+                        </h3>
+                      </li>
+                      <hr className="my-2"></hr>
+                      <li>
+                        <button
+                          onClick={logout}
+                          className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <FaPowerOff className="h-5 w-5" />
+                          <h3 className="text-sm font-semibold text-gray-800 px-4">
+                            Log Out
+                          </h3>
+                        </button>
+                      </li>
+                    </ul>
+                  ) : (
+                    // Logged-out Dropdown
+                    <ul className="py-2">
+                      <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        <Link to="/login" className="block w-full text-left">
+                          Log in
+                        </Link>
+                      </li>
+                      <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                        <Link to="/register" className="block w-full text-left">
+                          Register
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </nav>

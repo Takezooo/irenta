@@ -13,6 +13,7 @@ import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ChatPage from "./pages/ChatPage.js";
+import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
@@ -49,6 +50,7 @@ const App = () => {
                 }
               />
               <Route path="/" element={<LandingPage />} />
+              <Route path="/view-contract" element={<ViewContract />} />
 
               {/* Owner Routes */}
               <Route

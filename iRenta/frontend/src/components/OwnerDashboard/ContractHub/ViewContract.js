@@ -1,0 +1,177 @@
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../../global/contexts/AuthContext.js";
+import Topbar from "../../global/Topbar.js";
+
+const ViewContract = () => {
+  const { user } = useContext(AuthContext);
+
+  // Dummy contract details
+  const dummyContract = {
+    property: {
+      name: "Greenwood Apartments",
+      address: {
+        houseNumber: "123",
+        street: "Maple Street",
+        city: "Springfield",
+        zip: "12345",
+      },
+    },
+    tenant: { name: "John Doe" },
+    landlordName: "Jane Smith",
+    contractDetails: {
+      startDate: "2023-01-01",
+      endDate: "2024-01-01",
+      rentAmount: "$1500",
+      paymentFrequency: "Monthly",
+      termsAndConditions: "Tenant must pay rent on time and keep the property clean.",
+      rulesAndRegulations: "No smoking or pets allowed inside the property.",
+    },
+  };
+
+  const [contractDetails] = useState(dummyContract);
+
+  return (
+    <div className="flex-grow">
+      <Topbar />
+      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto mt-16">
+        <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
+          View Contract
+        </h1>
+
+        {/* Property Details */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Property Information
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Property Name
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.property.name}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                House Number
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.property.address.houseNumber}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Street
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.property.address.street}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                City
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.property.address.city}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                ZIP
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.property.address.zip}
+              </p>
+            </div>
+          </div>
+
+          {/* Contract Details */}
+          <h2 className="text-xl font-semibold text-gray-800 mt-6">
+            Contract Information
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Tenant
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.tenant.name || "N/A"}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Landlord
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.landlordName}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Start Date
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.contractDetails.startDate}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                End Date
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.contractDetails.endDate}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Rent Amount
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.contractDetails.rentAmount}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Payment Frequency
+              </label>
+              <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+                {contractDetails.contractDetails.paymentFrequency}
+              </p>
+            </div>
+          </div>
+
+          {/* Terms and Conditions */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Terms and Conditions
+            </label>
+            <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+              {contractDetails.contractDetails.termsAndConditions}
+            </p>
+          </div>
+
+          {/* Rules and Regulations */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Rules and Regulations
+            </label>
+            <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
+              {contractDetails.contractDetails.rulesAndRegulations}
+            </p>
+          </div>
+
+          <div className="flex w-full justify-center">
+            <button
+                className="mt-6 w-fit px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+                Download as PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ViewContract;

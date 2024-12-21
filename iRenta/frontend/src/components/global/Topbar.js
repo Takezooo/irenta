@@ -166,7 +166,9 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
                   <ul className="py-2">
                     <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                    <Link to="/view-contract" className="block w-full text-left">
                       View Contract
+                    </Link>
                     </li>
                   </ul>
                 </div>

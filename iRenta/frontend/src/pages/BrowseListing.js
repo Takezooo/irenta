@@ -6,7 +6,9 @@ import { Footer } from "../components/global/Footer";
 
 const BrowseListing = () => {
   const [listings, setListings] = useState([]); // Listings Data
+  const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [isMapFullScreen, setIsMapFullScreen] = useState(false); // Fullscreen Map for Phone
+  const listingsPerPage = 12;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,48 +26,74 @@ const BrowseListing = () => {
     setIsMapFullScreen(false); // Return to listings
   };
 
+  // Calculate paginated listings
+  const indexOfLastListing = currentPage * listingsPerPage;
+  const indexOfFirstListing = indexOfLastListing - listingsPerPage;
+  const currentListings = listings.slice(indexOfFirstListing, indexOfLastListing);
+
+  const totalPages = Math.ceil(listings.length / listingsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div className="pt-16 h-screen relative">
+    <div className="flex flex-col min-h-screen">
       <Topbar />
 
       {/* Main Content */}
       {!isMapFullScreen && (
-        <div className="flex flex-col lg:flex-row h-full">
+        <div className="flex-grow flex pt-[70px] h-screen">
           {/* Listings Section */}
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 flex-grow`}
-          >
-            {listings.map((listing) => (
-              <div
-                key={listing._id}
-                className="bg-white rounded-lg shadow-md overflow-hidden border h-[420px] flex flex-col justify-between hover:shadow-lg transition-all"
-              >
-                {/* Image Section */}
-                <div className="relative h-2/3">
-                  <img
-                    src={listing.imageUrl || "https://via.placeholder.com/300"}
-                    alt={listing.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500">
-                    <AiOutlineHeart size={20} />
-                  </button>
-                </div>
+          <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
+            <div className="flex flex-wrap gap-4 justify-center">
+              {currentListings.map((listing) => (
+                <div
+                  key={listing._id}
+                  className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all"
+                >
+                  {/* Image Section */}
+                  <div className="relative flex-shrink-0 h-2/3">
+                    <img
+                      src={listing.imageUrl || "https://via.placeholder.com/300"}
+                      alt={listing.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500">
+                      <AiOutlineHeart size={20} />
+                    </button>
+                  </div>
 
-                {/* Details Section */}
-                <div className="p-4 flex-grow flex flex-col justify-between">
-                  <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-2">{listing.description}</p>
-                  <p className="text-gray-700 font-bold mt-2">{listing.price} / night</p>
+                  {/* Details Section */}
+                  <div className="p-4 flex-grow flex flex-col justify-between">
+                    <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
+                    <p className="text-gray-500 text-sm line-clamp-2">{listing.description}</p>
+                    <p className="text-gray-700 font-bold mt-2">{listing.price} / night</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-4">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`px-4 py-2 mx-1 border rounded ${
+                    currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Map Section for Desktop */}
-          <div className="hidden lg:block lg:w-1/3 h-full bg-gray-200 relative transition-all duration-300">
+          {/* Map Section */}
+          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen">
             <iframe
-              className="w-full h-full border-none rounded-md"
+              className="w-full h-full border-none"
               src="https://maps.google.com/maps?q=Bacoor&t=&z=13&ie=UTF8&iwloc=&output=embed"
               allowFullScreen
               title="Map"
@@ -109,9 +137,8 @@ const BrowseListing = () => {
         </div>
       )}
 
-      <div className="hidden lg:block">
-        <Footer />
-      </div>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

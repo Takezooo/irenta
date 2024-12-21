@@ -160,7 +160,7 @@ export const ViewListing = () => {
                 </h2>
                 <ul className="text-gray-600">
                   <li>Jollibee</li>
-                  <li>Simbahan</li>
+                  <li>Simbahan</li> 
                   <li>SM</li>
                   {/* Add more items here */}
                 </ul>

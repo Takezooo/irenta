@@ -51,7 +51,6 @@ const App = () => {
               />
 
               <Route path="/" element={<LandingPage />} />
-              <Route path="/contract-hub" element={<ContractHub />} />
 
               {/* Owner Routes */}
               <Route
@@ -67,6 +66,14 @@ const App = () => {
                 element={
                   <PrivateRoute allowedRoles={["Owner"]}>
                     <AddListing />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/contract-hub"
+                element={
+                  <PrivateRoute allowedRoles={["Owner"]}>
+                    <ContractHub />
                   </PrivateRoute>
                 }
               />

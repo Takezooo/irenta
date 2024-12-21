@@ -8,7 +8,6 @@ import { GetToken } from "../../global/utils/Token.js";
 const API_LINK = "http://localhost:5000/api";
 
 const AddListing = () => {
-
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName, setFileName] = useState("No file chosen");
@@ -28,9 +27,24 @@ const AddListing = () => {
     long: "r",
     lat: "r",
   });
+  const [visitAvailability, setVisitAvailability] = useState({
+    startTime: "", // Default empty or preset value like "09:00"
+    endTime: "", // Default empty or preset value like "18:00"
+  });
+  
 
   const handleFormSubmit = async (e) => {
-    e.preventDefault(); 
+
+      // Validate that startTime is less than endTime
+  const start = new Date(`1970-01-01T${visitAvailability.startTime}`);
+  const end = new Date(`1970-01-01T${visitAvailability.endTime}`);
+
+  if (start >= end) {
+    alert("Start time must be earlier than end time.");
+    return;
+  }
+
+    e.preventDefault();
     // Ensure that required fields are filled out
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
@@ -47,18 +61,15 @@ const AddListing = () => {
         bathroomNumber,
         propertySize,
         address,
+        visitAvailability,
       };
 
       // Send a POST request to the backend API
-      const response = await axios.post(
-        `${API_LINK}/listings`,
-        newListing,
-        {
-          headers: {
-            Authorization: `Bearer ${storedToken}`, // Include the token here
-          },
-        }
-      );
+      const response = await axios.post(`${API_LINK}/listings`, newListing, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`, // Include the token here
+        },
+      });
 
       if (response.status === 201) {
         // Successfully created the listing
@@ -70,7 +81,6 @@ const AddListing = () => {
       alert("An error occurred while creating the listing.");
     }
   };
-
 
   const navigate = useNavigate();
 
@@ -99,12 +109,12 @@ const AddListing = () => {
           {/* Fixed Header */}
           <div className="p-6 bg-gray-50 border-b">
             <button
-                className="fixed right-10 bg-gray-200 rounded-full p-2 text-gray-400 hover:bg-gray-400 hover:text-gray-600 transition"
-                onClick={() => {
-                  navigate("/owner-dashboard");
-                }}
+              className="fixed right-10 bg-gray-200 rounded-full p-2 text-gray-400 hover:bg-gray-400 hover:text-gray-600 transition"
+              onClick={() => {
+                navigate("/owner-dashboard");
+              }}
             >
-                <AiOutlineClose className="w-6 h-6" />
+              <AiOutlineClose className="w-6 h-6" />
             </button>
             <h2 className="text-lg font-bold text-gray-800">Add a Listing</h2>
           </div>
@@ -112,56 +122,57 @@ const AddListing = () => {
           {/* Scrollable Content */}
           <div className="flex-grow overflow-y-auto p-6 space-y-6">
             {/* Photo Upload Section */}
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <p className="text-sm mb-2 text-gray-600">
-            Photos • {selectedImages.length} / 10 • You can add up to 10 photos.
-          </p>
-          {/* File Input */}
-          <div className="flex items-center">
-            <label
-              htmlFor="upload-images"
-              className="bg-blue-500 text-white px-4 py-2 rounded-l-lg cursor-pointer hover:bg-blue-600"
-            >
-              Choose Files
-            </label>
-            <input
-              type="file"
-              id="upload-images"
-              multiple
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-r-lg text-gray-600 flex-grow">
-              {selectedImages.length > 0
-                ? `${selectedImages.length} file(s) selected`
-                : "No file chosen"}
-            </span>
-          </div>
-          {/* Preview Section */}
-          {selectedImages.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {selectedImages.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
+            <div className="bg-gray-100 p-4 rounded-lg">
+              <p className="text-sm mb-2 text-gray-600">
+                Photos • {selectedImages.length} / 10 • You can add up to 10
+                photos.
+              </p>
+              {/* File Input */}
+              <div className="flex items-center">
+                <label
+                  htmlFor="upload-images"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-l-lg cursor-pointer hover:bg-blue-600"
                 >
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt={`Preview ${index}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
-                    onClick={() => handleRemoveImage(index)}
-                  >
-                  <IoClose className="w-6 h-6"/>
-                  </button>
+                  Choose Files
+                </label>
+                <input
+                  type="file"
+                  id="upload-images"
+                  multiple
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-r-lg text-gray-600 flex-grow">
+                  {selectedImages.length > 0
+                    ? `${selectedImages.length} file(s) selected`
+                    : "No file chosen"}
+                </span>
+              </div>
+              {/* Preview Section */}
+              {selectedImages.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {selectedImages.map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
+                    >
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt={`Preview ${index}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
+                        onClick={() => handleRemoveImage(index)}
+                      >
+                        <IoClose className="w-6 h-6" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
 
             {/* Input Fields */}
             <div className="space-y-4">
@@ -183,7 +194,7 @@ const AddListing = () => {
                 <label className="block text-sm font-medium mb-1 text-gray-700">
                   Rental Type
                 </label>
-                <select 
+                <select
                   onChange={(e) => setType(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -246,6 +257,40 @@ const AddListing = () => {
                 />
               </div>
 
+              {/* Visit Availability Section */}
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Visit Availability - Start Time
+                </label>
+                <input
+                  type="time"
+                  placeholder="Enter start time (e.g., 09:00)"
+                  onChange={(e) =>
+                    setVisitAvailability((prev) => ({
+                      ...prev,
+                      startTime: e.target.value,
+                    }))
+                  }
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Visit Availability - End Time
+                </label>
+                <input
+                  type="time"
+                  placeholder="Enter end time (e.g., 18:00)"
+                  onChange={(e) =>
+                    setVisitAvailability((prev) => ({
+                      ...prev,
+                      endTime: e.target.value,
+                    }))
+                  }
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               {/* Rental Description */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
@@ -303,7 +348,7 @@ const AddListing = () => {
 
           {/* Fixed Footer */}
           <div className="p-6 bg-gray-50 border-t">
-            <button 
+            <button
               className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"
               onClick={handleFormSubmit}
             >

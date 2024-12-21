@@ -161,11 +161,18 @@ const ViewContract = () => {
             </p>
           </div>
 
-          <div className="flex w-full justify-center">
+          <div className="flex flex-col w-full justify-center items-center gap-2">
             <button
-                className="mt-6 w-fit px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                className="my-5 w-fit px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
             >
                 Download as PDF
+            </button>
+            
+            Do you Agree in the Terms and Conditions of this Contract?
+            <button
+                className="w-fit px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+                I Agree
             </button>
           </div>
         </div>

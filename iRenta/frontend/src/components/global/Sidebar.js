@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { IoHome } from "react-icons/io5";
 import { TbLayoutListFilled } from "react-icons/tb";
@@ -23,9 +23,17 @@ const Sidebar = ({ isOpen }) => {
   const [activeContent, setActiveContent] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout, user } = useContext(AuthContext);
 
   const isActive = (content) => activeContent === content;
+
+  // Show sidebar only on `/owner-dashboard` routes
+  const isOwnerDashboard = location.pathname.startsWith("/owner-dashboard");
+
+  if (!isOwnerDashboard) {
+    return null; // Hide Sidebar for other routes
+  }
 
   return (
     <div className="flex w-screen">
@@ -35,6 +43,7 @@ const Sidebar = ({ isOpen }) => {
         }`}
       >
         <div className="flex flex-col justify-between items-center w-full h-[95%] rounded-lg py-3 overflow-y-auto overflow-hidden bg-gray-100 transition duration-75 ease-in-out">
+          {/* Sidebar Navigation */}
           <div className="w-full mx-auto space-y-2 font-medium">
             {user?.userType === "Owner" && (
               <>
@@ -110,10 +119,11 @@ const Sidebar = ({ isOpen }) => {
               </span>
             </button>
           </div>
+
           <div>
             <hr className="w-full my-2"></hr>
             <button
-              onClick={() => logout()}
+              onClick={logout}
               className="flex items-center py-2 px-16 text-gray-900 hover:bg-gray-200 group"
             >
               <FaPowerOff className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
@@ -125,6 +135,7 @@ const Sidebar = ({ isOpen }) => {
         </div>
       </aside>
 
+      {/* Content Section */}
       <div className="w-full">
         {activeContent === "content1" && <MainDashboard />}
         {activeContent === "content2" && <PropertyListing />}

@@ -1,6 +1,4 @@
 import React from "react";
-import Topbar from "../../components/global/Topbar"; // Placeholder for Topbar
-import { Footer } from "../../components/global/Footer"; // Placeholder for Footer
 
 const ContractHub = () => {
   // Placeholder contracts

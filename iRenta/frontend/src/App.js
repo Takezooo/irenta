@@ -13,7 +13,6 @@ import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ChatPage from "./pages/ChatPage.js";
-import ContractHub from "./pages/ContractHub/ContractHub.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
@@ -24,7 +23,6 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
-import CreateContract from "./pages/ContractHub/CreateContract.js";
 
 const App = () => {
   return (
@@ -50,9 +48,7 @@ const App = () => {
                   </PublicRoute>
                 }
               />
-
               <Route path="/" element={<LandingPage />} />
-              <Route path="/create-contract" element={<CreateContract />} />
 
               {/* Owner Routes */}
               <Route
@@ -68,14 +64,6 @@ const App = () => {
                 element={
                   <PrivateRoute allowedRoles={["Owner"]}>
                     <AddListing />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/contract-hub"
-                element={
-                  <PrivateRoute allowedRoles={["Owner"]}>
-                    <ContractHub />
                   </PrivateRoute>
                 }
               />

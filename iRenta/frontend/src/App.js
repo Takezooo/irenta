@@ -24,6 +24,7 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
+import CreateContract from "./pages/ContractHub/CreateContract.js";
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
               />
 
               <Route path="/" element={<LandingPage />} />
+              <Route path="/create-contract" element={<CreateContract />} />
 
               {/* Owner Routes */}
               <Route

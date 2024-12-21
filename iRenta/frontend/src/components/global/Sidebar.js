@@ -8,12 +8,14 @@ import {
   FaPeopleRoof,
   FaPowerOff,
   FaMessage,
+  FaFileContract,
 } from "react-icons/fa6";
 
 import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
 import { ManageTenants } from "../OwnerDashboard/ManageTenants.js";
 import { Calendar } from "../OwnerDashboard/Calendar.js";
+import ContractHub from "../../pages/ContractHub/ContractHub.js";
 
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
@@ -83,6 +85,18 @@ const Sidebar = ({ isOpen }) => {
                     Calendar
                   </span>
                 </button>
+
+                <button
+                  onClick={() => setActiveContent("content5")}
+                  className={`flex w-full items-center py-2 px-8 hover:bg-gray-200 group ${
+                    isActive("content5") ? "bg-gray-200 scale-110" : ""
+                  }`}
+                >
+                  <FaFileContract className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
+                  <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
+                    ContractHub
+                  </span>
+                </button>
               </>
             )}
 
@@ -116,6 +130,7 @@ const Sidebar = ({ isOpen }) => {
         {activeContent === "content2" && <PropertyListing />}
         {activeContent === "content3" && <ManageTenants />}
         {activeContent === "content4" && <Calendar />}
+        {activeContent === "content5" && <ContractHub />}
       </div>
     </div>
   );

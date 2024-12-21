@@ -13,6 +13,7 @@ import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ChatPage from "./pages/ChatPage.js";
+import ContractHub from "./pages/ContractHub/ContractHub.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
@@ -50,6 +51,7 @@ const App = () => {
               />
 
               <Route path="/" element={<LandingPage />} />
+              <Route path="/contract-hub" element={<ContractHub />} />
 
               {/* Owner Routes */}
               <Route

@@ -1,16 +1,13 @@
 import mongoose from "mongoose";
 
 const contractSchema = new mongoose.Schema({
-  tenant: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  tenant: { type: String, required: true },
   landlord: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
+  landlordName: { type: String, required: true },
   property: {
     name: { type: String, required: true },
     address: {
@@ -38,8 +35,9 @@ const contractSchema = new mongoose.Schema({
     enum: ["Pending", "Active", "Terminated", "Completed"],
     default: "Pending",
   },
+  pdfPath: { type: String }, // Path to the generated PDF
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 const Contract = mongoose.model("Contract", contractSchema);

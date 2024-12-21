@@ -1,34 +1,122 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
+
+import { createContract } from "../../../api/Contracts.js";
+import { fetchUserData } from "../../../api/Users.js";
+
+import { AuthContext } from "../../../global/contexts/AuthContext.js";
+import { GetToken } from "../../../global/utils/Token.js";
 
 const CreateContract = () => {
+  const { user } = useContext(AuthContext);
+  const storedToken = GetToken();
+
+  const [userProfile, setUserProfile] = useState({
+    info: {
+      firstName: "",
+      lastName: "",
+      profile: { link: "" },
+    },
+  });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (user?.id) {
+        try {
+          const user_data = await fetchUserData(user.id, storedToken);
+          setUserProfile(user_data);
+        } catch (err) {
+          console.error("Failed to fetch user data:", err);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [user, storedToken]); // Only re-run when `user` or `storedToken` changes
+
   const [formData, setFormData] = useState({
-    propertyName: "",
-    houseNumber: "",
-    street: "",
-    city: "",
-    zip: "",
-    tenant: "",
-    landlord: "",
-    startDate: "",
-    endDate: "",
-    rentAmount: "",
-    paymentFrequency: "Monthly",
-    depositAmount: "",
-    termsAndConditions: "",
-    rulesAndRegulations: "",
+    property: {
+      name: "",
+      address: {
+        houseNumber: "",
+        street: "",
+        city: "",
+        zip: "",
+      },
+    },
+    tenant: "", // Must be an ObjectId from the database
+    landlord: user.id, // Must be an ObjectId from the database
+    landlordName: "",
+    contractDetails: {
+      startDate: "",
+      endDate: "",
+      rentAmount: "",
+      paymentFrequency: "Monthly",
+      depositAmount: "",
+      termsAndConditions: "",
+      rulesAndRegulations: "",
+    },
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name.includes(".")) {
+      const keys = name.split(".");
+      setFormData((prev) => {
+        let updatedData = { ...prev };
+        let nestedData = updatedData;
+
+        keys.forEach((key, index) => {
+          if (index === keys.length - 1) {
+            nestedData[key] = value; // Set the value at the last key
+          } else {
+            if (!nestedData[key]) nestedData[key] = {};
+            nestedData = nestedData[key];
+          }
+        });
+
+        return updatedData;
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Contract Data Submitted:", formData);
+
+    // Clean up payload to remove duplicate keys
+    const cleanedPayload = {
+      property: {
+        name: formData.property.name,
+        address: { ...formData.property.address },
+      },
+      tenant: formData.tenant,
+      landlord: user.id, // Use the logged-in user's ID
+      landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`, // Ensure landlordName is set
+      contractDetails: { ...formData.contractDetails },
+    };
+
+    console.log("Submitting Cleaned Payload:", cleanedPayload);
+
+    try {
+      const contract = await createContract(cleanedPayload);
+      alert("Contract created successfully!");
+      console.log(contract);
+    } catch (err) {
+      console.error(
+        "Error creating contract:",
+        err.response?.data || err.message
+      );
+      alert(
+        `Failed to create contract: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+    }
   };
 
   return (
@@ -45,8 +133,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="text"
-                name="propertyName"
-                value={formData.propertyName}
+                name="property.name"
+                value={formData.property.name}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -57,8 +145,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="text"
-                name="houseNumber"
-                value={formData.houseNumber}
+                name="property.address.houseNumber"
+                value={formData.property.address.houseNumber}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -69,8 +157,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="text"
-                name="street"
-                value={formData.street}
+                name="property.address.street"
+                value={formData.property.address.street}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -81,24 +169,28 @@ const CreateContract = () => {
               </label>
               <input
                 type="text"
-                name="city"
-                value={formData.city}
+                name="property.address.city"
+                value={formData.property.address.city}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">ZIP</label>
+              <label className="block text-sm font-medium text-gray-700">
+                ZIP
+              </label>
               <input
                 type="text"
-                name="zip"
-                value={formData.zip}
+                name="property.address.zip"
+                value={formData.property.address.zip}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Tenant</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Tenant
+              </label>
               <input
                 type="text"
                 name="tenant"
@@ -116,9 +208,10 @@ const CreateContract = () => {
               </label>
               <input
                 type="text"
-                name="landlord"
-                value={formData.landlord}
-                onChange={handleChange}
+                name="landlordName"
+                value={`${userProfile.info.firstName} ${userProfile.info.lastName}`}
+                readOnly
+                onClick={(e) => e.preventDefault()} // Prevent modification
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
@@ -128,8 +221,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="date"
-                name="startDate"
-                value={formData.startDate}
+                name="contractDetails.startDate"
+                value={formData.contractDetails.startDate}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -140,8 +233,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="date"
-                name="endDate"
-                value={formData.endDate}
+                name="contractDetails.endDate"
+                value={formData.contractDetails.endDate}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -155,8 +248,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="number"
-                name="rentAmount"
-                value={formData.rentAmount}
+                name="contractDetails.rentAmount"
+                value={formData.contractDetails.rentAmount}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -166,8 +259,8 @@ const CreateContract = () => {
                 Payment Frequency
               </label>
               <select
-                name="paymentFrequency"
-                value={formData.paymentFrequency}
+                name="contractDetails.paymentFrequency"
+                value={formData.contractDetails.paymentFrequency}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               >
@@ -182,8 +275,8 @@ const CreateContract = () => {
               </label>
               <input
                 type="number"
-                name="depositAmount"
-                value={formData.depositAmount}
+                name="contractDetails.depositAmount"
+                value={formData.contractDetails.depositAmount}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -195,8 +288,8 @@ const CreateContract = () => {
               Terms and Conditions
             </label>
             <textarea
-              name="termsAndConditions"
-              value={formData.termsAndConditions}
+              name="contractDetails.termsAndConditions"
+              value={formData.contractDetails.termsAndConditions}
               onChange={handleChange}
               rows="4"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
@@ -207,8 +300,8 @@ const CreateContract = () => {
               Rules and Regulations
             </label>
             <textarea
-              name="rulesAndRegulations"
-              value={formData.rulesAndRegulations}
+              name="contractDetails.rulesAndRegulations"
+              value={formData.contractDetails.rulesAndRegulations}
               onChange={handleChange}
               rows="4"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"

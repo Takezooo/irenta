@@ -23,6 +23,7 @@ app.use(cors({
 // Import routes
 import userRoutes from './src/users/users.route.js';
 import listingRoutes from './src/listings/listings.route.js';
+import contractRoutes from './src/contracts/contracts.route.js';
 import ocularRoutes from './src/ocular/ocular.route.js';
 import chatRoutes from './src/chats/chat.route.js';
 
@@ -30,6 +31,7 @@ app.use("/api/users", userRoutes);
 
 // anything related to litings
 app.use("/api/listings", listingRoutes);
+app.use("/api/contracts", contractRoutes);
 
 // anything related to interactions with owners
 app.use("/api/chats", chatRoutes);

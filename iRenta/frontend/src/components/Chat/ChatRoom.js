@@ -11,19 +11,19 @@ const ChatRoom = ({ chatId, userId }) => {
   const [socket, setSocket] = useState(null);
   const [receiverName, setReceiverName] = useState(""); // Receiver's name state
 
-
   const authToken = GetToken();
 
   useEffect(() => {
     if (!authToken || !chatId) {
-      console.error("Auth token or chatId is missing. Cannot connect to Socket.IO.");
+      console.error(
+        "Auth token or chatId is missing. Cannot connect to Socket.IO."
+      );
       return;
     }
 
     const newSocket = io("http://localhost:5000", {
       auth: { token: authToken },
     });
-
 
     if (chatId) {
       newSocket.emit("joinRoom", { chatId });
@@ -44,43 +44,38 @@ const ChatRoom = ({ chatId, userId }) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Fetch the name of the other user
-    newSocket.on("otherUser", (userName) => {
-      setOtherUserName(userName);
-    });
-
     return () => newSocket.disconnect();
   }, [authToken, chatId]);
 
-    // Fetch the receiver's name based on chatId
-    useEffect(() => {
-      const fetchChatDetails = async () => {
-        try {
-          const chats = await fetchUserChats(); // Fetch all user chats
-          const currentChat = chats.find((chat) => chat._id === chatId); // Find the current chat by ID
-  
-          if (currentChat) {
-            // Extract the other participant's name
-            const otherParticipant = currentChat.participants.find(
-              (participant) => participant._id !== user.id
-            );
-  
-            setReceiverName(
-              otherParticipant
-                ? `${otherParticipant.info.firstName} ${otherParticipant.info.lastName}`
-                : "Unknown User"
-            );
-          } else {
-            setReceiverName("Unknown User");
-          }
-        } catch (err) {
-          console.error("Failed to fetch chat details", err);
+  // Fetch the receiver's name based on chatId
+  useEffect(() => {
+    const fetchChatDetails = async () => {
+      try {
+        const chats = await fetchUserChats(); // Fetch all user chats
+        const currentChat = chats.find((chat) => chat._id === chatId); // Find the current chat by ID
+
+        if (currentChat) {
+          // Extract the other participant's name
+          const otherParticipant = currentChat.participants.find(
+            (participant) => participant._id !== user.id
+          );
+
+          setReceiverName(
+            otherParticipant
+              ? `${otherParticipant.info.firstName} ${otherParticipant.info.lastName}`
+              : "Unknown User"
+          );
+        } else {
           setReceiverName("Unknown User");
         }
-      };
-  
-      fetchChatDetails();
-    }, [chatId, user.id]);
+      } catch (err) {
+        console.error("Failed to fetch chat details", err);
+        setReceiverName("Unknown User");
+      }
+    };
+
+    fetchChatDetails();
+  }, [chatId, user.id]);
 
   const handleSendMessage = () => {
     if (message.trim() && socket) {
@@ -91,27 +86,30 @@ const ChatRoom = ({ chatId, userId }) => {
 
   return (
     <div className="h-full flex flex-col bg-white border border-gray-200 rounded-t-lg shadow-lg">
-
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              msg.sender?._id === user.id ? "justify-end" : "justify-start"
-            } mb-2`}
-          >
+        {messages.map((msg, index) => {
+          const senderId = msg.senderId || msg.sender?._id; // Handle both formats
+          const isCurrentUser = senderId === user.id;
+          return (
             <div
-              className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
-                msg.sender?._id === user.id
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
+              key={index}
+              className={`flex ${
+                isCurrentUser ? "justify-end" : "justify-start"
+              } mb-2`}
             >
-              {msg.content || msg.message}
+              <div
+                className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
+                  isCurrentUser
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+              >
+                {msg.content || msg.message}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Chat Input */}

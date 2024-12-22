@@ -7,7 +7,7 @@ import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle, FaBell } from "react-icons/fa";
+import { FaPowerOff, FaUserCircle, FaBell, FaHeart } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);
@@ -176,7 +176,18 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li>
+                      <li className="flex w-full justify-center hover:bg-gray-100">
+                        <button
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                        >
+                          <FaHeart className="h-5 w-5" />
+                          <h3 className="text-sm font-semibold text-gray-900 px-4">
+                            Wishlist
+                          </h3>
+                        </button>
+                      </li>
+                      <hr className="my-2"></hr>
+                      <li className="flex w-full justify-center">
                         <button
                           onClick={logout}
                           className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
@@ -191,10 +202,15 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                   ) : (
                     // Logged-out Dropdown
                     <ul className="py-4">
-                      <li>
-                        <Link to="/login" className="flex items-center w-full px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
+                      <li className="flex w-full justify-center">
+                        <Link to="/login" className="flex items-center w-fit px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
                           <FaPowerOff className="h-5 w-5" />
                           <span className="text-sm font-semibold text-gray-100 px-4">Log in</span>
+                        </Link>
+                      </li>
+                      <li className="flex w-full justify-center">
+                        <Link to="/register" className="flex items-center w-fit px-4 py-3 text-sm text-gray-100 group ">
+                          <span className="text-sm font-semibold text-gray-500 px-4 group-hover:text-gray-900">Register</span>
                         </Link>
                       </li>
                     </ul>

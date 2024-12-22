@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import CreateContract from "./CreateContract";
+import EditContract from "./EditContract";
+import ViewContract from "./ViewContract"; // Import the ViewContract component
 import { fetchContracts, downloadPdf } from "../../../api/Contracts.js"; // Import the API function to fetch contracts
 
 const ContractHub = () => {
   const [view, setView] = useState("ContractHub"); // State to toggle between views
   const [contracts, setContracts] = useState([]); // State to store fetched contracts
+  const [selectedContractId, setSelectedContractId] = useState(null); // Track the contract being edited or viewed
+
   const handleDownload = (contractId) => {
     if (!contractId) {
       console.error("Error: contractId is undefined.");
@@ -101,9 +105,19 @@ const ContractHub = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
                         className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600"
-                        onClick={() =>
-                          alert(`Viewing details for ${contract?.property.name}`)
-                        }
+                        onClick={() => {
+                          setSelectedContractId(contract?._id); // Set the selected contract ID
+                          setView("EditContract"); // Switch to the EditContract view
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="ml-2 px-4 py-2 bg-green-500 text-white text-xs font-bold rounded hover:bg-green-600"
+                        onClick={() => {
+                          setSelectedContractId(contract?._id); // Set the selected contract ID
+                          setView("ViewContract"); // Switch to the ViewContract view
+                        }}
                       >
                         View
                       </button>
@@ -123,11 +137,53 @@ const ContractHub = () => {
             </table>
           </div>
         </>
-      ) : (
+      ) : view === "CreateContract" ? (
         <>
           <CreateContract
             onContractCreated={() => {
               // Fetch the contracts again after creating a new one
+              const refreshContracts = async () => {
+                try {
+                  const updatedContracts = await fetchContracts();
+                  setContracts(updatedContracts);
+                  setView("ContractHub"); // Go back to Contract Hub view
+                } catch (err) {
+                  console.error("Failed to refresh contracts:", err);
+                }
+              };
+
+              refreshContracts();
+            }}
+          />
+          {/* Back to ContractHub Button */}
+          <div className="mt-4">
+            <button
+              onClick={() => setView("ContractHub")}
+              className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
+            >
+              Back to Contract Hub
+            </button>
+          </div>
+        </>
+      ) : view === "ViewContract" ? (
+        <>
+          <ViewContract contractId={selectedContractId} />
+          {/* Back to ContractHub Button */}
+          <div className="mt-4">
+            <button
+              onClick={() => setView("ContractHub")}
+              className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
+            >
+              Back to Contract Hub
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <EditContract
+            contractId={selectedContractId}
+            onContractUpdated={() => {
+              // Fetch the contracts again after updating
               const refreshContracts = async () => {
                 try {
                   const updatedContracts = await fetchContracts();

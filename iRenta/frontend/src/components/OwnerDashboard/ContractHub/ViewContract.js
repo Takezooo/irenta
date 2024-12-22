@@ -32,8 +32,7 @@ const ViewContract = () => {
 
   return (
     <div className="flex-grow">
-      <Topbar />
-      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto mt-16">
+      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
           View Contract
         </h1>

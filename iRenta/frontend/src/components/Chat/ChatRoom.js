@@ -2,13 +2,15 @@ import React, { useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { GetToken } from "../../global/utils/Token.js";
+import { fetchUserChats } from "../../api/Chats.js";
 
 const ChatRoom = ({ chatId, userId }) => {
   const { user } = useContext(AuthContext); // Access the user context
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [otherUserName, setOtherUserName] = useState("Other User");
+  const [receiverName, setReceiverName] = useState(""); // Receiver's name state
+
 
   const authToken = GetToken();
 
@@ -22,15 +24,18 @@ const ChatRoom = ({ chatId, userId }) => {
       auth: { token: authToken },
     });
 
-    newSocket.emit("joinRoom", { chatId });
-    console.log(`Joining room: ${chatId}`);
+
+    if (chatId) {
+      newSocket.emit("joinRoom", { chatId });
+      console.log(`Joining room: ${chatId}`);
+    }
 
     setSocket(newSocket);
 
     // Listen for chat history
     newSocket.on("chatHistory", (chatMessages) => {
       console.log("Chat history received:", chatMessages);
-      setMessages(chatMessages);
+      setMessages(chatMessages); // Load the chat history into state
     });
 
     // Listen for new messages
@@ -46,6 +51,36 @@ const ChatRoom = ({ chatId, userId }) => {
 
     return () => newSocket.disconnect();
   }, [authToken, chatId]);
+
+    // Fetch the receiver's name based on chatId
+    useEffect(() => {
+      const fetchChatDetails = async () => {
+        try {
+          const chats = await fetchUserChats(); // Fetch all user chats
+          const currentChat = chats.find((chat) => chat._id === chatId); // Find the current chat by ID
+  
+          if (currentChat) {
+            // Extract the other participant's name
+            const otherParticipant = currentChat.participants.find(
+              (participant) => participant._id !== user.id
+            );
+  
+            setReceiverName(
+              otherParticipant
+                ? `${otherParticipant.info.firstName} ${otherParticipant.info.lastName}`
+                : "Unknown User"
+            );
+          } else {
+            setReceiverName("Unknown User");
+          }
+        } catch (err) {
+          console.error("Failed to fetch chat details", err);
+          setReceiverName("Unknown User");
+        }
+      };
+  
+      fetchChatDetails();
+    }, [chatId, user.id]);
 
   const handleSendMessage = () => {
     if (message.trim() && socket) {

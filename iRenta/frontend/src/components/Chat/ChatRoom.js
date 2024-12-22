@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useRef } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { GetToken } from "../../global/utils/Token.js";
@@ -10,6 +11,7 @@ const ChatRoom = ({ chatId, userId }) => {
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [receiverName, setReceiverName] = useState(""); // Receiver's name state
+  const chatContainerRef = useRef(null); // Reference for the chat container
 
   const authToken = GetToken();
 
@@ -46,6 +48,13 @@ const ChatRoom = ({ chatId, userId }) => {
 
     return () => newSocket.disconnect();
   }, [authToken, chatId]);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   // Fetch the receiver's name based on chatId
   useEffect(() => {
@@ -84,10 +93,20 @@ const ChatRoom = ({ chatId, userId }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent newline in input
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className="h-full flex flex-col bg-white border border-gray-200 rounded-t-lg shadow-lg">
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-4"
+      >
         {messages.map((msg, index) => {
           const senderId = msg.senderId || msg.sender?._id; // Handle both formats
           const isCurrentUser = senderId === user.id;
@@ -128,6 +147,7 @@ const ChatRoom = ({ chatId, userId }) => {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />

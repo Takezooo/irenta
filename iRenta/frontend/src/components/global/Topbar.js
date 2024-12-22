@@ -1,20 +1,18 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { GetToken } from "../../global/utils/Token.js"; // Import utilities
-import { fetchUserData } from "../../api/Users.js";
 import { AuthContext } from "../../global/contexts/AuthContext";
+import { GetToken } from "../../global/utils/Token.js";
+import { fetchUserData } from "../../api/Users.js";
+import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { RiLoginCircleFill } from "react-icons/ri";
-import { CiHeart } from "react-icons/ci";
-import { FaPowerOff, FaUserCircle, FaBell, FaCommentAlt } from "react-icons/fa";
+import { FaPowerOff, FaUserCircle, FaBell } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",
@@ -24,8 +22,6 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
   });
 
   const storedToken = GetToken();
-
-  const chatRef = useRef(null);
   const notifRef = useRef(null);
   const profileRef = useRef(null);
 
@@ -44,18 +40,15 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
     fetchUser();
   }, [user, storedToken]);
 
-  // Close dropdowns on outside click
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        chatRef.current &&
-        !chatRef.current.contains(event.target) &&
         notifRef.current &&
         !notifRef.current.contains(event.target) &&
         profileRef.current &&
         !profileRef.current.contains(event.target)
       ) {
-        setChatOpen(false);
         setNotifOpen(false);
         setDropdownOpen(false);
       }
@@ -67,28 +60,17 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
     };
   }, []);
 
-  // Close other dropdowns when clicking a button
-  const handleChatToggle = () => {
-    setChatOpen(!chatOpen);
-    setNotifOpen(false);
-    setDropdownOpen(false);
-  };
-
   const handleNotifToggle = () => {
     setNotifOpen(!notifOpen);
-    setChatOpen(false);
     setDropdownOpen(false);
   };
 
   const handleProfileToggle = () => {
     setDropdownOpen(!dropdownOpen);
-    setChatOpen(false);
     setNotifOpen(false);
   };
 
-  const location = useLocation(); // Get the current route
-
-  // Check if current route is OwnerDashboard
+  const location = useLocation();
   const isOwnerDashboard = location.pathname === "/owner-dashboard";
 
   return (
@@ -96,10 +78,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
       <div className="px-6 py-3 lg:px-10 lg:pl-3">
         <div className="flex items-center justify-between">
           {/* Sidebar Toggle and Logo */}
-          <div className="flex items-center justify-start rtl:justify-end">
+          <div className="flex items-center justify-start">
             {isOwnerDashboard && (
               <button
-                className="text-gray-900 rounded-lg hover:bg-gray-300 group z-60"
+                className="text-gray-900 rounded-lg hover:bg-gray-300 group"
                 onClick={toggleSidebar}
               >
                 {isOpen ? (
@@ -107,9 +89,6 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 ) : (
                   <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
                 )}
-                <span className="absolute mt-1 p-1 rounded-md text-xs whitespace-nowrap invisible group-hover:visible group-hover:opacity-80 bg-gray-700 text-white">
-                  {isOpen ? "Close Sidebar" : "Open Sidebar"}
-                </span>
               </button>
             )}
             <Link to="/" className="flex ms-2 md:me-24">
@@ -137,40 +116,24 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
-            {/* Chat Button */}
-            <div className="relative" ref={chatRef}>
-              <button
-                onClick={handleChatToggle}
-                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
-              >
-                <FaCommentAlt className="text-md" />
-              </button>
-              {chatOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
-                  <ul className="py-2">
-                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                      No new messages
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
+            {/* Chat Dropdown */}
+            <ChatDropdown />
 
             {/* Notification Button */}
             <div className="relative" ref={notifRef}>
-            <button
-              onClick={handleNotifToggle}
-              className="h-10 w-10 bg-gray-200 hover:bg-gray-300  rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
-            >
-              <FaBell className="text-lg" />
-            </button>
+              <button
+                onClick={handleNotifToggle}
+                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
+              >
+                <FaBell className="text-lg" />
+              </button>
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
                   <ul className="py-2">
                     <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                    <Link to="/view-contract" className="block w-full text-left">
-                      View Contract
-                    </Link>
+                      <Link to="/view-contract" className="block w-full text-left">
+                        View Contract
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -213,17 +176,11 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li className="flex justify-evenly items-center w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100">
-                        <CiHeart className="h-5 w-5" />
-                        <h3 className="text-sm font-semibold text-gray-800">
-                          View Wishlist
-                        </h3>
-                      </li>
-                      <hr className="my-2"></hr>
-                      <li className="mt-2 flex justify-center text-center">
+                      <li>
                         <button
                           onClick={logout}
-                          className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"                        >
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                        >
                           <FaPowerOff className="h-5 w-5" />
                           <h3 className="text-sm font-semibold text-gray-100 px-4">
                             Log out
@@ -234,15 +191,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                   ) : (
                     // Logged-out Dropdown
                     <ul className="py-4">
-                      <li className="mt-2 flex justify-center text-center">
-                        <Link to="/login" className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
-                          <RiLoginCircleFill className="h-5 w-5"/>
-                          <h3 className="text-sm font-semibold text-gray-100 px-4">Log in</h3>
-                        </Link>
-                      </li>
-                      <li className="mt-2 flex justify-center text-center">
-                        <Link to="/register" className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full text-gray-800 hover:bg-gray-100">
-                          <h3 className="text-sm font-semibold text-gray-800 px-4">Register</h3>
+                      <li>
+                        <Link to="/login" className="flex items-center w-full px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
+                          <FaPowerOff className="h-5 w-5" />
+                          <span className="text-sm font-semibold text-gray-100 px-4">Log in</span>
                         </Link>
                       </li>
                     </ul>

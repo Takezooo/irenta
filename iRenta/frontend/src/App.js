@@ -12,7 +12,6 @@ import NotAuthorized from "./pages/Unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
-import ChatPage from "./pages/ChatPage.js";
 import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -86,24 +85,6 @@ const App = () => {
                 element={
                   <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                     <ViewListing />
-                  </PrivateRoute>
-                }
-              />
-
-              <Route
-                path="/chat/"
-                element={
-                  <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                    <ChatPage />
-                  </PrivateRoute>
-                }
-              />
-
-              <Route
-                path="/chat/:chatId"
-                element={
-                  <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                    <ChatPage />
                   </PrivateRoute>
                 }
               />

@@ -91,21 +91,31 @@ const ChatRoom = ({ chatId, userId }) => {
         {messages.map((msg, index) => {
           const senderId = msg.senderId || msg.sender?._id; // Handle both formats
           const isCurrentUser = senderId === user.id;
+          const isPreviousMessageFromSameUser =
+            index > 0 && messages[index - 1].senderId === senderId;
+
           return (
-            <div
-              key={index}
-              className={`flex ${
-                isCurrentUser ? "justify-end" : "justify-start"
-              } mb-2`}
-            >
+            <div key={index}>
+              {/* Display receiver name on top of other user's messages if it's the first message in a sequence */}
+              {!isCurrentUser && !isPreviousMessageFromSameUser && (
+                <div className="text-sm text-gray-500 font-semibold mb-1">
+                  {receiverName}
+                </div>
+              )}
               <div
-                className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
-                  isCurrentUser
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
-                }`}
+                className={`flex ${
+                  isCurrentUser ? "justify-end" : "justify-start"
+                } mb-2`}
               >
-                {msg.content || msg.message}
+                <div
+                  className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
+                    isCurrentUser
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-black"
+                  }`}
+                >
+                  {msg.content || msg.message}
+                </div>
               </div>
             </div>
           );

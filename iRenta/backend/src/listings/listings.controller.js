@@ -50,7 +50,7 @@ export const CreateListing = async (req, res) => {
     }
 
     // Destructure necessary fields from the request body
-    const { title, description, price, type, bedroomNumber, bathroomNumber, propertySize, address } = req.body;
+    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = req.body;
 
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {

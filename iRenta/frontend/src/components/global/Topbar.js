@@ -6,6 +6,8 @@ import { AuthContext } from "../../global/contexts/AuthContext";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
+import { RiLoginCircleFill } from "react-icons/ri";
+import { CiHeart } from "react-icons/ci";
 import { FaPowerOff, FaUserCircle, FaBell, FaCommentAlt } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
@@ -189,7 +191,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <FaUserCircle className="text-blue-500 text-xl" />
+                    <FaUserCircle className="h-full w-full text-blue-500 text-xl" />
                   )}
                 </div>
               </button>
@@ -211,29 +213,36 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li>
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-4 text-sm text-gray-700 hover:bg-gray-100">
+                        <CiHeart className="h-5 w-5" />
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          View Wishlist
+                        </h3>
+                      </li>
+                      <hr className="my-2"></hr>
+                      <li className="mt-2 flex justify-center text-center">
                         <button
                           onClick={logout}
-                          className="flex items-center w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-                        >
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"                        >
                           <FaPowerOff className="h-5 w-5" />
-                          <h3 className="text-sm font-semibold text-gray-800 px-4">
-                            Log Out
+                          <h3 className="text-sm font-semibold text-gray-100 px-4">
+                            Log out
                           </h3>
                         </button>
                       </li>
                     </ul>
                   ) : (
                     // Logged-out Dropdown
-                    <ul className="py-2">
-                      <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                        <Link to="/login" className="block w-full text-left">
-                          Log in
+                    <ul className="py-4">
+                      <li className="mt-2 flex justify-center text-center">
+                        <Link to="/login" className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
+                          <RiLoginCircleFill className="h-5 w-5"/>
+                          <h3 className="text-sm font-semibold text-gray-100 px-4">Log in</h3>
                         </Link>
                       </li>
-                      <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                        <Link to="/register" className="block w-full text-left">
-                          Register
+                      <li className="mt-2 flex justify-center text-center">
+                        <Link to="/register" className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full text-gray-800 hover:bg-gray-100">
+                          <h3 className="text-sm font-semibold text-gray-800 px-4">Register</h3>
                         </Link>
                       </li>
                     </ul>

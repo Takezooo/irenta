@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const ManageTenant = () => {
-  const [tenants, setTenants] = useState([
+  const [tenants] = useState([
     {
       propertyName: "Sunrise Apartments",
       name: "John Doe",

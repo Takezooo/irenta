@@ -179,7 +179,7 @@ const LandingPage = () => {
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <a className="mt-4 inline-block text-black underline">See more</a>
+            <button className="mt-4 inline-block text-black underline">See more</button>
           </div>
         </div>
       </div>

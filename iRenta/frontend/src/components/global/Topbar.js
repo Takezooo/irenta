@@ -7,7 +7,7 @@ import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle, FaBell, FaHeart, FaBuilding } from "react-icons/fa";
+import { FaPowerOff, FaUserCircle, FaBell, FaBuilding } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);

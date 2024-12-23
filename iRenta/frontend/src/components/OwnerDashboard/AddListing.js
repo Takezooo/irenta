@@ -11,7 +11,7 @@ const API_LINK = "http://localhost:5000/api";
 const AddListing = () => {
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
-  const [fileName, setFileName] = useState("No file chosen");
+  const [fileName] = useState("No file chosen");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

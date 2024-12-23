@@ -7,8 +7,6 @@ import Topbar from "../components/global/Topbar.js";
 import Sidebar from "../components/global/Sidebar.js";
 import { Footer } from "../components/global/Footer.js";
 
-import BrowseListing from "./BrowseListing.js";
-
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { useProperty } from "../global/contexts/PropertyContext";
 
@@ -17,6 +15,8 @@ import { fetchListings } from "../api/Listings.js";
 const LandingPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
 
   const { user } = useContext(AuthContext);
   const { setSelectedProperty } = useProperty();
@@ -46,6 +46,26 @@ const LandingPage = () => {
   };
 
   const scrollContainerRef = useRef(null);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtStart = container.scrollLeft === 0;
+      const isAtEnd =
+        container.scrollWidth - container.clientWidth === container.scrollLeft;
+
+      setShowLeftArrow(!isAtStart);
+      setShowRightArrow(!isAtEnd);
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -105,12 +125,14 @@ const LandingPage = () => {
           </button>
         </div>
         <div className="relative">
-          <button
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
-          >
-            <FaChevronLeft />
-          </button>
+          {showLeftArrow && (
+            <button
+              onClick={scrollLeft}
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+            >
+              <FaChevronLeft />
+            </button>
+          )}
           <div
             ref={scrollContainerRef}
             className="flex overflow-x-hidden space-x-4 px-10"
@@ -129,12 +151,14 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
-          <button
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
-          >
-            <FaChevronRight />
-          </button>
+          {showRightArrow && (
+            <button
+              onClick={scrollRight}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+            >
+              <FaChevronRight />
+            </button>
+          )}
         </div>
       </div>
 

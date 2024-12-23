@@ -18,7 +18,7 @@ const listingSchema = new mongoose.Schema({
     street: { type: String, required: true },
     city: { type: String, required: true },
     zip: { type: String },
-    long: { type: String },
+    lng: { type: String },
     lat: { type: String },
   },
   visitAvailability: {

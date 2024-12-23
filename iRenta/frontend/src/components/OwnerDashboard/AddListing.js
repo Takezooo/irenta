@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
+import MapPicker from "../Mapping/MapPicker";
 import { GetToken } from "../../global/utils/Token.js";
 
 const API_LINK = "http://localhost:5000/api";
@@ -24,17 +25,24 @@ const AddListing = () => {
     street: "rw",
     city: "rw",
     zip: "r",
-    long: "r",
-    lat: "r",
+    lng: null,
+    lat: null,
   });
   const [visitAvailability, setVisitAvailability] = useState({
     startTime: "", // Default empty or preset value like "09:00"
     endTime: "", // Default empty or preset value like "18:00"
   });
   
-
+  const handleLocationChange = (location) => {
+    setAddress((prevAddress) => ({
+      ...prevAddress, // Preserve other properties
+      lng: location.lng,
+      lat: location.lat,
+    }));
+  };
+  
   const handleFormSubmit = async (e) => {
-
+    // console.log(process.env.GOOGLE_MAPS_KEY);
       // Validate that startTime is less than endTime
   const start = new Date(`1970-01-01T${visitAvailability.startTime}`);
   const end = new Date(`1970-01-01T${visitAvailability.endTime}`);
@@ -334,13 +342,21 @@ const AddListing = () => {
                 <label className="block text-sm font-medium mb-1 text-gray-700">
                   Pin Location
                 </label>
-                <div className="bg-gray-100 rounded-lg h-40 overflow-hidden">
-                  <iframe
+                <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
+                  {/* <iframe
                     className="w-full h-full border-none"
                     src={`https://maps.google.com/maps?q=Manila&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                     allowFullScreen
                     title="Pinned Location Map"
-                  ></iframe>
+                  ></iframe> */}
+                  <MapPicker onLocationChange={handleLocationChange} />
+                  {address && (
+                    <div>
+                      <h3>Selected Location:</h3>
+                      <p>Latitude: {address.lat}</p>
+                      <p>Longitude: {address.lng}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

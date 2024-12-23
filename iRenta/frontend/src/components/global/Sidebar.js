@@ -13,7 +13,7 @@ import {
 import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
 import ManageTenants from "../OwnerDashboard/ManageTenants.js";
-import { Calendar } from "../OwnerDashboard/Calendar.js";
+import OcularVisitCalendar from "../OwnerDashboard/OcularVisitCalendar.js";
 import ContractHub from "../OwnerDashboard/ContractHub/ContractHub.js";
 
 import { AuthContext } from "../../global/contexts/AuthContext.js";
@@ -129,7 +129,7 @@ const Sidebar = ({ isOpen }) => {
         {activeContent === "content1" && <MainDashboard />}
         {activeContent === "content2" && <PropertyListing />}
         {activeContent === "content3" && <ManageTenants />}
-        {activeContent === "content4" && <Calendar />}
+        {activeContent === "content4" && <OcularVisitCalendar />}
         {activeContent === "content5" && <ContractHub />}
       </div>
     </div>

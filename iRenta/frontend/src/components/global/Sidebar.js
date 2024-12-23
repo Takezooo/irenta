@@ -7,7 +7,6 @@ import {
   FaCalendar,
   FaPeopleRoof,
   FaPowerOff,
-  FaMessage,
   FaFileContract,
 } from "react-icons/fa6";
 
@@ -20,7 +19,7 @@ import ContractHub from "../OwnerDashboard/ContractHub/ContractHub.js";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
 const Sidebar = ({ isOpen }) => {
-  const [activeContent, setActiveContent] = useState("");
+  const [activeContent, setActiveContent] = useState("content1"); // Default to Main Dashboard
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,7 +37,7 @@ const Sidebar = ({ isOpen }) => {
   return (
     <div className="flex w-screen">
       <aside
-        className={`fixed top-0 left-0 z-40 w-56 h-screen pt-20 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transform transition-transform duration-300 ease-in-out ${
           isOpen ? "-translate-x-full ml-0" : "translate-x-0 ml-4"
         }`}
       >
@@ -67,7 +66,7 @@ const Sidebar = ({ isOpen }) => {
                 >
                   <TbLayoutListFilled className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
                   <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                    Property Listings
+                    Manage Listings
                   </span>
                 </button>
 
@@ -79,7 +78,7 @@ const Sidebar = ({ isOpen }) => {
                 >
                   <FaPeopleRoof className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
                   <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                    Tenants
+                    Manage Tenants
                   </span>
                 </button>
 
@@ -108,16 +107,6 @@ const Sidebar = ({ isOpen }) => {
                 </button>
               </>
             )}
-
-            <button
-              className="flex w-full items-center py-2 px-8 hover:bg-gray-200 group"
-              onClick={() => navigate("/chat")}
-            >
-              <FaMessage className="text-xl text-blue-700 transition duration-75 group-hover:text-gray-900" />
-              <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                Chat List
-              </span>
-            </button>
           </div>
 
           <div>
@@ -136,7 +125,7 @@ const Sidebar = ({ isOpen }) => {
       </aside>
 
       {/* Content Section */}
-      <div className="w-full">
+      <div className="w-full pr-4 sm:ml-72">
         {activeContent === "content1" && <MainDashboard />}
         {activeContent === "content2" && <PropertyListing />}
         {activeContent === "content3" && <ManageTenants />}

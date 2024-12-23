@@ -1,5 +1,3 @@
-// src/components/LandingPage.js
-
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import React Router hook
 
@@ -17,7 +15,6 @@ import { useProperty } from "../global/contexts/PropertyContext";
 import { fetchListings } from "../api/Listings.js";
 
 const LandingPage = () => {
-
   const [isOpen, setIsOpen] = useState(false);
   const [listings, setListings] = useState([]);
 
@@ -25,7 +22,7 @@ const LandingPage = () => {
   const { setSelectedProperty } = useProperty();
 
   const navigate = useNavigate(); // React Router navigation hook
-  
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
@@ -69,28 +66,13 @@ const LandingPage = () => {
       <Sidebar isOpen={isOpen} />
 
       <div className="mx-auto mt-36 flex align-center flex-col p-5 rounded-xl w-[90%] from-blue-950 bg-gradient-to-r to-gray-800 overflow-hidden">
-        {/* <div className="absolute z-[-1] w-full h-full overflow-hidden">
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/b/b4/Makati_City_Lights2_%28Jopet_Sy%29_-_Flickr.jpg"
-                        className="w-full h-full object-cover brightness-75"
-                        alt="Metro Manila City Lights"
-                    /> 
-                </div> */}
         <h1 className="font-extrabold text-6xl mb-2 text-gray-100 sm:text-7xl">
           WELCOME TO <br></br>iRENTA
         </h1>
 
         {/* Conditionally Render Buttons Based on User Role */}
         {user ? (
-          <>
-            {user.userType === "Owner" && (
-              <Link to="/owner-dashboard">
-                <button className="w-[100%] px-[24px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">
-                  Manage Your Listings
-                </button>
-              </Link>
-            )}
-          </>
+          <></> // Removed the "Manage Your Listings" button
         ) : (
           <>
             <p className="text-m text-white mb-[20px]">
@@ -111,6 +93,7 @@ const LandingPage = () => {
           </>
         )}
       </div>
+
       <div className="mx-auto flex align-center flex-col rounded-xl mt-16 w-[90%]">
         <div className="flex flex-row w-full items-center justify-between">
           <h2 className="text-xl font-bold mb-4">Dormitories</h2>
@@ -169,14 +152,6 @@ const LandingPage = () => {
           </div>
           <div className="bg-gray-300 p-6 mt-2 rounded-xl text-black text-wrap">
             <p className="mt-2 text-sm">
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>

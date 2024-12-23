@@ -33,7 +33,7 @@ const ContractHub = () => {
   }, []); // Run once on component mount
 
   return (
-    <div className="mt-16 flex-grow p-6 pb-4 sm:ml-64">
+    <div className="mt-16 flex-grow p-6 pb-4">
       {view === "ContractHub" ? (
         <>
           <h1 className="text-2xl font-bold mb-6">Contract Hub</h1>

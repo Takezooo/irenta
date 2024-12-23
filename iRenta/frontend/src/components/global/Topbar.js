@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../global/contexts/AuthContext";
 import { GetToken } from "../../global/utils/Token.js";
 import { fetchUserData } from "../../api/Users.js";
@@ -7,7 +7,7 @@ import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle, FaBell, FaHeart } from "react-icons/fa";
+import { FaPowerOff, FaUserCircle, FaBell, FaHeart, FaBuilding } from "react-icons/fa";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);
@@ -24,6 +24,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
   const storedToken = GetToken();
   const notifRef = useRef(null);
   const profileRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -68,6 +69,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
   const handleProfileToggle = () => {
     setDropdownOpen(!dropdownOpen);
     setNotifOpen(false);
+  };
+
+  const handleManageListings = () => {
+    navigate("/owner-dashboard"); // Navigate to the Manage Listings page
   };
 
   const location = useLocation();
@@ -176,16 +181,19 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li className="flex w-full justify-center hover:bg-gray-100">
-                        <button
-                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
-                        >
-                          <FaHeart className="h-5 w-5" />
-                          <h3 className="text-sm font-semibold text-gray-900 px-4">
-                            Wishlist
-                          </h3>
-                        </button>
-                      </li>
+                      {user.userType === "Owner" && (
+                        <li className="flex w-full justify-center hover:bg-gray-100">
+                          <button
+                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                            onClick={handleManageListings}
+                          >
+                            <FaBuilding className="h-5 w-5" />
+                            <h3 className="text-sm font-semibold text-gray-900 px-4">
+                              Manage Listings
+                            </h3>
+                          </button>
+                        </li>
+                      )}
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button

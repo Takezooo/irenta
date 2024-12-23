@@ -81,7 +81,7 @@ export const PropertyListing = () => {
   };
 
   return (
-    <div className="pt-20 pb-4 mx-2 flex flex-col xl:flex-row-reverse sm:ml-64">
+    <div className="pt-20 pb-4 mx-2 flex flex-col xl:flex-row-reverse">
       {/* Right Side: Profile */}
       <div className="justify-end w-full xl:w-1/4 pb-4 xl:px-4">
         {/* Show only on smaller screens (less than sm) */}

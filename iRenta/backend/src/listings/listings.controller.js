@@ -1,4 +1,5 @@
 import Listing from './listings.model.js';
+import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 
 export const GetAllListings = async (req, res) => {
   try {
@@ -8,6 +9,23 @@ export const GetAllListings = async (req, res) => {
     const listings = await Listing.find({ userId: ownerId });
 
     res.status(200).json(listings);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export const GetListingById = async (req, res) => {
+  try {
+    const listingId = req.params.listingId; // Get the listing ID from URL params
+
+    // Fetch the specific listing by ID
+    const listing = await Listing.findById(listingId);
+
+    if (!listing) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    res.status(200).json(listing);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -27,18 +45,47 @@ export const DisplayListings = async (req, res) => {
 export const CreateListing = async (req, res) => {
   try {
     // Check if the logged-in user is an "owner"
-    if (req.user.userType !== 'Owner') {
+    if (req.user.userType !== "Owner") {
       return res.status(403).json({ message: "Only owners can create listings." });
     }
 
-    const { title, description, price } = req.body;
+    // Destructure necessary fields from the request body
+    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = req.body;
 
-    // Create the listing with the logged-in user's ID
+    // Check if the address object is present and has required fields
+    if (!address || !address.houseNumber || !address.street || !address.city) {
+      return res.status(400).json({
+        message: "Address is incomplete. Ensure houseNumber, street, and city are provided.",
+      });
+    }
+
+    // Validate visitAvailability
+    if (visitAvailability) {
+      const { startTime, endTime } = visitAvailability;
+
+      // Ensure both times are provided
+      if (!startTime || !endTime) {
+        return res.status(400).json({ message: "Visit availability requires both startTime and endTime." });
+      }
+
+      // Ensure startTime is earlier than endTime
+      if (moment(startTime, "HH:mm").isSameOrAfter(moment(endTime, "HH:mm"))) {
+        return res.status(400).json({ message: "Start time must be earlier than end time." });
+      }
+    }
+
+    // Create the listing with the logged-in user's ID, address, and visitAvailability
     const newListing = await Listing.create({
       title,
       description,
       price,
+      type,
+      bedroomNumber,
+      bathroomNumber,
+      propertySize,
       userId: req.user.id, // Associate with the logged-in owner
+      address,
+      visitAvailability, // Include validated visit availability
     });
 
     res.status(201).json(newListing);
@@ -96,4 +143,5 @@ export default {
   UpdateListing,
   DeleteListing,
   DisplayListings,
+  GetListingById,
 };

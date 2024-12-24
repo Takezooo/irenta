@@ -1,37 +1,90 @@
-import http from http
 import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import Chat from "../../src/chats/chat.model.js";
+const socketIO = (server) => {
+  const io = new Server(server, {
+    cors: {
+      origin: "*", // Allow all origins
+      methods: ["GET", "POST"],
+    },
+  });
 
-const SocketIO = (app) => {
-    const server = http.createServer(app);
-    const io = new Server(server, {
-        pingTimeout: 60000,
-        cors: {
-            // origin: [
-            //     "sample url"
-            // ],
-            origin: "*",
-        },
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token; // Get the token from handshake auth
+    if (!token) return next(new Error("Authentication error"));
+
+    try {
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = user; // Attach the user to the socket object
+      next();
+    } catch (err) {
+      next(new Error("Authentication error"));
+    }
+  });
+
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.user);
+
+    // **Join a Room**
+    socket.on("joinRoom", async ({ chatId }) => {
+      try {
+        socket.join(chatId);
+        console.log(`User ${socket.user.id} joined room ${chatId}`);
+
+        // Fetch chat history from the database
+        const chat = await Chat.findById(chatId).populate(
+          "messages.sender",
+          "username"
+        ); // Populate sender username
+        if (!chat) {
+          console.log("Chat not found.");
+          return;
+        }
+        // Send chat history back to the client
+        socket.emit("chatHistory", chat.messages);
+      } catch (error) {
+        console.error("Error fetching chat history:", error.message);
+      }
     });
 
-    io.on("connection", (socket) => {
-        console.log("Connected to Socket.io");
+    // **Send and Broadcast Message**
+    socket.on("sendMessage", async ({ chatId, message }) => {
+      try {
+        const chat = await Chat.findById(chatId);
 
-        socket.on("setup", (userData) => {
-            socket.join(userData._id);
-            socket.emit("connected");
-        });
+        if (!chat) {
+          console.log("Chat not found.");
+          return;
+        }
 
-        socket.on("disconnect", () => {
-            console.log("Disconnected from Socket.io");
-        });
+        const newMessage = {
+          sender: socket.user.id,
+          content: message,
+          timestamp: Date.now(),
+        };
 
-        // SENDING EVENT APPLICATIONS
-        socket.on("send-event-appli", (obj) => {
-            io.emit("receive-event-appli", obj);
-        });
+        chat.messages.push(newMessage);
+        await chat.save();
+
+        const payload = {
+          senderId: socket.user.id, // Attach user ID from authentication
+          message,
+          timestamp: Date.now(),
+        };
+
+        io.to(chatId).emit("receiveMessage", payload);
+        console.log(`Message sent to room ${chatId} by ${socket.user.id}`);
+      } catch (error) {
+        console.error("Error saving message:", error.message);
+      }
     });
 
-    return server;
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.user);
+    });
+  });
+
+  return io;
 };
 
-export default SocketIO;
+export default socketIO;

@@ -8,7 +8,7 @@ import { GetToken } from "../../global/utils/Token.js";
 
 const API_LINK = "http://localhost:5000/api";
 
-const EditListing = () => {
+const AddListing = () => {
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName] = useState("No file chosen");
@@ -148,7 +148,7 @@ const EditListing = () => {
             >
               <AiOutlineClose className="w-6 h-6" />
             </button>
-            <h2 className="text-lg font-bold text-gray-800">Edit Listing</h2>
+            <h2 className="text-lg font-bold text-gray-800">Add a Listing</h2>
           </div>
 
           {/* Scrollable Content */}
@@ -385,7 +385,7 @@ const EditListing = () => {
               className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"
               onClick={handleFormSubmit}
             >
-              Update Listing
+              Add Listing
             </button>
           </div>
         </div>
@@ -474,4 +474,4 @@ const EditListing = () => {
   );
 };
 
-export default EditListing;
+export default AddListing;

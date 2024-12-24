@@ -21,7 +21,7 @@ router.get("/", RequireAuth, GetAllUsers);
 router.get("/:id", RequireAuth, GetSpecificUser);
 
 // route for create/upload profile and picture
-router.post("/", RequireAuth, upload.single("file"), CreateUser);
+router.post("/", upload.single("file"), CreateUser);
 
 // route for update profile and picture
 router.patch("/:id", RequireAuth, upload.single("file"), UpdateUser);

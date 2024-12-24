@@ -1,79 +1,75 @@
-// src/components/LandingPage.js
-
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import React Router hook
+
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
 import Topbar from "../components/global/Topbar.js";
+import Sidebar from "../components/global/Sidebar.js";
 import { Footer } from "../components/global/Footer.js";
+
 import { AuthContext } from "../global/contexts/AuthContext.js";
+import { useProperty } from "../global/contexts/PropertyContext";
+
 import { fetchListings } from "../api/Listings.js";
+
 const LandingPage = () => {
-  const { user } = useContext(AuthContext);
+  const [isOpen, setIsOpen] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const { user } = useContext(AuthContext);
+  const { setSelectedProperty } = useProperty();
+
+  const navigate = useNavigate(); // React Router navigation hook
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchListings();
       setListings(data); // assuming fetchListings returns an array
     };
-  
+
     fetchData();
   }, []);
 
-//   const cards = [
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//     {
-//       title: "Live Good Dormitory",
-//       location: "Ermita, Manila",
-//       price: "₱2,000 - ₱8,000",
-//     },
-//   ];
+  const handleBrowseListing = () => {
+    navigate("/browse-listing"); // Route to the Request Visit Page
+  };
+
+  const handleViewProperty = (listings) => {
+    if (!user) {
+      navigate("/login");
+    } else {
+      setSelectedProperty(listings);
+      navigate(`/${listings._id}`);
+    }
+  };
 
   const scrollContainerRef = useRef(null);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtStart = container.scrollLeft === 0;
+      const isAtEnd =
+        container.scrollWidth - container.clientWidth === container.scrollLeft;
+
+      setShowLeftArrow(!isAtStart);
+      setShowRightArrow(!isAtEnd);
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -89,31 +85,18 @@ const LandingPage = () => {
 
   return (
     <div>
-      <Topbar />
+      <Topbar toggleSidebar={toggleSidebar} isOpen={isOpen} />
+
+      <Sidebar isOpen={isOpen} />
 
       <div className="mx-auto mt-36 flex align-center flex-col p-5 rounded-xl w-[90%] from-blue-950 bg-gradient-to-r to-gray-800 overflow-hidden">
-        {/* <div className="absolute z-[-1] w-full h-full overflow-hidden">
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/b/b4/Makati_City_Lights2_%28Jopet_Sy%29_-_Flickr.jpg"
-                        className="w-full h-full object-cover brightness-75"
-                        alt="Metro Manila City Lights"
-                    /> 
-                </div> */}
         <h1 className="font-extrabold text-6xl mb-2 text-gray-100 sm:text-7xl">
           WELCOME TO <br></br>iRENTA
         </h1>
 
         {/* Conditionally Render Buttons Based on User Role */}
         {user ? (
-          <>
-            {user.userType === "Owner" && (
-              <Link to="/owner-dashboard">
-                <button className="w-[100%] px-[24px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300">
-                  Manage Your Listings
-                </button>
-              </Link>
-            )}
-          </>
+          <></> // Removed the "Manage Your Listings" button
         ) : (
           <>
             <p className="text-m text-white mb-[20px]">
@@ -134,15 +117,26 @@ const LandingPage = () => {
           </>
         )}
       </div>
+
       <div className="mx-auto flex align-center flex-col rounded-xl mt-16 w-[90%]">
-        <h2 className="text-xl font-bold mb-4">Dormitories</h2>
-        <div className="relative">
+        <div className="flex flex-row w-full items-center justify-between">
+          <h2 className="text-xl font-bold mb-4">Dormitories</h2>
           <button
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+            onClick={handleBrowseListing}
+            className="mt-4 inline-block text-black underline"
           >
-            <FaChevronLeft />
+            See more
           </button>
+        </div>
+        <div className="relative">
+          {showLeftArrow && (
+            <button
+              onClick={scrollLeft}
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+            >
+              <FaChevronLeft />
+            </button>
+          )}
           <div
             ref={scrollContainerRef}
             className="flex overflow-x-hidden space-x-4 px-10"
@@ -151,6 +145,7 @@ const LandingPage = () => {
               <div
                 key={listing._id}
                 className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
+                onClick={() => handleViewProperty(listing)}
               >
                 <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
                 {/* Placeholder for image */}
@@ -160,12 +155,14 @@ const LandingPage = () => {
               </div>
             ))}
           </div>
-          <button
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
-          >
-            <FaChevronRight />
-          </button>
+          {showRightArrow && (
+            <button
+              onClick={scrollRight}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+            >
+              <FaChevronRight />
+            </button>
+          )}
         </div>
       </div>
 
@@ -185,18 +182,10 @@ const LandingPage = () => {
             <p className="mt-2 text-sm">
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <a href="#" className="mt-4 inline-block text-black underline">
+            <button className="mt-4 inline-block text-black underline">
               See more
-            </a>
+            </button>
           </div>
         </div>
       </div>

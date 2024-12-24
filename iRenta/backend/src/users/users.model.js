@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
       zip: { type: String },
     },
   },
+  conversations: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+    },
+  ],
 //   listings: [{ type: Types.ObjectId, ref: 'listings' }]
 });
 

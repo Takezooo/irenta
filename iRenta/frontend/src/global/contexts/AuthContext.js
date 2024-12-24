@@ -10,35 +10,52 @@ export const AuthProvider = ({ children }) => {
 
    // Load token and user on app initialization
    useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = GetToken();
-      const storedRefreshToken = GetRefreshToken();
-  
-      if (storedToken) {
-        // Decode token to extract user info
-        try {
-          const storedUser = JSON.parse(atob(storedToken.split(".")[1]));
+  const initializeAuth = async () => {
+    const storedToken = GetToken();
+    const storedRefreshToken = GetRefreshToken();
+
+    if (storedToken) {
+      try {
+        const storedUser = JSON.parse(atob(storedToken.split(".")[1]));
+        // Check token expiration
+        const isExpired = storedUser.exp * 1000 < Date.now();
+        if (isExpired) {
+          if (storedRefreshToken) {
+            try {
+              const newToken = await refreshAccessToken(); // Refresh token
+              const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
+              setUser(refreshedUser);
+              setToken(newToken);
+            } catch (err) {
+              console.error("Token refresh failed:", err);
+              logout();
+            }
+          } else {
+            logout();
+          }
+        } else {
           setUser(storedUser);
           setToken(storedToken);
-        } catch (err) {
-          console.error("Invalid token format:", err);
         }
-      } else if (storedRefreshToken) {
-        // Attempt to refresh the authToken
-        try {
-          const newToken = await refreshAccessToken();
-          const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
-          setUser(refreshedUser);
-          setToken(newToken);
-        } catch (err) {
-          console.error("Failed to refresh access token:", err);
-          logout(); // Clear tokens if refresh fails
-        }
+      } catch (err) {
+        console.error("Invalid token format:", err);
+        logout(); // Clear tokens if parsing fails
       }
-    };
-  
-    initializeAuth();
-  }, []);
+    } else if (storedRefreshToken) {
+      try {
+        const newToken = await refreshAccessToken();
+        const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
+        setUser(refreshedUser);
+        setToken(newToken);
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+        logout();
+      }
+    }
+  };
+
+  initializeAuth();
+}, []);
   
   // Login: Save token and user
   const login = (userData, authToken) => {

@@ -364,17 +364,6 @@ const AddListing = () => {
               {/* Map Section */}
               <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
                 <MapPicker onLocationChange={handleLocationChange} />
-                {address && (
-                  <div>
-                    <h3>Selected Address:</h3>
-                    <p>House Number: {address.houseNumber}</p>
-                    <p>Street: {address.street}</p>
-                    <p>City: {address.city}</p>
-                    <p>Zip: {address.zip}</p>
-                    <p>Latitude: {address.lat}</p>
-                    <p>Longitude: {address.lng}</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
-import MapPicker from "../Mapping/MapPicker";
+import MapPicker from "../Mapping/MapPicker.js";
 import { GetToken } from "../../global/utils/Token.js";
 
 const API_LINK = "http://localhost:5000/api";
@@ -21,10 +21,10 @@ const AddListing = () => {
   const [bathroomNumber, setBathroomNumber] = useState("");
   const [propertySize, setPropertySize] = useState("");
   const [address, setAddress] = useState({
-    houseNumber: "12",
-    street: "rw",
-    city: "rw",
-    zip: "r",
+    houseNumber: "",
+    street: "",
+    city: "",
+    zip: "",
     lng: null,
     lat: null,
   });
@@ -33,32 +33,57 @@ const AddListing = () => {
     endTime: "", // Default empty or preset value like "18:00"
   });
   
-  const handleLocationChange = (location) => {
-    setAddress((prevAddress) => ({
-      ...prevAddress, // Preserve other properties
-      lng: location.lng,
-      lat: location.lat,
-    }));
+  const handleLocationChange = async (location) => {
+    try {
+      const response = await axios.get(
+        `/api/map/geocode?lat=${location.lat}&lng=${location.lng}`
+      );
+      const results = response.data.results;
+  
+      if (results && results.length > 0) {
+        const addressComponents = results[0].address_components;
+  
+        // Parse address components
+        const houseNumber = addressComponents.find((comp) =>
+          comp.types.includes("street_number")
+        )?.long_name || "";
+        const street = addressComponents.find((comp) =>
+          comp.types.includes("route")
+        )?.long_name || "";
+        const city = addressComponents.find((comp) =>
+          comp.types.includes("locality")
+        )?.long_name || "";
+        const zip = addressComponents.find((comp) =>
+          comp.types.includes("postal_code")
+        )?.long_name || "";
+  
+        // Update address state
+        setAddress({
+          houseNumber,
+          street,
+          city,
+          zip,
+          lng: location.lng,
+          lat: location.lat,
+        });
+      } else {
+        console.error("No address components found.");
+      }
+    } catch (error) {
+      console.error("Error fetching address details:", error);
+    }
   };
   
+  
   const handleFormSubmit = async (e) => {
-    // console.log(process.env.GOOGLE_MAPS_KEY);
-      // Validate that startTime is less than endTime
-  const start = new Date(`1970-01-01T${visitAvailability.startTime}`);
-  const end = new Date(`1970-01-01T${visitAvailability.endTime}`);
-
-  if (start >= end) {
-    alert("Start time must be earlier than end time.");
-    return;
-  }
-
     e.preventDefault();
-    // Ensure that required fields are filled out
+  
+    // Ensure all required fields are filled out
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
       return;
     }
-
+  
     try {
       const newListing = {
         title,
@@ -71,18 +96,17 @@ const AddListing = () => {
         address,
         visitAvailability,
       };
-
-      // Send a POST request to the backend API
+  
+      // Send POST request to API
       const response = await axios.post(`${API_LINK}/listings`, newListing, {
         headers: {
           Authorization: `Bearer ${storedToken}`, // Include the token here
         },
       });
-
+  
       if (response.status === 201) {
-        // Successfully created the listing
         alert("Listing created successfully!");
-        navigate("/owner-dashboard"); // Navigate to the owner dashboard
+        navigate("/owner-dashboard");
       }
     } catch (error) {
       console.error("Error creating listing:", error);
@@ -338,26 +362,19 @@ const AddListing = () => {
               </div>
 
               {/* Map Section */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Pin Location
-                </label>
-                <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
-                  {/* <iframe
-                    className="w-full h-full border-none"
-                    src={`https://maps.google.com/maps?q=Manila&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                    allowFullScreen
-                    title="Pinned Location Map"
-                  ></iframe> */}
-                  <MapPicker onLocationChange={handleLocationChange} />
-                  {address && (
-                    <div>
-                      <h3>Selected Location:</h3>
-                      <p>Latitude: {address.lat}</p>
-                      <p>Longitude: {address.lng}</p>
-                    </div>
-                  )}
-                </div>
+              <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
+                <MapPicker onLocationChange={handleLocationChange} />
+                {address && (
+                  <div>
+                    <h3>Selected Address:</h3>
+                    <p>House Number: {address.houseNumber}</p>
+                    <p>Street: {address.street}</p>
+                    <p>City: {address.city}</p>
+                    <p>Zip: {address.zip}</p>
+                    <p>Latitude: {address.lat}</p>
+                    <p>Longitude: {address.lng}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

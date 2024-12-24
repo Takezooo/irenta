@@ -26,6 +26,7 @@ import listingRoutes from './src/listings/listings.route.js';
 import contractRoutes from './src/contracts/contracts.route.js';
 import ocularRoutes from './src/ocular/ocular.route.js';
 import chatRoutes from './src/chats/chat.route.js';
+import mapRoutes from './src/maps/maps.routes.js'
 
 app.use("/api/users", userRoutes);
 
@@ -36,6 +37,9 @@ app.use("/api/contracts", contractRoutes);
 // anything related to interactions with owners
 app.use("/api/chats", chatRoutes);
 app.use('/api/ocular', ocularRoutes);
+
+// map route
+app.use("/api/map", mapRoutes);
 
 app.get("/", (req, res) => {
     res.status(200).json({

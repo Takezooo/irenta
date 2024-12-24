@@ -13,6 +13,7 @@ import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
+import EditListing from "./components/OwnerDashboard/EditListing.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
@@ -23,6 +24,7 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
+
 
 const App = () => {
   return (
@@ -65,6 +67,15 @@ const App = () => {
                 element={
                   <PrivateRoute allowedRoles={["Owner"]}>
                     <AddListing />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/edit-list"
+                element={
+                  <PrivateRoute allowedRoles={["Owner"]}>
+                    <EditListing />
                   </PrivateRoute>
                 }
               />

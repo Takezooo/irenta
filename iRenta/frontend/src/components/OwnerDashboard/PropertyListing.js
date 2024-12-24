@@ -217,7 +217,11 @@ export const PropertyListing = () => {
                   >
                     Remove
                   </button>
-                  <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">
+                  <button
+                    onClick={() => {
+                      navigate("/edit-list");
+                    }}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md shadow hover:bg-gray-300">
                     Edit
                   </button>
                 </div>

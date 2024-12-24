@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { fetchListings } from "../api/Listings"; // API function
-import Topbar from "../components/global/Topbar";
+import { useNavigate } from "react-router-dom";
 import { AiOutlineHeart } from "react-icons/ai";
 import { Footer } from "../components/global/Footer";
+import Topbar from "../components/global/Topbar";
+import { fetchListings } from "../api/Listings"; // API function
+import { useProperty } from "../global/contexts/PropertyContext";
 
 const BrowseListing = () => {
   const [listings, setListings] = useState([]); // Listings Data
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [isMapFullScreen, setIsMapFullScreen] = useState(false); // Fullscreen Map for Phone
+  const { setSelectedProperty } = useProperty();
+  const navigate = useNavigate(); // React Router navigation hook
+
   const listingsPerPage = 12;
 
   useEffect(() => {
@@ -29,12 +34,20 @@ const BrowseListing = () => {
   // Calculate paginated listings
   const indexOfLastListing = currentPage * listingsPerPage;
   const indexOfFirstListing = indexOfLastListing - listingsPerPage;
-  const currentListings = listings.slice(indexOfFirstListing, indexOfLastListing);
+  const currentListings = listings.slice(
+    indexOfFirstListing,
+    indexOfLastListing
+  );
 
   const totalPages = Math.ceil(listings.length / listingsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleViewProperty = (listings) => {
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
   };
 
   return (
@@ -50,12 +63,15 @@ const BrowseListing = () => {
               {currentListings.map((listing) => (
                 <div
                   key={listing._id}
+                  onClick={() => handleViewProperty(listing)}
                   className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all"
                 >
                   {/* Image Section */}
                   <div className="relative flex-shrink-0 h-2/3">
                     <img
-                      src={listing.imageUrl || "https://via.placeholder.com/300"}
+                      src={
+                        listing.imageUrl || "https://via.placeholder.com/300"
+                      }
                       alt={listing.title}
                       className="w-full h-full object-cover"
                     />
@@ -66,9 +82,15 @@ const BrowseListing = () => {
 
                   {/* Details Section */}
                   <div className="p-4 flex-grow flex flex-col justify-between">
-                    <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
-                    <p className="text-gray-500 text-sm line-clamp-2">{listing.description}</p>
-                    <p className="text-gray-700 font-bold mt-2">{listing.price} / night</p>
+                    <h3 className="text-lg font-semibold truncate">
+                      {listing.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm line-clamp-2">
+                      {listing.description}
+                    </p>
+                    <p className="text-gray-700 font-bold mt-2">
+                      {listing.price} / night
+                    </p>
                   </div>
                 </div>
               ))}
@@ -81,7 +103,9 @@ const BrowseListing = () => {
                   key={index}
                   onClick={() => handlePageChange(index + 1)}
                   className={`px-4 py-2 mx-1 border rounded ${
-                    currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
+                    currentPage === index + 1
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
                   }`}
                 >
                   {index + 1}

@@ -49,7 +49,7 @@ const App = () => {
                 }
               />
               <Route path="/" element={<LandingPage />} />
-              
+              <Route path="/browse-listing" element={<BrowseListing />} />
 
               {/* Owner Routes */}
               <Route
@@ -70,16 +70,6 @@ const App = () => {
               />
 
               {/* Seeker and Owner Routes */}
-
-              <Route
-                path="/browse-listing"
-                element={
-                  <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                    <BrowseListing />
-                  </PrivateRoute>
-                }
-              />
-
               <Route
                 path="/:propertyId"
                 element={
@@ -89,13 +79,14 @@ const App = () => {
                 }
               />
 
-              <Route 
+              <Route
                 path="/view-contract"
                 element={
                   <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                     <ViewContract />
                   </PrivateRoute>
-                } />
+                }
+              />
 
               {/* Fallback Route */}
               <Route path="*" element={<NotAuthorized />} />

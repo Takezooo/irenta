@@ -41,8 +41,12 @@ const LandingPage = () => {
   };
 
   const handleViewProperty = (listings) => {
-    setSelectedProperty(listings);
-    navigate(`/${listings._id}`);
+    if (!user) {
+      navigate("/login");
+    } else {
+      setSelectedProperty(listings);
+      navigate(`/${listings._id}`);
+    }
   };
 
   const scrollContainerRef = useRef(null);
@@ -179,7 +183,9 @@ const LandingPage = () => {
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <button className="mt-4 inline-block text-black underline">See more</button>
+            <button className="mt-4 inline-block text-black underline">
+              See more
+            </button>
           </div>
         </div>
       </div>

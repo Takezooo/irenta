@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineHeart } from "react-icons/ai";
 import { Footer } from "../components/global/Footer";
 import Topbar from "../components/global/Topbar";
 import { fetchListings } from "../api/Listings"; // API function
+import { AuthContext }  from  "../global/contexts/AuthContext"; //
 import { useProperty } from "../global/contexts/PropertyContext";
 
 const BrowseListing = () => {
@@ -11,6 +12,7 @@ const BrowseListing = () => {
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [isMapFullScreen, setIsMapFullScreen] = useState(false); // Fullscreen Map for Phone
   const { setSelectedProperty } = useProperty();
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate(); // React Router navigation hook
 
   const listingsPerPage = 12;
@@ -46,8 +48,12 @@ const BrowseListing = () => {
   };
 
   const handleViewProperty = (listings) => {
-    setSelectedProperty(listings);
-    navigate(`/${listings._id}`);
+    if (!user) {
+      navigate("/login");
+    } else {
+      setSelectedProperty(listings);
+      navigate(`/${listings._id}`);
+    }
   };
 
   return (

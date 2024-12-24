@@ -1,34 +1,26 @@
-import React, { useState, useContext } from "react";
-import { AuthContext } from "../../../global/contexts/AuthContext.js";
-import Topbar from "../../global/Topbar.js";
+import React, { useState, useEffect } from "react";
+import { fetchContractById } from "../../../api/Contracts.js"; // Create a function to fetch a specific contract
 
-const ViewContract = () => {
-  const { user } = useContext(AuthContext);
+const ViewContract = ({ contractId }) => {
+  const [contractDetails, setContractDetails] = useState([]);
 
-  // Dummy contract details
-  const dummyContract = {
-    property: {
-      name: "Greenwood Apartments",
-      address: {
-        houseNumber: "123",
-        street: "Maple Street",
-        city: "Springfield",
-        zip: "12345",
-      },
-    },
-    tenant: { name: "John Doe" },
-    landlordName: "Jane Smith",
-    contractDetails: {
-      startDate: "2023-01-01",
-      endDate: "2024-01-01",
-      rentAmount: "$1500",
-      paymentFrequency: "Monthly",
-      termsAndConditions: "Tenant must pay rent on time and keep the property clean.",
-      rulesAndRegulations: "No smoking or pets allowed inside the property.",
-    },
-  };
+  useEffect(() => {
+    const getContract = async () => {
+      try {
+        const fetchedContract = await fetchContractById(contractId);
+        setContractDetails(fetchedContract);
+      } catch (err) {
+        console.error("Failed to fetch contract:", err);
+      }
+    };
 
-  const [contractDetails] = useState(dummyContract);
+    getContract();
+  }, [contractId]);
+
+  if (!contractDetails) {
+    return <div>Loading...</div>;
+  }
+
 
   return (
     <div className="flex-grow">
@@ -48,7 +40,7 @@ const ViewContract = () => {
                 Property Name
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.property.name}
+                {contractDetails?.property?.name}
               </p>
             </div>
             <div>
@@ -56,7 +48,7 @@ const ViewContract = () => {
                 House Number
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.property.address.houseNumber}
+                {contractDetails?.property?.address?.houseNumber}
               </p>
             </div>
             <div>
@@ -64,7 +56,7 @@ const ViewContract = () => {
                 Street
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.property.address.street}
+                {contractDetails?.property?.address?.street}
               </p>
             </div>
             <div>
@@ -72,7 +64,7 @@ const ViewContract = () => {
                 City
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.property.address.city}
+                {contractDetails?.property?.address?.city}
               </p>
             </div>
             <div>
@@ -80,7 +72,7 @@ const ViewContract = () => {
                 ZIP
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.property.address.zip}
+                {contractDetails?.property?.address?.zip}
               </p>
             </div>
           </div>
@@ -95,7 +87,7 @@ const ViewContract = () => {
                 Tenant
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.tenant.name || "N/A"}
+                {contractDetails?.tenant?.name || "N/A"}
               </p>
             </div>
             <div>
@@ -103,7 +95,7 @@ const ViewContract = () => {
                 Landlord
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.landlordName}
+                {contractDetails?.landlordName}
               </p>
             </div>
             <div>
@@ -111,7 +103,7 @@ const ViewContract = () => {
                 Start Date
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.contractDetails.startDate}
+                {contractDetails?.contractDetails?.startDate}
               </p>
             </div>
             <div>
@@ -119,7 +111,7 @@ const ViewContract = () => {
                 End Date
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.contractDetails.endDate}
+                {contractDetails?.contractDetails?.endDate}
               </p>
             </div>
             <div>
@@ -127,7 +119,7 @@ const ViewContract = () => {
                 Rent Amount
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.contractDetails.rentAmount}
+                {contractDetails?.contractDetails?.rentAmount}
               </p>
             </div>
             <div>
@@ -135,7 +127,7 @@ const ViewContract = () => {
                 Payment Frequency
               </label>
               <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-                {contractDetails.contractDetails.paymentFrequency}
+                {contractDetails?.contractDetails?.paymentFrequency}
               </p>
             </div>
           </div>
@@ -146,7 +138,7 @@ const ViewContract = () => {
               Terms and Conditions
             </label>
             <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-              {contractDetails.contractDetails.termsAndConditions}
+              {contractDetails?.contractDetails?.termsAndConditions}
             </p>
           </div>
 
@@ -156,22 +148,17 @@ const ViewContract = () => {
               Rules and Regulations
             </label>
             <p className="mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50">
-              {contractDetails.contractDetails.rulesAndRegulations}
+              {contractDetails?.contractDetails?.rulesAndRegulations}
             </p>
           </div>
 
           <div className="flex flex-col w-full justify-center items-center gap-2">
-            <button
-                className="my-5 w-fit px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-                Download as PDF
+            <button className="my-5 w-fit px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+              Download as PDF
             </button>
-            
             Do you Agree in the Terms and Conditions of this Contract?
-            <button
-                className="w-fit px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-            >
-                I Agree
+            <button className="w-fit px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+              I Agree
             </button>
           </div>
         </div>

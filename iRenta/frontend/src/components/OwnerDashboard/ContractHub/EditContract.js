@@ -1,42 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
+import { fetchContractById, updateContract } from "../../../api/Contracts.js"; // Create a function to fetch a specific contract
 
-const EditContract = () => {
-  // Dummy user data
-  const dummyUserProfile = {
-    info: {
-      firstName: "John",
-      lastName: "Doe",
-      profile: { link: "https://via.placeholder.com/150" },
-    },
-  };
+const EditContract = ({ contractId, onContractUpdated }) => {
+  const [formData, setFormData] = useState(null);
+  const [error, setError] = useState("");
 
-  // Dummy contract data
-  const dummyContract = {
-    property: {
-      name: "Ocean View Apartment",
-      address: {
-        houseNumber: "12B",
-        street: "Beachside Avenue",
-        city: "Malibu",
-        zip: "90265",
-      },
-    },
-    tenant: "Jane Smith",
-    landlord: "John Doe",
-    landlordName: "John Doe",
-    contractDetails: {
-      startDate: "2024-01-01",
-      endDate: "2024-12-31",
-      rentAmount: "3000",
-      paymentFrequency: "Monthly",
-      depositAmount: "6000",
-      termsAndConditions: "No pets allowed. Rent must be paid by the 5th of each month.",
-      rulesAndRegulations: "No loud noise after 10 PM. Parking is only allowed in designated spots.",
-    },
-  };
+  useEffect(() => {
+    const getContract = async () => {
+      try {
+        const fetchedContract = await fetchContractById(contractId);
+        if (fetchedContract.status !== "Pending") {
+          setError("Only contracts with status 'Passive' can be edited.");
+        } else {
+          setFormData(fetchedContract);
+        }
+      } catch (err) {
+        console.error("Failed to fetch contract:", err);
+        setError("Failed to fetch contract data.");
+      }
+    };
 
-  const [userProfile, setUserProfile] = useState(dummyUserProfile);
-  const [formData, setFormData] = useState(dummyContract);
+    getContract();
+  }, [contractId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,11 +51,30 @@ const EditContract = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated Contract Data:", formData);
-    alert("Contract updated successfully! (dummy operation)");
+    try {
+      if (formData.status === "Pending") {
+        const updatedContract = await updateContract(contractId, formData);
+        alert("Contract updated successfully!");
+        console.log("Updated contract:", updatedContract);
+        onContractUpdated(); // Refresh the contract list
+      } else {
+        alert("Only inactive contracts can be edited.");
+      }
+    } catch (error) {
+      console.error("Error updating contract:", error);
+      alert("Failed to update the contract. Please try again.");
+    }
   };
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  if (!formData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex-grow">

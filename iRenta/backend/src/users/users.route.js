@@ -8,6 +8,7 @@ import {
     LoginUser,
     GoogleLoginUser,
     RefreshToken,
+    ToggleLikedListing,
 } from "./users.controller.js";
 import upload from "../../global/config/Multer.js";
 import RequireAuth from "../../global/middlewares/RequireAuth.js";
@@ -27,6 +28,8 @@ router.post("/", upload.single("file"), CreateUser);
 router.patch("/:id", RequireAuth, upload.single("file"), UpdateUser);
 
 router.delete("/:id", RequireAuth, DeleteUser);
+
+router.post("/toggle-like", RequireAuth, ToggleLikedListing);
 
 // for login purpose
 router.post("/login", LoginUser);

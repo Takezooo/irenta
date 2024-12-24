@@ -101,6 +101,7 @@ const App = () => {
 
               {/* Fallback Route */}
               <Route path="*" element={<NotAuthorized />} />
+              <Route path="/not-authorized" element={<NotAuthorized />} />
             </Routes>
           </Router>
         </PropertyProvider>

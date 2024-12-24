@@ -7,16 +7,16 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true }, // Trim whitespaces
   },
   info: {
-    firstName: { type: String, required: true, trim: true }, // Trim whitespaces
-    middleName: { type: String, required: false, trim: true }, // Trim whitespaces
-    lastName: { type: String, required: true, trim: true }, // Trim whitespaces
+    firstName: { type: String, required: true },
+    middleName: { type: String, required: false },
+    lastName: { type: String, required: true },
     birthDate: { type: Date, required: true },
     gender: { type: String, required: true },
     phoneNumber: { type: Number, required: true },
     profile: {
       id: { type: String },
-      name: { type: String, trim: true }, // Trim whitespaces
-      link: { type: String, trim: true }, // Trim whitespaces
+      name: { type: String },
+      link: { type: String },
     },
     userType: { type: String, enum: ["Seeker", "Owner"], required: true },
     address: {
@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({
       ref: "Chat",
     },
   ],
-  // listings: [{ type: Types.ObjectId, ref: 'listings' }]
+  likedListings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }], // Array to store liked listings
+  //   listings: [{ type: Types.ObjectId, ref: 'listings' }]
 });
 
 const User = mongoose.model("User", userSchema);

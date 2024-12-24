@@ -50,6 +50,44 @@ export const GetCreatedContracts = async (req, res) => {
   }
 };
 
+export const GetContractById = async (req, res) => {
+  try {
+    const { id } = req.params; // Extract the contract ID from the URL
+
+    const contract = await Contract.findById(id); // Fetch the contract by ID
+
+    if (!contract) {
+      return res.status(404).json({ message: "Contract not found" });
+    }
+
+    res.status(200).json(contract); // Return the contract data
+  } catch (error) {
+    console.error("Error fetching contract by ID:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const UpdateContract = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the contract ID from the URL
+    const updatedData = req.body; // Get the updated data from the request body
+
+    const contract = await Contract.findByIdAndUpdate(id, updatedData, {
+      new: true, // Return the updated contract
+      runValidators: true, // Validate the update against the schema
+    });
+
+    if (!contract) {
+      return res.status(404).json({ message: "Contract not found" });
+    }
+
+    res.status(200).json(contract);
+  } catch (error) {
+    console.error("Error updating contract:", error);
+    res.status(500).json({ message: "Failed to update contract" });
+  }
+};
+
 export const GetPdf = async (req, res) => {
     try {
       const { id } = req.params;

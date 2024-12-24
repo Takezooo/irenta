@@ -38,13 +38,18 @@ const ContractHub = () => {
         <>
           <h1 className="text-2xl font-bold mb-6">Contract Hub</h1>
 
-          {/* Create Contract Button */}
-          <div className="mb-4">
+          {/* Create and Upload Contract Button */}
+          <div className="mb-4 flex flex-wrap gap-4">
             <button
               onClick={() => setView("CreateContract")}
               className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
             >
               Create Contract
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-green-600"
+            >
+              Upload Contract
             </button>
           </div>
 
@@ -103,15 +108,24 @@ const ContractHub = () => {
                       {contract.status}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600"
-                        onClick={() => {
-                          setSelectedContractId(contract?._id); // Set the selected contract ID
-                          setView("EditContract"); // Switch to the EditContract view
-                        }}
-                      >
-                        Edit
-                      </button>
+                      {contract.status === "Pending" ? (
+                        <button
+                          className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600"
+                          onClick={() => {
+                            setSelectedContractId(contract?._id); // Set the selected contract ID
+                            setView("EditContract"); // Switch to the EditContract view
+                          }}
+                        >
+                          Edit
+                        </button>
+                      ) : (
+                        <button
+                          className="px-4 py-2 bg-gray-300 text-gray-500 text-xs font-bold rounded cursor-not-allowed"
+                          disabled
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
                         className="ml-2 px-4 py-2 bg-green-500 text-white text-xs font-bold rounded hover:bg-green-600"
                         onClick={() => {

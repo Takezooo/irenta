@@ -49,3 +49,37 @@ export const fetchContracts = async () => {
         console.error(err.response?.data?.message || "Error fetching contracts");
       }
   };
+
+  export const fetchContractById = async (contractId) => {
+    const authToken = GetToken(); // Retrieve the user's authentication token
+  
+    try {
+      const response = await axios.get(`${API_BASE_URL}/${contractId}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Pass the token for authentication
+        },
+      });
+  
+      return response.data; // Return the contract data
+    } catch (err) {
+      console.error("Error fetching contract by ID:", err.response?.data || err.message);
+      throw new Error(err.response?.data?.message || "Failed to fetch contract");
+    }
+  };
+  
+
+  export const updateContract = async (contractId, updatedData) => {
+    const authToken = GetToken();
+  
+    try {
+      const response = await axios.put(`${API_BASE_URL}/${contractId}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating contract:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || "Failed to update contract");
+    }
+  };

@@ -2,6 +2,7 @@ import express from "express";
 import {
     GetAllUsers,
     GetSpecificUser,
+    GetUserDataNoAuth,
     CreateUser,
     UpdateUser,
     DeleteUser,
@@ -20,6 +21,7 @@ router.get("/", RequireAuth, GetAllUsers);
 // router.get('/all-users', RequireAuth, GetAllUsers);
 
 router.get("/:id", RequireAuth, GetSpecificUser);
+router.get("/prop-owner/:id", GetUserDataNoAuth); // route to fecth specific user data without auth (for guest browsing)
 
 // route for create/upload profile and picture
 router.post("/", upload.single("file"), CreateUser);

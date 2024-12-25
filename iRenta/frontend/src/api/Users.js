@@ -21,6 +21,16 @@ export const fetchUserData = async (id, auth) => {
   }
 };
 
+export const fetchOwnerData = async (id) => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/prop-owner/${id}`);
+    return data;
+  } catch (err) {
+    console.error(err.response?.data?.message || "Error fetching user data");
+    return null;
+  }
+};
+
 export const toggleLike = async (listingId) => {
   const authToken = GetToken();
 

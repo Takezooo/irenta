@@ -38,6 +38,21 @@ const GetSpecificUser = async (req, res) => {
   }
 };
 
+const GetUserDataNoAuth = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Id!" });
+    }
+
+    const user = await Users.findById(id);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 // function for creating a new user
 const CreateUser = async (req, res) => {
   try {
@@ -370,6 +385,7 @@ const ToggleLikedListing = async (req, res) => {
 export {
   GetAllUsers,
   GetSpecificUser,
+  GetUserDataNoAuth,
   CreateUser,
   UpdateUser,
   DeleteUser,

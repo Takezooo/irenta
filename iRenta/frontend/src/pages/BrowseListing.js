@@ -14,7 +14,6 @@ const BrowseListing = () => {
   const [listings, setListings] = useState([]); // Listings Data
   const [likedListings, setLikedListings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
-  const [userData, setUserData] = useState([]);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false); // Fullscreen Map for Phone
   const { setSelectedProperty } = useProperty();
   const { user } = useContext(AuthContext);
@@ -25,22 +24,20 @@ const BrowseListing = () => {
 
   useEffect(() => {
     const fetchCurrentUserData = async () => {
-      if (!user) {
-        setUserData(null);
-      } else {
+      if (user) {
         const userdata = await fetchUserData(user?.id, authToken);
-        setUserData(userdata);
         setLikedListings(userdata?.likedListings);
+      } else {
+        setLikedListings([]);
       }
     };
-
     const fetchData = async () => {
       const data = await fetchListings();
       setListings(data);
     };
     fetchData();
     fetchCurrentUserData();
-  }, [authToken]);
+  }, [authToken, user]);
 
   const handleLikeToggle = async (listingId) => {
     if (!user) {

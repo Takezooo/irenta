@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import Topbar from "../components/global/Topbar";
 import { AiOutlineClose, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
-import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Import React Router hook
 import RequestOcularVisit from "../components/Listing/RequestOcularVisit";
 import { Footer } from "../components/global/Footer";
+import ChatRoom from "../components/Chat/ChatRoom";
 import { AuthContext } from "../global/contexts/AuthContext";
 import { useProperty } from "../global/contexts/PropertyContext";
+import { ChatDropdownContext } from "../global/contexts/ChatDropdownContext";
 import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../api/Chats";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../api/Users";
@@ -15,7 +16,9 @@ export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
   const [location, setLocation] = useState("Bacoor");
   const [ownerData, setOwnerData] = useState([]);
+  const [activeChat, setActiveChat] = useState(null); // Stores current chat data
   const { selectedProperty } = useProperty();
+  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } = useContext(ChatDropdownContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const authToken = GetToken();
@@ -76,16 +79,17 @@ export const ViewListing = () => {
   };
 
   const handleChatClick = async (ownerId, listingId) => {
-    if (user) {
-      try {
-        const chat = await getOrCreateChat(ownerId, listingId);
-        console.log("Chat created or fetched:", chat);
-        navigate(`/chat/${chat._id}`, { state: { userId: user.id } });
-      } catch (err) {
-        console.error("Failed to create or navigate to chat", err);
+    try {
+      const chat = await getOrCreateChat(ownerId, listingId);
+  
+      if (chat) {
+        setSelectedChatId(chat._id); // Set the selected chat in ChatDropdown
+        const otherParticipant = chat.participants.find((p) => p._id !== user?.id);
+        setSelectedUserId(otherParticipant?._id || null);
+        setChatRoomOpen(true); // Open the chat room
       }
-    } else {
-      navigate("/login");
+    } catch (error) {
+      console.error("Error handling chat click:", error);
     }
   };
 

@@ -24,13 +24,16 @@ const BrowseListing = () => {
   const listingsPerPage = 12;
 
   useEffect(() => {
-
     const fetchCurrentUserData = async () => {
-      const userdata = await fetchUserData(user.id, authToken);
-      setUserData(userdata);
-      setLikedListings(userdata.likedListings);
+      if (!user) {
+        setUserData(null);
+      } else {
+        const userdata = await fetchUserData(user?.id, authToken);
+        setUserData(userdata);
+        setLikedListings(userdata?.likedListings);
+      }
     };
-    
+
     const fetchData = async () => {
       const data = await fetchListings();
       setListings(data);
@@ -75,12 +78,8 @@ const BrowseListing = () => {
   };
 
   const handleViewProperty = (listings) => {
-    if (!user) {
-      navigate("/login");
-    } else {
-      setSelectedProperty(listings);
-      navigate(`/${listings._id}`);
-    }
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
   };
 
   return (

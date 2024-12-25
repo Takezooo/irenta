@@ -25,7 +25,6 @@ import PublicRoute from "./global/routes/PublicRoute.js";
 // import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
 
-
 const App = () => {
   return (
     <>
@@ -52,6 +51,7 @@ const App = () => {
               />
               <Route path="/" element={<LandingPage />} />
               <Route path="/browse-listing" element={<BrowseListing />} />
+              <Route path="/:propertyId" element={<ViewListing />} />
 
               {/* Owner Routes */}
               <Route
@@ -81,15 +81,6 @@ const App = () => {
               />
 
               {/* Seeker and Owner Routes */}
-              <Route
-                path="/:propertyId"
-                element={
-                  <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                    <ViewListing />
-                  </PrivateRoute>
-                }
-              />
-
               <Route
                 path="/view-contract"
                 element={

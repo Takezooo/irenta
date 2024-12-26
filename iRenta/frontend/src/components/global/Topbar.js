@@ -204,10 +204,11 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                           </button>
                         </li>
                       )}
+                      {/* Liked Button */}
                       <li className="flex w-full justify-center hover:bg-gray-100">
                         <button
                           className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
-                          onClick={handleManageListings}
+                          onClick={() => navigate("/liked-listing")}
                         >
                           <AiFillHeart size={20} className="text-red-500" />
                           <h3 className="text-sm font-semibold text-gray-900 px-4">

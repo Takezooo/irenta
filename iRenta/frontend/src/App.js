@@ -14,6 +14,7 @@ import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
 import EditListing from "./components/OwnerDashboard/EditListing.js";
+import LikedListing from "./components/Listing/LikedListing.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
@@ -51,9 +52,11 @@ const App = () => {
                     </PublicRoute>
                   }
                 />
+
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/browse-listing" element={<BrowseListing />} />
                 <Route path="/:propertyId" element={<ViewListing />} />
+                <Route path="/liked-listing" element={<LikedListing />} />
 
                 {/* Owner Routes */}
                 <Route

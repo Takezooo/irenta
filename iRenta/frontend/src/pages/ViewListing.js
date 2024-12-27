@@ -183,7 +183,6 @@ export const ViewListing = () => {
                       ) : (
                         <>
                           <AiOutlineHeart size={20} />
-                          <p>Like</p>
                         </>
                       )}
                     </button>

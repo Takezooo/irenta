@@ -67,6 +67,7 @@ export const getOrCreateChat = async (req, res) => {
     if (!chat) {
       const newChat = {
         participants: [userId, recipientId],
+        listing: listingId 
       };
 
       // Include listingId only if it exists

@@ -38,13 +38,18 @@ const ContractHub = () => {
         <>
           <h1 className="text-2xl font-bold mb-6">Contract Hub</h1>
 
-          {/* Create Contract Button */}
-          <div className="mb-4">
+          {/* Create and Upload Contract Button */}
+          <div className="mb-4 flex flex-wrap gap-4">
             <button
               onClick={() => setView("CreateContract")}
               className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
             >
               Create Contract
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-green-600"
+            >
+              Upload Contract
             </button>
           </div>
 

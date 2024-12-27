@@ -41,12 +41,8 @@ const LandingPage = () => {
   };
 
   const handleViewProperty = (listings) => {
-    if (!user) {
-      navigate("/login");
-    } else {
-      setSelectedProperty(listings);
-      navigate(`/${listings._id}`);
-    }
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
   };
 
   const scrollContainerRef = useRef(null);

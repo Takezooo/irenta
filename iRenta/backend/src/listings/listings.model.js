@@ -13,6 +13,11 @@ const listingSchema = new mongoose.Schema({
     ref: 'User', // Reference the User model
     required: true,
   },
+  images: [{
+    id: { type: String },
+    name: { type: String },
+    link: { type: String },
+  }],
   address: {
     houseNumber: { type: String, required: true },
     street: { type: String, required: true },

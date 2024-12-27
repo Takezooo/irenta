@@ -8,6 +8,7 @@ import ChatDropdown from "../Chat/ChatDropdown";
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
 import { FaPowerOff, FaUserCircle, FaBell, FaBuilding } from "react-icons/fa";
+import { AiFillHeart } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const { logout, user } = useContext(AuthContext);
@@ -136,7 +137,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
                   <ul className="py-2">
                     <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                      <Link to="/view-contract" className="block w-full text-left">
+                      <Link
+                        to="/view-contract"
+                        className="block w-full text-left"
+                      >
                         View Contract
                       </Link>
                     </li>
@@ -154,7 +158,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                   {user ? (
                     <img
-                      src={userProfile.info.profile.link || "https://via.placeholder.com/150"}
+                      src={
+                        userProfile.info.profile.link ||
+                        "https://via.placeholder.com/150"
+                      }
                       alt="Profile"
                       className="h-full w-full object-cover"
                     />
@@ -171,7 +178,10 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                       <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                           <img
-                            src={userProfile.info.profile.link || "https://via.placeholder.com/150"}
+                            src={
+                              userProfile.info.profile.link ||
+                              "https://via.placeholder.com/150"
+                            }
                             alt="Profile"
                             className="h-full w-full object-cover"
                           />
@@ -194,6 +204,18 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                           </button>
                         </li>
                       )}
+                      {/* Liked Button */}
+                      <li className="flex w-full justify-center hover:bg-gray-100">
+                        <button
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                          onClick={() => navigate("/liked-listing")}
+                        >
+                          <AiFillHeart size={20} className="text-red-500" />
+                          <h3 className="text-sm font-semibold text-gray-900 px-4">
+                            Liked
+                          </h3>
+                        </button>
+                      </li>
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button
@@ -211,14 +233,24 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                     // Logged-out Dropdown
                     <ul className="py-4">
                       <li className="flex w-full justify-center">
-                        <Link to="/login" className="flex items-center w-fit px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600">
+                        <Link
+                          to="/login"
+                          className="flex items-center w-fit px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                        >
                           <FaPowerOff className="h-5 w-5" />
-                          <span className="text-sm font-semibold text-gray-100 px-4">Log in</span>
+                          <span className="text-sm font-semibold text-gray-100 px-4">
+                            Log in
+                          </span>
                         </Link>
                       </li>
                       <li className="flex w-full justify-center">
-                        <Link to="/register" className="flex items-center w-fit px-4 py-3 text-sm text-gray-100 group ">
-                          <span className="text-sm font-semibold text-gray-500 px-4 group-hover:text-gray-900">Register</span>
+                        <Link
+                          to="/register"
+                          className="flex items-center w-fit px-4 py-3 text-sm text-gray-100 group "
+                        >
+                          <span className="text-sm font-semibold text-gray-500 px-4 group-hover:text-gray-900">
+                            Register
+                          </span>
                         </Link>
                       </li>
                     </ul>

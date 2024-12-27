@@ -77,33 +77,40 @@ const AddListing = () => {
   
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
-    // Ensure all required fields are filled out
+
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
       return;
     }
-  
+
     try {
-      const newListing = {
-        title,
-        description,
-        price,
-        type,
-        bedroomNumber,
-        bathroomNumber,
-        propertySize,
-        address,
-        visitAvailability,
-      };
-  
-      // Send POST request to API
-      const response = await axios.post(`${API_LINK}/listings`, newListing, {
+      const formData = new FormData();
+      formData.append(
+        "data",
+        JSON.stringify({
+          title,
+          description,
+          price,
+          type,
+          bedroomNumber,
+          bathroomNumber,
+          propertySize,
+          address,
+          visitAvailability,
+        })
+      );
+
+      selectedImages.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const response = await axios.post(`${API_LINK}/listings`, formData, {
         headers: {
-          Authorization: `Bearer ${storedToken}`, // Include the token here
+          Authorization: `Bearer ${storedToken}`,
+          "Content-Type": "multipart/form-data",
         },
       });
-  
+
       if (response.status === 201) {
         alert("Listing created successfully!");
         navigate("/owner-dashboard");
@@ -130,6 +137,7 @@ const AddListing = () => {
     setSelectedImages((prevImages) => [...prevImages, ...newFiles]);
   };
 
+  // Remove an image from the selected list
   const handleRemoveImage = (index) => {
     setSelectedImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
@@ -364,17 +372,6 @@ const AddListing = () => {
               {/* Map Section */}
               <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
                 <MapPicker onLocationChange={handleLocationChange} />
-                {address && (
-                  <div>
-                    <h3>Selected Address:</h3>
-                    <p>House Number: {address.houseNumber}</p>
-                    <p>Street: {address.street}</p>
-                    <p>City: {address.city}</p>
-                    <p>Zip: {address.zip}</p>
-                    <p>Latitude: {address.lat}</p>
-                    <p>Longitude: {address.lng}</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -1,5 +1,9 @@
 import Listing from './listings.model.js';
 import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
+import driveService from "../../global/utils/Drive.js";
+import dotenv from "dotenv";
+
+dotenv.config(); // Load environment variables
 
 export const GetAllListings = async (req, res) => {
   try {
@@ -44,13 +48,15 @@ export const DisplayListings = async (req, res) => {
 
 export const CreateListing = async (req, res) => {
   try {
+    const { body, files } = req;
+
     // Check if the logged-in user is an "owner"
     if (req.user.userType !== "Owner") {
       return res.status(403).json({ message: "Only owners can create listings." });
     }
 
     // Destructure necessary fields from the request body
-    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = req.body;
+    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {
@@ -74,6 +80,24 @@ export const CreateListing = async (req, res) => {
       }
     }
 
+    // Handle image uploads
+    let listingImages = [];
+    
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const { id: fileId, name: fileName } = await driveService.UploadFiles(
+          file,
+          process.env.PROPERTY_FOLDER_ID
+        );
+
+        listingImages.push({
+          id: fileId,
+          name: fileName,
+          link: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
+        });
+      }
+    }
+
     // Create the listing with the logged-in user's ID, address, and visitAvailability
     const newListing = await Listing.create({
       title,
@@ -86,6 +110,7 @@ export const CreateListing = async (req, res) => {
       userId: req.user.id, // Associate with the logged-in owner
       address,
       visitAvailability, // Include validated visit availability
+      images: listingImages, // Associate images with the listing
     });
 
     res.status(201).json(newListing);

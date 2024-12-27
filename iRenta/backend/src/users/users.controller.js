@@ -38,6 +38,21 @@ const GetSpecificUser = async (req, res) => {
   }
 };
 
+const GetUserDataNoAuth = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Id!" });
+    }
+
+    const user = await Users.findById(id);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 // function for creating a new user
 const CreateUser = async (req, res) => {
   try {
@@ -336,13 +351,46 @@ const RefreshToken = async (req, res) => {
   }
 };
 
+const ToggleLikedListing = async (req, res) => {
+  try {
+    const { listingId } = req.body;
+    if (!listingId) {
+      return res.status(400).json({ message: "Listing ID is required" });
+    }
+    const userId = req.user.id;
+
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isLiked = user.likedListings.includes(listingId);
+
+    if (isLiked) {
+      user.likedListings = user.likedListings.filter(
+        (id) => id.toString() !== listingId
+      );
+    } else {
+      user.likedListings.push(listingId);
+    }
+
+    await user.save();
+    res.status(200).json({ likedListings: user.likedListings });
+  } catch (error) {
+    console.error("Error toggling liked listing:", error);
+    res.status(500).json({ message: "Failed to toggle liked listing" });
+  }
+};
+
 export {
   GetAllUsers,
   GetSpecificUser,
+  GetUserDataNoAuth,
   CreateUser,
   UpdateUser,
   DeleteUser,
   LoginUser,
   GoogleLoginUser,
   RefreshToken,
+  ToggleLikedListing,
 };

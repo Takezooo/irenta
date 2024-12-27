@@ -13,6 +13,7 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "@react-google-maps/api": "^2.20.5",
         "@react-oauth/google": "^0.12.1",
         "axios": "^1.7.9",
         "bcrypt": "^5.1.1",

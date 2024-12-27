@@ -1,29 +1,56 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Footer } from "../components/global/Footer";
 import Topbar from "../components/global/Topbar";
+import { toggleLike } from "../api/Users";
 import { fetchListings } from "../api/Listings"; // API function
-import { AuthContext }  from  "../global/contexts/AuthContext"; //
+import { fetchUserData } from "../api/Users";
+import { GetToken } from "../global/utils/Token";
+import { AuthContext } from "../global/contexts/AuthContext"; //
 import { useProperty } from "../global/contexts/PropertyContext";
 
 const BrowseListing = () => {
   const [listings, setListings] = useState([]); // Listings Data
+  const [likedListings, setLikedListings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [isMapFullScreen, setIsMapFullScreen] = useState(false); // Fullscreen Map for Phone
   const { setSelectedProperty } = useProperty();
   const { user } = useContext(AuthContext);
+  const authToken = GetToken();
   const navigate = useNavigate(); // React Router navigation hook
 
   const listingsPerPage = 12;
 
   useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      if (user) {
+        const userdata = await fetchUserData(user?.id, authToken);
+        setLikedListings(userdata?.likedListings);
+      } else {
+        setLikedListings([]);
+      }
+    };
     const fetchData = async () => {
       const data = await fetchListings();
       setListings(data);
     };
     fetchData();
-  }, []);
+    fetchCurrentUserData();
+  }, [authToken, user]);
+
+  const handleLikeToggle = async (listingId) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      const updatedLikes = await toggleLike(listingId);
+      setLikedListings(updatedLikes); // Update local state
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
 
   const openMapFullScreen = () => {
     setIsMapFullScreen(true); // Show map fullscreen
@@ -48,12 +75,8 @@ const BrowseListing = () => {
   };
 
   const handleViewProperty = (listings) => {
-    if (!user) {
-      navigate("/login");
-    } else {
-      setSelectedProperty(listings);
-      navigate(`/${listings._id}`);
-    }
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
   };
 
   return (
@@ -69,7 +92,6 @@ const BrowseListing = () => {
               {currentListings.map((listing) => (
                 <div
                   key={listing._id}
-                  onClick={() => handleViewProperty(listing)}
                   className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all"
                 >
                   {/* Image Section */}
@@ -79,15 +101,26 @@ const BrowseListing = () => {
                         listing.imageUrl || "https://via.placeholder.com/300"
                       }
                       alt={listing.title}
+                      onClick={() => handleViewProperty(listing)}
                       className="w-full h-full object-cover"
                     />
-                    <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500">
-                      <AiOutlineHeart size={20} />
+                    <button
+                      onClick={() => handleLikeToggle(listing._id)}
+                      className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500"
+                    >
+                      {likedListings?.includes(listing._id) ? (
+                        <AiFillHeart size={20} className="text-red-500" />
+                      ) : (
+                        <AiOutlineHeart size={20} />
+                      )}
                     </button>
                   </div>
 
                   {/* Details Section */}
-                  <div className="p-4 flex-grow flex flex-col justify-between">
+                  <div
+                    className="p-4 flex-grow flex flex-col justify-between"
+                    onClick={() => handleViewProperty(listing)}
+                  >
                     <h3 className="text-lg font-semibold truncate">
                       {listing.title}
                     </h3>

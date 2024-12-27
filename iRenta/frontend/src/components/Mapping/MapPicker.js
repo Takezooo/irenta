@@ -98,23 +98,6 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
         onChange={handleAddressInputChange}
         className="w-full p-2.5 mb-2.5"
       />
-      {suggestions.length > 0 && (
-        <ul style={{ listStyleType: "none", padding: "0" }}>
-          {suggestions.map((s, index) => (
-            <li
-              key={index}
-              onClick={() => handleSuggestionClick(s)}
-              style={{
-                cursor: "pointer",
-                padding: "5px",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "400px" }}
         center={selectedLocation}

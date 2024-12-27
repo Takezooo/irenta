@@ -40,6 +40,7 @@ export const PropertyListing = () => {
       try {
         const data = await fetchOwnerListings();
         setListings(data);
+        console.log(data);
       } catch (err) {
         console.error("Failed to fetch listings:", err);
         setError("Failed to fetch listings");
@@ -141,16 +142,25 @@ export const PropertyListing = () => {
                   <div className="col-span-2">
                     <div className="relative mx-auto">
                       <div className="h-60 sm:h-74 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
-                        <span className="text-gray-500">Main Image</span>
+                      <img
+                          src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                          alt={listing.title}
+                          className="h-full w-full object-cover rounded-lg"
+                        />
+                        {/* <span className="text-gray-500">Main Image</span> */}
                       </div>
                       <div className="flex justify-evenly space-x-2 overflow-x-auto scrollbar-hide">
-                        <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
+                        <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md">
+
+
+                        </div>
                         <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
                         <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
                         <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
                       </div>
                     </div>
                   </div>
+                  
 
                   <div className="col-span-3 flex flex-col justify-between">
                     <div className="flex justify-between items-center border-b pb-4 mb-4">

@@ -18,7 +18,7 @@ router.get("/", DisplayListings);
 router.get("/user", authenticate, GetAllListings);
 
 // Route to fetch a specific list
-router.delete('/:id', GetListingById);
+router.get('/:id', GetListingById);
 
 // Route to create a listing (only for owners)
 router.post('/', authenticate, upload.array("files", 10), CreateListing);

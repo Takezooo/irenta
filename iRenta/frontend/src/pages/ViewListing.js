@@ -18,7 +18,8 @@ export const ViewListing = () => {
   const [ownerData, setOwnerData] = useState([]);
   const [activeChat, setActiveChat] = useState(null); // Stores current chat data
   const { selectedProperty } = useProperty();
-  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } = useContext(ChatDropdownContext);
+  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
+    useContext(ChatDropdownContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const authToken = GetToken();
@@ -81,10 +82,12 @@ export const ViewListing = () => {
   const handleChatClick = async (ownerId, listingId) => {
     try {
       const chat = await getOrCreateChat(ownerId, listingId);
-  
+
       if (chat) {
         setSelectedChatId(chat._id); // Set the selected chat in ChatDropdown
-        const otherParticipant = chat.participants.find((p) => p._id !== user?.id);
+        const otherParticipant = chat.participants.find(
+          (p) => p._id !== user?.id
+        );
         setSelectedUserId(otherParticipant?._id || null);
         setChatRoomOpen(true); // Open the chat room
       }
@@ -153,13 +156,21 @@ export const ViewListing = () => {
                   <h3 className="text-lg sm:text-2xl font-semibold mb-4">
                     ₱4,000 / head / month
                   </h3>
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <button
-                      onClick={handleRequestVisit}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
-                    >
-                      Request Visit
-                    </button>
+                  <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <div className="space-x-2">
+                      <button
+                        onClick={handleRequestVisit}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+                      >
+                        Request Visit
+                      </button>
+                      <button
+                        onClick={handleRequestVisit}
+                        className="bg-gray-100 text-black px-4 py-2 rounded-full hover:bg-gray-300"
+                      >
+                        Reserve Listing
+                      </button>
+                    </div>
                     <button
                       onClick={() => handleLikeToggle(selectedProperty?._id)}
                       className="flex items-center gap-1"

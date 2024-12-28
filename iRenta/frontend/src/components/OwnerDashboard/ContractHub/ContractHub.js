@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CreateContract from "./CreateContract";
 import EditContract from "./EditContract";
 import ViewContract from "./ViewContract"; // Import the ViewContract component
-import { fetchContracts, downloadPdf } from "../../../api/Contracts.js"; // Import the API function to fetch contracts
+import { fetchContracts, downloadPdf, updateContractStatus } from "../../../api/Contracts.js"; // Import the API function to fetch and update contracts
 
 const ContractHub = () => {
   const [view, setView] = useState("ContractHub"); // State to toggle between views
@@ -45,11 +45,6 @@ const ContractHub = () => {
               className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
             >
               Create Contract
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-green-600"
-            >
-              Upload Contract
             </button>
           </div>
 
@@ -96,16 +91,16 @@ const ContractHub = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       ${contract?.contractDetails.rentAmount}
                     </td>
-                    <td
-                      className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${
-                        contract?.status === "Active"
-                          ? "text-green-600"
-                          : contract.status === "Pending"
-                          ? "text-yellow-600"
-                          : "text-gray-600"
-                      }`}
-                    >
-                      {contract.status}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <select
+                        className="border border-gray-300 rounded px-2 py-1 text-sm font-semibold"
+                        value={contract.status}
+                      >
+                        <option className="text-orange-500" value="Pending">Pending</option>
+                        <option className="text-blue-500" value="Active">Active</option>
+                        <option className="text-red-500" value="Expired">Terminated</option>
+                        <option className="text-green-500" value="Expired">Completed</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {contract.status === "Pending" ? (
@@ -152,75 +147,42 @@ const ContractHub = () => {
           </div>
         </>
       ) : view === "CreateContract" ? (
-        <>
-          <CreateContract
-            onContractCreated={() => {
-              // Fetch the contracts again after creating a new one
-              const refreshContracts = async () => {
-                try {
-                  const updatedContracts = await fetchContracts();
-                  setContracts(updatedContracts);
-                  setView("ContractHub"); // Go back to Contract Hub view
-                } catch (err) {
-                  console.error("Failed to refresh contracts:", err);
-                }
-              };
+        <CreateContract
+          onContractCreated={() => {
+            // Fetch the contracts again after creating a new one
+            const refreshContracts = async () => {
+              try {
+                const updatedContracts = await fetchContracts();
+                setContracts(updatedContracts);
+                setView("ContractHub"); // Go back to Contract Hub view
+              } catch (err) {
+                console.error("Failed to refresh contracts:", err);
+              }
+            };
 
-              refreshContracts();
-            }}
-          />
-          {/* Back to ContractHub Button */}
-          <div className="mt-4">
-            <button
-              onClick={() => setView("ContractHub")}
-              className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
-            >
-              Back to Contract Hub
-            </button>
-          </div>
-        </>
+            refreshContracts();
+          }}
+        />
       ) : view === "ViewContract" ? (
-        <>
-          <ViewContract contractId={selectedContractId} />
-          {/* Back to ContractHub Button */}
-          <div className="mt-4">
-            <button
-              onClick={() => setView("ContractHub")}
-              className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
-            >
-              Back to Contract Hub
-            </button>
-          </div>
-        </>
+        <ViewContract contractId={selectedContractId} />
       ) : (
-        <>
-          <EditContract
-            contractId={selectedContractId}
-            onContractUpdated={() => {
-              // Fetch the contracts again after updating
-              const refreshContracts = async () => {
-                try {
-                  const updatedContracts = await fetchContracts();
-                  setContracts(updatedContracts);
-                  setView("ContractHub"); // Go back to Contract Hub view
-                } catch (err) {
-                  console.error("Failed to refresh contracts:", err);
-                }
-              };
+        <EditContract
+          contractId={selectedContractId}
+          onContractUpdated={() => {
+            // Fetch the contracts again after updating
+            const refreshContracts = async () => {
+              try {
+                const updatedContracts = await fetchContracts();
+                setContracts(updatedContracts);
+                setView("ContractHub"); // Go back to Contract Hub view
+              } catch (err) {
+                console.error("Failed to refresh contracts:", err);
+              }
+            };
 
-              refreshContracts();
-            }}
-          />
-          {/* Back to ContractHub Button */}
-          <div className="mt-4">
-            <button
-              onClick={() => setView("ContractHub")}
-              className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
-            >
-              Back to Contract Hub
-            </button>
-          </div>
-        </>
+            refreshContracts();
+          }}
+        />
       )}
     </div>
   );

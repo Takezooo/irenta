@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import React Router hook
 
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 import Topbar from "../components/global/Topbar.js";
 import Sidebar from "../components/global/Sidebar.js";
@@ -9,7 +10,7 @@ import { Footer } from "../components/global/Footer.js";
 
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { useProperty } from "../global/contexts/PropertyContext";
-
+import { toggleLike } from "../api/Users";
 import { fetchListings } from "../api/Listings.js";
 
 const LandingPage = () => {
@@ -17,10 +18,9 @@ const LandingPage = () => {
   const [listings, setListings] = useState([]);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-
   const { user } = useContext(AuthContext);
   const { setSelectedProperty } = useProperty();
-
+  const [likedListings, setLikedListings] = useState([]);
   const navigate = useNavigate(); // React Router navigation hook
 
   const toggleSidebar = () => {
@@ -79,6 +79,19 @@ const LandingPage = () => {
     }
   };
 
+  const handleLikeToggle = async (listingId) => {
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+      try {
+        const updatedLikes = await toggleLike(listingId);
+        setLikedListings(updatedLikes); // Update local state
+      } catch (error) {
+        console.error("Error toggling like:", error);
+      }
+    };
+
   return (
     <div>
       <Topbar toggleSidebar={toggleSidebar} isOpen={isOpen} />
@@ -128,33 +141,62 @@ const LandingPage = () => {
           {showLeftArrow && (
             <button
               onClick={scrollLeft}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md bg-gray-200 hover:bg-gray-300"
             >
               <FaChevronLeft />
             </button>
           )}
           <div
             ref={scrollContainerRef}
-            className="flex overflow-x-hidden space-x-4 px-10"
+            className="flex overflow-x-hidden space-x-4"
           >
             {listings.map((listing) => (
               <div
                 key={listing._id}
-                className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md border p-4"
-                onClick={() => handleViewProperty(listing)}
+                className="flex-shrink-0 h-96 w-72 bg-white rounded-lg shadow-md border overflow-hidden"
               >
-                <div className="h-40 bg-gray-200 rounded-md mb-4"></div>{" "}
-                {/* Placeholder for image */}
-                <h3 className="text-lg font-semibold">{listing.title}</h3>
-                <p className="text-gray-500 text-sm">{listing.description}</p>
-                <p className="text-gray-700 mt-2 font-bold">{listing.price}</p>
+                {/* Image Section */}
+                <div className="relative flex-shrink-0 h-2/3">
+                  <img
+                    src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                    alt={listing.title}
+                    onClick={() => handleViewProperty(listing)}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    onClick={() => handleLikeToggle(listing._id)}
+                    className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500"
+                  >
+                    {likedListings?.includes(listing._id) ? (
+                      <AiFillHeart size={20} className="text-red-500" />
+                    ) : (
+                      <AiOutlineHeart size={20} />
+                    )}
+                  </button>
+                </div>
+
+                {/* Details Section */}
+                <div
+                  className="p-4 flex-grow h-1/3 flex flex-col justify-between"
+                  onClick={() => handleViewProperty(listing)}
+                >
+                  <h3 className="text-lg font-semibold truncate">
+                    {listing.title}
+                  </h3>
+                  <p className="text-gray-500 text-sm line-clamp-2">
+                    {listing.description}
+                  </p>
+                  <p className="justify-end text-gray-700 font-bold mt-2">
+                    {listing.price} / night
+                  </p>
+                </div>
               </div>
             ))}
           </div>
           {showRightArrow && (
             <button
               onClick={scrollRight}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md hover:bg-gray-300"
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md bg-gray-200 hover:bg-gray-300"
             >
               <FaChevronRight />
             </button>

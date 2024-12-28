@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { FaChevronLeft } from "react-icons/fa";
 import { Footer } from "../components/global/Footer";
 import Topbar from "../components/global/Topbar";
 import { toggleLike } from "../api/Users";
@@ -79,6 +80,10 @@ const BrowseListing = () => {
     navigate(`/${listings._id}`);
   };
 
+  const handleBackClick = () => {
+    navigate(-1); // Navigate back to the previous page
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Topbar />
@@ -88,6 +93,12 @@ const BrowseListing = () => {
         <div className="flex-grow flex pt-[70px] h-screen">
           {/* Listings Section */}
           <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
+            <button
+            onClick={handleBackClick}
+            className="w-fit flex bg-gray-500 rounded-full items-center py-2 px-4 mb-4 text-gray-100 hover:bg-gray-700"
+            >
+                <FaChevronLeft className="text-lg" />
+            </button>
             <div className="flex flex-wrap gap-4 ">
               {currentListings.map((listing) => (
                 <div

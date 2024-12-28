@@ -36,9 +36,9 @@ const Sidebar = ({ isOpen }) => {
   return (
     <div className="flex w-screen">
       <aside
-        className={`fixed top-20 left-0 z-40 ${
+        className={`hidden fixed top-20 left-0 z-40 ${
           isOpen ? "w-64" : "w-20"
-        } h-[90%] ml-4 transform transition-all duration-300 ease-in-out bg-gray-100 rounded-lg shadow-md`}
+        } h-[90%] ml-4 transform transition-all duration-300 ease-in-out bg-gray-100 rounded-lg shadow-md lg:inline-block`}
       >
         <div className="flex flex-col justify-between h-full py-3">
           {/* Sidebar Navigation */}
@@ -163,10 +163,61 @@ const Sidebar = ({ isOpen }) => {
         </div>
       </aside>
 
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white shadow-md z-50">
+        <div className="flex justify-around py-3">
+          <button
+            onClick={() => setActiveContent("content1")}
+            className={`flex flex-col items-center text-blue-500 ${
+              isActive("content1") ? "text-blue-900" : ""
+            }`}
+          >
+            <IoHome size={24} />
+            <span className="text-xs">Dashboard</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content2")}
+            className={`flex flex-col items-center text-blue-500 ${
+              isActive("content2") ? "text-blue-900" : ""
+            }`}
+          >
+            <TbLayoutListFilled size={24} />
+            <span className="text-xs">Listings</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content3")}
+            className={`flex flex-col items-center text-blue-500 ${
+              isActive("content3") ? "text-blue-900" : ""
+            }`}
+          >
+            <FaPeopleRoof size={24} />
+            <span className="text-xs">Tenants</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content4")}
+            className={`flex flex-col items-center text-blue-500 ${
+              isActive("content4") ? "text-blue-900" : ""
+            }`}
+          >
+            <FaCalendar size={24} />
+            <span className="text-xs">Calendar</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content5")}
+            className={`flex flex-col items-center text-blue-500 ${
+              isActive("content5") ? "text-blue-900" : ""
+            }`}
+          >
+            <FaFileContract size={24} />
+            <span className="text-xs">Contracts</span>
+          </button>
+        </div>
+      </div>
+
       {/* Content Section */}
       <div
-        className={`transition-all duration-300 mr-4 ${
-          isOpen ? "ml-72" : "ml-28"
+        className={`transition-all duration-300 mx-4 ${
+          isOpen ? "lg:ml-72" : "lg:ml-28"
         } w-full`}
       >
         {activeContent === "content1" && <MainDashboard />}

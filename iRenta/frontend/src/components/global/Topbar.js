@@ -122,17 +122,34 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
+            
+            {/* Like Button */}
+            <div className="relative group">
+              <button
+                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-red-500 hover:text-red-600 flex justify-center items-center"
+                onClick={() => navigate("/liked-listing")}
+              >
+                <AiFillHeart className="text-lg" />
+              </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Liked Listings
+              </h5>
+            </div>
+
             {/* Chat Dropdown */}
             <ChatDropdown />
 
             {/* Notification Button */}
-            <div className="relative" ref={notifRef}>
+            <div className="relative group" ref={notifRef}>
               <button
                 onClick={handleNotifToggle}
                 className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
               >
                 <FaBell className="text-lg" />
               </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Notification
+              </h5>
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
                   <ul className="py-2">
@@ -150,7 +167,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
             </div>
 
             {/* Profile Button */}
-            <div className="relative" ref={profileRef}>
+            <div className="relative group" ref={profileRef}>
               <button
                 onClick={handleProfileToggle}
                 className="flex items-center gap-2 rounded-full hover:ring-blue-500 hover:ring-4 transition-all"
@@ -170,6 +187,9 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                   )}
                 </div>
               </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Your Profile
+              </h5>
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
                   {user ? (
@@ -205,17 +225,6 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         </li>
                       )}
                       {/* Liked Button */}
-                      <li className="flex w-full justify-center hover:bg-gray-100">
-                        <button
-                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
-                          onClick={() => navigate("/liked-listing")}
-                        >
-                          <AiFillHeart size={20} className="text-red-500" />
-                          <h3 className="text-sm font-semibold text-gray-900 px-4">
-                            Liked
-                          </h3>
-                        </button>
-                      </li>
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button

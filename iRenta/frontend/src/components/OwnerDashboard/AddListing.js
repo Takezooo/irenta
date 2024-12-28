@@ -284,6 +284,36 @@ const AddListing = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">Amenities & Inclusions</label>
+                <div className="space-y-2 bg-white border border-gray-300 p-2 rounded-lg">
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">Fully Furnished</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">Semi Furnished</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">Aircon</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">WiFi / Internet</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">Electricity Bill</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <span className="text-gray-700">Water Bill</span>
+                  </label>
+                </div>
+              </div>
+
               {/* Property Square Feet */}
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">

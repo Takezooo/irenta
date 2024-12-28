@@ -8,6 +8,7 @@ const ContractHub = () => {
   const [view, setView] = useState("ContractHub"); // State to toggle between views
   const [contracts, setContracts] = useState([]); // State to store fetched contracts
   const [selectedContractId, setSelectedContractId] = useState(null); // Track the contract being edited or viewed
+  const [status, setStatus] = useState("Pending"); // Default status
 
   const handleDownload = (contractId) => {
     if (!contractId) {
@@ -32,6 +33,26 @@ const ContractHub = () => {
     getContracts();
   }, []); // Run once on component mount
 
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value); // Update the selected status
+  };
+
+  // Determine the text color based on the selected status
+  const getTextColor = () => {
+    switch (status) {
+      case "Pending":
+        return "text-orange-500";
+      case "Active":
+        return "text-blue-500";
+      case "Terminated":
+        return "text-red-500";
+      case "Completed":
+        return "text-green-500";
+      default:
+        return "text-gray-500";
+    }
+  };
+
   return (
     <div className="mt-16 flex-grow p-6 pb-4">
       {view === "ContractHub" ? (
@@ -53,32 +74,32 @@ const ContractHub = () => {
             <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
               <thead className="bg-gray-100 rounded-lg">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Property Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Tenant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Landlord
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Rent Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     Actions
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
                     File
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {contracts.map((contract) => (
-                  <tr key={contract?._id} className="border-b">
+                  <tr key={contract?._id} className="text-center border-b">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {contract?.property.name}
                     </td>
@@ -93,13 +114,14 @@ const ContractHub = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       <select
-                        className="border border-gray-300 rounded px-2 py-1 text-sm font-semibold"
-                        value={contract.status}
+                        className={`mt-1 border border-gray-300 rounded px-2 py-1 text-sm font-medium ${getTextColor()}`}
+                        value={status}
+                        onChange={handleStatusChange}
                       >
                         <option className="text-orange-500" value="Pending">Pending</option>
                         <option className="text-blue-500" value="Active">Active</option>
-                        <option className="text-red-500" value="Expired">Terminated</option>
-                        <option className="text-green-500" value="Expired">Completed</option>
+                        <option className="text-red-500" value="Terminated">Terminated</option>
+                        <option className="text-green-500" value="Completed">Completed</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">

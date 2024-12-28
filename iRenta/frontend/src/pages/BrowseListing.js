@@ -88,7 +88,7 @@ const BrowseListing = () => {
         <div className="flex-grow flex pt-[70px] h-screen">
           {/* Listings Section */}
           <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 ">
               {currentListings.map((listing) => (
                 <div
                   key={listing._id}
@@ -97,9 +97,7 @@ const BrowseListing = () => {
                   {/* Image Section */}
                   <div className="relative flex-shrink-0 h-2/3">
                     <img
-                      src={
-                        listing.imageUrl || "https://via.placeholder.com/300"
-                      }
+                      src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
                       alt={listing.title}
                       onClick={() => handleViewProperty(listing)}
                       className="w-full h-full object-cover"

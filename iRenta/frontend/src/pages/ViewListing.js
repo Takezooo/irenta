@@ -122,27 +122,28 @@ export const ViewListing = () => {
         </button>
 
         {/* Image Gallery and Title Section */}
-        <div className="flex flex-col items-center gap-8">
-          <div className="bg-white rounded-lg shadow-md p-6 border w-full lg:w-3/4">
-            <div className="flex flex-col xl:flex-row gap-6">
-              {/* Image Gallery */}
-              <div className="w-full xl:w-1/2">
-                <div className="relative">
-                  <div className="h-60 sm:h-80 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
-                    <span className="text-gray-500">Main Image</span>
-                  </div>
-                  {/* Thumbnail Images */}
-                  <div className="flex justify-between space-x-2 overflow-x-auto">
-                    <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                    <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                    <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                    <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                  </div>
-                </div>
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-full lg:w-3/4">
+            <div className="relative flex flex-col lg:flex-row h-auto lg:h-96 gap-4">
+              {/* Main Image */}
+              <div className="w-full lg:w-1/2 h-64 lg:h-full bg-gray-200 rounded-lg shadow-md flex items-center justify-center">
+                <span className="text-gray-500">Main Image</span>
               </div>
+              {/* Thumbnail Images */}
+              <div className="grid grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-1/2 h-auto lg:h-full">
+                <div className="h-24 lg:h-full bg-gray-300 rounded-md"></div>
+                <div className="h-24 lg:h-full bg-gray-300 rounded-md"></div>
+                <div className="h-24 lg:h-full bg-gray-300 rounded-md"></div>
+                <div className="h-24 lg:h-full bg-gray-300 rounded-md"></div>
+              </div>
+            </div>
+          </div>
 
+          <div className="flex flex-col lg:flex-row gap-6 bg-gray-100 w-full lg:w-3/4">
+            {/* Pinned Location Section */}
+            <div className="w-full lg:w-2/3 bg-white rounded-lg shadow-md p-4">
               {/* Details Section */}
-              <div className="w-full xl:w-1/2 flex flex-col">
+              <div className="w-full flex flex-col">
                 <div className="border-b pb-4 mb-4">
                   <h2 className="text-xl sm:text-2xl font-bold text-blue-600">
                     {selectedProperty?.title}
@@ -221,21 +222,6 @@ export const ViewListing = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row gap-6 bg-gray-100 w-full lg:w-3/4">
-            {/* Pinned Location Section */}
-            <div className="w-full lg:w-2/3 bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
-              <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
-                <iframe
-                  className="w-full h-full border-none"
-                  src={`https://maps.google.com/maps?q=${location}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                  allowFullScreen
-                  title="Pinned Location Map"
-                ></iframe>
-              </div>
-            </div>
 
             {/* Details Section */}
             <div className="w-full lg:w-1/3 flex flex-col gap-6">
@@ -253,7 +239,7 @@ export const ViewListing = () => {
               </div>
 
               {/* Property Owner Messaging Section */}
-              <div className="sm:block bg-white rounded-lg shadow-md border p-6 h-full">
+              <div className="sm:block bg-white rounded-lg shadow-md border p-6 h-fit">
                 {/* Hide on smaller screens (less than sm) */}
                 <div className="flex flex-col items-center">
                   {/* Profile Picture */}
@@ -289,6 +275,19 @@ export const ViewListing = () => {
               </div>
             </div>
           </div>
+
+          <div className="w-full lg:w-3/4 bg-white rounded-lg shadow-md p-4">
+            <h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
+            <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
+              <iframe
+                className="w-full h-full border-none"
+                src={`https://maps.google.com/maps?q=${location}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                allowFullScreen
+                title="Pinned Location Map"
+              ></iframe>
+            </div>
+          </div>
+          {/*  */}
 
           {/* Reviews Section */}
           <div className="w-full lg:w-3/4 bg-white rounded-lg shadow-md p-4">

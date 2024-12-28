@@ -208,7 +208,7 @@ const Sidebar = ({ isOpen }) => {
               isActive("content5") ? "text-blue-900" : ""
             }`}
           >
-            <FaFileContract size={24} />
+            <FaFileContract size={24} /> 
             <span className="text-xs">Contracts</span>
           </button>
         </div>

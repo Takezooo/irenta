@@ -216,7 +216,7 @@ const Sidebar = ({ isOpen }) => {
 
       {/* Content Section */}
       <div
-        className={`transition-all duration-300 mx-4 ${
+        className={`transition-all duration-300 mx-4 mt-16 lg:mt-0 ${
           isOpen ? "lg:ml-72" : "lg:ml-28"
         } w-full`}
       >

@@ -12,8 +12,8 @@ import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle, FaBell, FaBuilding } from "react-icons/fa";
-import { AiFillHeart } from "react-icons/ai";
+import { FaPowerOff, FaUserCircle, FaBell, FaBuilding, FaSearch } from "react-icons/fa";
+import { AiFillHeart, AiFillHome } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
   const [notifications, setNotifications] = useState([]);
@@ -99,13 +99,13 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
   return (
     <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200 shadow">
-      <div className="px-6 py-3 lg:px-10 lg:pl-3">
-        <div className="flex items-center justify-between">
+      <div className="">
+        <div className="hidden lg:flex items-center justify-between px-6 py-3 lg:px-10 lg:pl-3">
           {/* Sidebar Toggle and Logo */}
           <div className="flex items-center justify-start">
             {isOwnerDashboard && (
               <button
-                className="text-gray-900 rounded-lg hover:bg-gray-300 group"
+                className="text-gray-900 rounded-lg hover:bg-gray-200 group"
                 onClick={toggleSidebar}
               >
                 {isOpen ? (
@@ -132,7 +132,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
             <div className="w-full max-w-xs">
               <input
                 type="text"
-                className="w-full bg-white border border-gray-300 rounded-md py-2 px-4 shadow-sm text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white border border-gray-300 rounded-full py-2 px-4 shadow-sm text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Search..."
               />
             </div>
@@ -154,7 +154,9 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
             </div>
 
             {/* Chat Dropdown */}
-            <ChatDropdown />
+            <div  className="relative">
+              <ChatDropdown />
+            </div>
 
             {/* Notification Button */}
             <div className="relative group" ref={notifRef}>
@@ -297,9 +299,225 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
             </div>
           </div>
         </div>
+
+        {/* Mobile Topbar Navigation */}
+        <div className="lg:hidden grid grid-rows-2">
+          <div className="flex items-center justify-between w-full px-4 bg-white shadow-md z-50">
+            {/* Sidebar Toggle and Logo */}
+            <div className="flex items-center justify-start">
+              {isOwnerDashboard && (
+                <button
+                  className="text-gray-900 rounded-lg hover:bg-gray-200 group"
+                  onClick={toggleSidebar}
+                >
+                  {isOpen ? (
+                    <CgSidebarOpen className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                  ) : (
+                    <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                  )}
+                </button>
+              )}
+              <Link to="/" className="flex flex-shrink-0 ms-2">
+                <img
+                  src="../assets/images/iRenta.png"
+                  className="h-8 w-auto me-3"
+                  alt="iRenta Logo"
+                />
+              </Link>
+              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
+                iRenta
+              </span>
+            </div>
+
+            {/* Search Bar */}
+            <div className="w-full flex justify-end">
+              <div className="max-w-xs">
+                <button
+                  className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
+                >
+                  <FaSearch className="text-2xl" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Nav bar */}
+          <div className="grid grid-cols-5 w-full bg-white shadow-md z-50">
+            {/* Home Button */}
+            <div className="w-full group mx-auto">
+              <button
+                className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
+                onClick={() => navigate("/")}
+              >
+                <AiFillHome className="text-3xl" />
+              </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Home
+              </h5>
+            </div>
+
+            {/* Like Button */}
+            <div className="w-full group mx-auto">
+              <button
+                className="h-full w-full py-4 hover:bg-gray-200 text-red-500 hover:text-red-600 flex justify-center items-center"
+                onClick={() => navigate("/liked-listing")}
+              >
+                <AiFillHeart className="text-3xl" />
+              </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Liked Listings
+              </h5>
+            </div>
+
+            {/* Chat Dropdown */}
+            <div className="w-full group mx-auto">
+              <ChatDropdown />
+            </div>
+
+            {/* Notification Button */}
+            <div className="w-full group mx-auto" ref={notifRef}>
+              <button
+                onClick={handleNotifToggle}
+                className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
+              >
+                <FaBell className="text-3xl" />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount}</span>
+                )}
+              </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Notification
+              </h5>
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
+                  <ul className="py-2">
+                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                      <Link
+                        to="/view-contract"
+                        className="block w-full text-left"
+                      >
+                        View Contract
+                      </Link>
+                    </li>
+                  </ul>
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      {notification.message}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Profile Button */}
+            <div className="group w-full mx-auto" ref={profileRef}>
+              <button
+                onClick={handleProfileToggle}
+                className="flex items-center h-full w-full gap-2 rounded-full transition-all"
+              >
+                <div className="h-full w-full flex items-center justify-center overflow-hidden">
+                  {user ? (
+                    <img
+                      src={
+                        userProfile?.info?.profile.link ||
+                        "https://via.placeholder.com/150"
+                      }
+                      alt="Profile"
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <FaUserCircle className="h-full w-full text-blue-500 text-xl" />
+                  )}
+                </div>
+              </button>
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+                Your Profile
+              </h5>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
+                  {user ? (
+                    // Logged-in Dropdown
+                    <ul className="py-2">
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={
+                              userProfile?.info?.profile.link ||
+                              "https://via.placeholder.com/150"
+                            }
+                            alt="Profile"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          {userProfile?.info?.firstName}
+                        </h3>
+                      </li>
+                      <hr className="my-2"></hr>
+                      {user.userType === "Owner" && (
+                        <li className="flex w-full justify-center hover:bg-gray-100">
+                          <button
+                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                            onClick={handleManageListings}
+                          >
+                            <FaBuilding className="h-5 w-5" />
+                            <h3 className="text-sm font-semibold text-gray-900 px-4">
+                              Manage Listings
+                            </h3>
+                          </button>
+                        </li>
+                      )}
+                      {/* Liked Button */}
+                      <hr className="my-2"></hr>
+                      <li className="flex w-full justify-center">
+                        <button
+                          onClick={logout}
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                        >
+                          <FaPowerOff className="h-5 w-5" />
+                          <h3 className="text-sm font-semibold text-gray-100 px-4">
+                            Log out
+                          </h3>
+                        </button>
+                      </li>
+                    </ul>
+                  ) : (
+                    // Logged-out Dropdown
+                    <ul className="py-4">
+                      <li className="flex w-full justify-center">
+                        <Link
+                          to="/login"
+                          className="flex items-center w-fit px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                        >
+                          <FaPowerOff className="h-5 w-5" />
+                          <span className="text-sm font-semibold text-gray-100 px-4">
+                            Log in
+                          </span>
+                        </Link>
+                      </li>
+                      <li className="flex w-full justify-center">
+                        <Link
+                          to="/register"
+                          className="flex items-center w-fit px-4 py-3 text-sm text-gray-100 group "
+                        >
+                          <span className="text-sm font-semibold text-gray-500 px-4 group-hover:text-gray-900">
+                            Register
+                          </span>
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </nav>
   );
-};
+};                                                                                                                                           
 
 export default Topbar;

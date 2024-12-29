@@ -1,19 +1,25 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const ocularSchema = new mongoose.Schema({
   propertyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Property',
+    ref: "Listing",
     required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
+    required: true,
+  },
+  remarks: {
+    type: String,
+    enum: ["Approved", "Declined", "Pending"],
+    default: "Pending",
     required: true,
   },
   date: { type: Date, required: true },
-  time: { type: String, required: true }, // Use `String` for time in "HH:mm" format 
-  createdAt: { type: Date, default: Date.now }
+  time: { type: String, required: true }, // Use `String` for time in "HH:mm" format
+  createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model('Ocular', ocularSchema);
+export default mongoose.model("Ocular", ocularSchema);

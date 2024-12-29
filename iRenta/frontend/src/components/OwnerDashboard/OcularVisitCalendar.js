@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
-import { fetchReservedDatesByOwner  } from "../../global/api/Ocular.js";
+import { fetchReservedDatesByOwner } from "../../global/api/Ocular.js";
 import { GetToken } from "../../global/utils/Token.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -27,26 +27,39 @@ export const OcularVisitCalendar = () => {
     const loadReservedDates = async () => {
       try {
         const data = await fetchReservedDatesByOwner(authToken);
-        setEvents(
-          data.map((visit) => ({
-            title: `Visit - ${visit.propertyId}`, // You can enhance this with property details
-            start: new Date(`${visit.date}T${visit.time}`),
-            end: new Date(`${visit.date}T${visit.time}`),
-            propertyId: visit.propertyId, // Include property details for event selection
-            seekerName: visit.seekerName,
-            contactInfo: visit.contactInfo,
-            remarks: visit.remarks,
-          }))
-        );
-        console.log(events);
+
+        // Map the fetched data to the format required by the Calendar component
+        const mappedEvents = data.map((visit) => {
+          const visitDate = new Date(visit.date);
+          const [hours, minutes] = visit.time.split(":");
+          visitDate.setHours(hours, minutes);
+
+          return {
+            title: `Visit - ${visit.propertyId?.title || "Unknown Property"}`,
+            start: new Date(visitDate),
+            end: new Date(visitDate.getTime() + 60 * 60 * 1000), // 1-hour event
+            propertyId: visit.propertyId._id,
+            propertyName: visit.propertyId.title,
+            seekerName: `${visit.userId.info.firstName} ${visit.userId.info.lastName}`,
+            contactInfo: visit.userId.info.phoneNumber,
+            remarks: `Email: ${visit.userId.credentials.email}`, // Add email or any additional info
+          };
+        });
+
+        setEvents(mappedEvents);
+        console.log("Mapped Events:", mappedEvents);
       } catch (err) {
-        console.error("Failed to fetch reserved dates:", err.response?.data?.message || err.message);
+        console.error(
+          "Failed to fetch reserved dates:",
+          err.response?.data?.message || err.message
+        );
       }
     };
 
     loadReservedDates();
   }, [authToken]);
 
+  // Handle selecting an event
   const handleSelectEvent = (event) => {
     alert(`
       Property Name: ${event.propertyName}
@@ -57,16 +70,6 @@ export const OcularVisitCalendar = () => {
     `);
   };
 
-  useEffect(() => {
-    events.forEach((event, index) => {
-      console.log(`Event ${index}:`, {
-        title: event.title,
-        start: event.start,
-        end: event.end,
-      });
-    });
-  }, [events]);
-  
   return (
     <div className="pt-20 pb-4">
       <div className="p-4 w-full h-full bg-gray-100 rounded-md shadow overflow-hidden">

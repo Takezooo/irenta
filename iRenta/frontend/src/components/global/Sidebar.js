@@ -18,11 +18,9 @@ import ContractHub from "../OwnerDashboard/ContractHub/ContractHub.js";
 
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
-const Sidebar = ({ isOpen }) => {
-  const [activeContent, setActiveContent] = useState("content1"); // Default to Main Dashboard
+const Sidebar = ({ isOpen, activeContent, setActiveContent }) => {
 
   const location = useLocation();
-  const { logout, user } = useContext(AuthContext);
 
   const isActive = (content) => activeContent === content;
 
@@ -47,172 +45,98 @@ const Sidebar = ({ isOpen }) => {
               isOpen ? "w-full" : "w-20"
             } flex flex-col items-center space-y-2 font-medium`}
           >
-            {user?.userType === "Owner" && (
-              <>
-                <button
-                  onClick={() => setActiveContent("content1")}
-                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
-                    isActive("content1") ? "bg-gray-300" : ""
-                  }`}
-                >
-                  <IoHome
-                    className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
-                      isOpen ? "" : "mx-auto"
-                    }`}
-                  />
-                  {isOpen && (
-                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                      Main Dashboard
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setActiveContent("content2")}
-                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
-                    isActive("content2") ? "bg-gray-300" : ""
-                  }`}
-                >
-                  <TbLayoutListFilled
-                    className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
-                      isOpen ? "" : "mx-auto"
-                    }`}
-                  />
-                  {isOpen && (
-                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                      Manage Listings
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setActiveContent("content3")}
-                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
-                    isActive("content3") ? "bg-gray-300" : ""
-                  }`}
-                >
-                  <FaPeopleRoof
-                    className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
-                      isOpen ? "" : "mx-auto"
-                    }`}
-                  />
-                  {isOpen && (
-                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                      Manage Tenants
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setActiveContent("content4")}
-                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
-                    isActive("content4") ? "bg-gray-300" : ""
-                  }`}
-                >
-                  <FaCalendar
-                    className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
-                      isOpen ? "" : "mx-auto"
-                    }`}
-                  />
-                  {isOpen && (
-                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                      Calendar
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setActiveContent("content5")}
-                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
-                    isActive("content5") ? "bg-gray-300" : ""
-                  }`}
-                >
-                  <FaFileContract
-                    className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
-                      isOpen ? "" : "mx-auto"
-                    }`}
-                  />
-                  {isOpen && (
-                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                      ContractHub
-                    </span>
-                  )}
-                </button>
-              </>
-            )}
-          </div>
-
-          <div className={`${isOpen ? "w-full" : "w-20"} flex flex-col items-center`}>
-            <hr className="w-full my-2" />
             <button
-              onClick={logout}
-              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group`}
+              onClick={() => setActiveContent("content1")}
+              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
+                isActive("content1") ? "bg-gray-300" : ""
+              }`}
             >
-              <FaPowerOff
+              <IoHome
                 className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
                   isOpen ? "" : "mx-auto"
                 }`}
               />
               {isOpen && (
                 <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
-                  Sign Out
+                  Main Dashboard
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveContent("content2")}
+              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
+                isActive("content2") ? "bg-gray-300" : ""
+              }`}
+            >
+              <TbLayoutListFilled
+                className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
+                  isOpen ? "" : "mx-auto"
+                }`}
+              />
+              {isOpen && (
+                <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
+                  Manage Listings
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveContent("content3")}
+              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
+                isActive("content3") ? "bg-gray-300" : ""
+              }`}
+            >
+              <FaPeopleRoof
+                className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
+                  isOpen ? "" : "mx-auto"
+                }`}
+              />
+              {isOpen && (
+                <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
+                  Manage Tenants
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveContent("content4")}
+              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
+                isActive("content4") ? "bg-gray-300" : ""
+              }`}
+            >
+              <FaCalendar
+                className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
+                  isOpen ? "" : "mx-auto"
+                }`}
+              />
+              {isOpen && (
+                <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
+                  Calendar
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveContent("content5")}
+              className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 group ${
+                isActive("content5") ? "bg-gray-300" : ""
+              }`}
+            >
+              <FaFileContract
+                className={`text-xl text-blue-700 transition duration-75 group-hover:text-gray-900 ${
+                  isOpen ? "" : "mx-auto"
+                }`}
+              />
+              {isOpen && (
+                <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black ms-3 whitespace-nowrap">
+                  ContractHub
                 </span>
               )}
             </button>
           </div>
         </div>
       </aside>
-
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white shadow-md z-50">
-        <div className="flex justify-around py-3">
-          <button
-            onClick={() => setActiveContent("content1")}
-            className={`flex flex-col items-center text-blue-500 ${
-              isActive("content1") ? "text-blue-900" : ""
-            }`}
-          >
-            <IoHome size={24} />
-            <span className="text-xs">Dashboard</span>
-          </button>
-          <button
-            onClick={() => setActiveContent("content2")}
-            className={`flex flex-col items-center text-blue-500 ${
-              isActive("content2") ? "text-blue-900" : ""
-            }`}
-          >
-            <TbLayoutListFilled size={24} />
-            <span className="text-xs">Listings</span>
-          </button>
-          <button
-            onClick={() => setActiveContent("content3")}
-            className={`flex flex-col items-center text-blue-500 ${
-              isActive("content3") ? "text-blue-900" : ""
-            }`}
-          >
-            <FaPeopleRoof size={24} />
-            <span className="text-xs">Tenants</span>
-          </button>
-          <button
-            onClick={() => setActiveContent("content4")}
-            className={`flex flex-col items-center text-blue-500 ${
-              isActive("content4") ? "text-blue-900" : ""
-            }`}
-          >
-            <FaCalendar size={24} />
-            <span className="text-xs">Calendar</span>
-          </button>
-          <button
-            onClick={() => setActiveContent("content5")}
-            className={`flex flex-col items-center text-blue-500 ${
-              isActive("content5") ? "text-blue-900" : ""
-            }`}
-          >
-            <FaFileContract size={24} /> 
-            <span className="text-xs">Contracts</span>
-          </button>
-        </div>
-      </div>
 
       {/* Content Section */}
       <div

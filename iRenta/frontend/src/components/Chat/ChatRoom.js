@@ -28,8 +28,10 @@ const ChatRoom = ({ chatId, userId }) => {
     });
 
     if (chatId) {
-      newSocket.emit("joinRoom", { chatId });
-      console.log(`Joining room: ${chatId}`);
+      newSocket.on("connect", () => {
+        console.log("Socket connected. Joining room...");
+        newSocket.emit("joinRoom", { chatId });
+      });
     }
 
     setSocket(newSocket);

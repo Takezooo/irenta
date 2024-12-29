@@ -14,7 +14,7 @@ import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
 import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
 import EditListing from "./components/OwnerDashboard/EditListing.js";
-import LikedListing from "./components/Listing/LikedListing.js";
+import LikedListing from "./pages/LikedListing.js";
 
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";

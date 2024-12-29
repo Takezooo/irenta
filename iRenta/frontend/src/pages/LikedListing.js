@@ -2,13 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { FaChevronLeft } from "react-icons/fa"; // Import back arrow icon
-import { Footer } from "../global/Footer";
-import Topbar from "../global/Topbar";
+import { Footer } from "../components/global/Footer";
+import Topbar from "../components/global/Topbar";
 
-import { GetToken } from "../../global/utils/Token";
-import { AuthContext } from "../../global/contexts/AuthContext";
-import { fetchUserData, toggleLike } from "../../api/Users";
-import { fetchSpecificList } from "../../api/Listings";
+import { GetToken } from "../global/utils/Token";
+import { AuthContext } from "../global/contexts/AuthContext";
+import { useProperty } from "../global/contexts/PropertyContext";
+import { fetchUserData, toggleLike } from "../api/Users";
+import { fetchSpecificList } from "../api/Listings";
 
 const LikedListing = () => {
   const { user } = useContext(AuthContext); // Access logged-in user
@@ -16,6 +17,7 @@ const LikedListing = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const likedIds = likedListings.map((liked) => liked._id);
+  const { setSelectedProperty } = useProperty();
   const navigate = useNavigate();
   const authToken = GetToken();
 
@@ -64,6 +66,11 @@ const LikedListing = () => {
     }
   };
 
+  const handleViewProperty = (listings) => {
+    setSelectedProperty(listings);
+    navigate(`/${listings._id}`);
+  };
+
   const openMapFullScreen = () => {
     setIsMapFullScreen(true);
   };
@@ -109,6 +116,7 @@ const LikedListing = () => {
                         } // Default image if not available
                         alt={listing?.title}
                         className="w-full h-full object-cover"
+                        onClick={() => handleViewProperty(listing)}
                       />
                       <button
                         onClick={() => handleLikeToggle(listing._id)}
@@ -123,7 +131,10 @@ const LikedListing = () => {
                     </div>
 
                     {/* Details Section */}
-                    <div className="p-4 flex-grow flex flex-col justify-between">
+                    <div
+                      className="p-4 flex-grow flex flex-col justify-between"
+                      onClick={() => handleViewProperty(listing)}
+                    >
                       <h3 className="text-lg font-semibold truncate">
                         {listing?.title}
                       </h3>

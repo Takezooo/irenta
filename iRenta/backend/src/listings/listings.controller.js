@@ -20,21 +20,23 @@ export const GetAllListings = async (req, res) => {
 
 export const GetListingById = async (req, res) => {
   try {
-    const listingId = req.params.listingId; // Get the listing ID from URL params
+    const listingId = req.params.id; // Get the listing ID from URL params
 
-    // Fetch the specific listing by ID
+    console.log("Fetching listing with ID:", listingId); // Debug log
+
     const listing = await Listing.findById(listingId);
 
     if (!listing) {
-      return res.status(404).json({ message: 'Listing not found' });
+      console.error("Listing not found:", listingId); // Log missing ID
+      return res.status(404).json({ message: "Listing not found" });
     }
 
     res.status(200).json(listing);
   } catch (err) {
+    console.error("Error fetching listing:", err.message); // Log error
     res.status(400).json({ message: err.message });
   }
 };
-
 export const DisplayListings = async (req, res) => {
   try {
     // Fetch all listings (no authentication required)

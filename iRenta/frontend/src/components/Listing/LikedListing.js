@@ -1,37 +1,68 @@
-import React, { useState } from "react";
-import { AiFillHeart } from "react-icons/ai";
-import { FaChevronLeft  } from "react-icons/fa"; // Import back arrow icon
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { FaChevronLeft } from "react-icons/fa"; // Import back arrow icon
 import { Footer } from "../global/Footer";
 import Topbar from "../global/Topbar";
 
-const LikedListing = () => {
-  const [likedListings] = useState([
-    {
-      _id: "1",
-      title: "Modern Apartment in City Center",
-      description: "A cozy apartment with stunning city views.",
-      price: "$150 / night",
-      imageUrl: "https://via.placeholder.com/300",
-    },
-    {
-      _id: "2",
-      title: "Luxury Villa with Private Pool",
-      description: "Enjoy your stay in a luxurious villa with a private pool.",
-      price: "$500 / night",
-      imageUrl: "https://via.placeholder.com/300",
-    },
-    {
-      _id: "3",
-      title: "Charming Cottage in the Countryside",
-      description: "Escape to a peaceful countryside retreat in this cottage.",
-      price: "$200 / night",
-      imageUrl: "https://via.placeholder.com/300",
-    },
-  ]);
+import { GetToken } from "../../global/utils/Token";
+import { AuthContext } from "../../global/contexts/AuthContext";
+import { fetchUserData, toggleLike } from "../../api/Users";
+import { fetchSpecificList } from "../../api/Listings";
 
+const LikedListing = () => {
+  const { user } = useContext(AuthContext); // Access logged-in user
+  const [likedListings, setLikedListings] = useState([]); // State to store liked listings
+  const [isLoading, setIsLoading] = useState(true);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
+  const likedIds = likedListings.map((liked) => liked._id);
   const navigate = useNavigate();
+  const authToken = GetToken();
+
+  useEffect(() => {
+    const fetchLikedListings = async () => {
+      if (!user || !authToken) return;
+      try {
+        const userData = await fetchUserData(user.id, authToken);
+        const likedIds = userData?.likedListings || [];
+
+        // Use Promise.all to fetch all liked listings
+        const likedDetails = await Promise.all(
+          likedIds.map((id) => fetchSpecificList(id))
+        );
+
+        // Filter out null or undefined listings
+        const validListings = likedDetails.filter(
+          (listing) => listing !== null
+        );
+        setLikedListings(validListings);
+        console.log(likedListings);
+      } catch (error) {
+        console.error("Error fetching liked listings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLikedListings();
+    console.log(likedListings);
+  }, [user, authToken]);
+
+  const handleLikeToggle = async (listingId) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    try {
+      const updatedLikes = await toggleLike(listingId);
+      const filteredListings = likedListings.filter(
+        (listing) => listing._id !== listingId
+      ); // Remove unliked listing
+      setLikedListings(filteredListings);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
 
   const openMapFullScreen = () => {
     setIsMapFullScreen(true);
@@ -49,24 +80,21 @@ const LikedListing = () => {
     <div className="flex flex-col min-h-screen">
       <Topbar />
 
-      {/* Back Button */}
-      <div className="">
-        
-      </div>
-
       {/* Main Content */}
       {!isMapFullScreen && (
         <div className="flex-grow flex pt-[70px] h-screen">
           {/* Listings Section */}
           <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
             <button
-            onClick={handleBackClick}
-            className="flex items-center gap-2 p-2 text-gray-500 hover:text-gray-900"
+              onClick={handleBackClick}
+              className="flex items-center gap-2 p-2 text-gray-500 hover:text-gray-900"
             >
-                <FaChevronLeft className="text-lg" />
+              <FaChevronLeft className="text-lg" />
             </button>
             <h1 className="text-2xl font-bold mb-2 p-4">Your Liked Listings</h1>
-            {likedListings.length > 0 ? (
+            {isLoading ? (
+              <p className="text-center text-gray-500">Loading...</p>
+            ) : likedListings.length > 0 ? (
               <div className="flex flex-wrap gap-4 justify-center">
                 {likedListings.map((listing) => (
                   <div
@@ -76,30 +104,43 @@ const LikedListing = () => {
                     {/* Image Section */}
                     <div className="relative flex-shrink-0 h-2/3">
                       <img
-                        src={listing.imageUrl}
-                        alt={listing.title}
+                        src={
+                          listing.images?.[0]?.link || "/placeholder-image.jpg"
+                        } // Default image if not available
+                        alt={listing?.title}
                         className="w-full h-full object-cover"
                       />
-                      <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-red-500">
-                        <AiFillHeart size={20} />
+                      <button
+                        onClick={() => handleLikeToggle(listing._id)}
+                        className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500"
+                      >
+                        {likedIds.includes(listing._id) ? (
+                          <AiFillHeart size={20} className="text-red-500" />
+                        ) : (
+                          <AiOutlineHeart size={20} />
+                        )}
                       </button>
                     </div>
 
                     {/* Details Section */}
                     <div className="p-4 flex-grow flex flex-col justify-between">
                       <h3 className="text-lg font-semibold truncate">
-                        {listing.title}
+                        {listing?.title}
                       </h3>
                       <p className="text-gray-500 text-sm line-clamp-2">
-                        {listing.description}
+                        {listing?.description}
                       </p>
-                      <p className="text-gray-700 font-bold mt-2">{listing.price}</p>
+                      <p className="text-gray-700 font-bold mt-2">
+                        ₱{listing?.price || "N/A"}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-center text-gray-500">No liked listings found.</p>
+              <p className="text-center text-gray-500">
+                No liked listings found.
+              </p>
             )}
           </div>
 

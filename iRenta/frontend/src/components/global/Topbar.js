@@ -15,7 +15,7 @@ import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
 import { FaPowerOff, FaUserCircle, FaBell, FaBuilding } from "react-icons/fa";
 import { AiFillHeart } from "react-icons/ai";
 
-const Topbar = ({ toggleSidebar, isOpen }) => {
+const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { logout, user } = useContext(AuthContext);
@@ -75,8 +75,8 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
       setUnreadCount((prev) => prev - 1);
     }
 
-    if (notification.type === "RequestVisit" && user?.userType === "Owner") {
-      navigate("/owner-dashboard"); // Navigate to the OcularVisitCalendar
+    if (notification.type === "RequestVisit") {
+      setActiveContent("content4"); // Directly set the calendar as active content
     }
   };
 
@@ -186,6 +186,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
+                      className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer bg-gray-100"
                     >
                       {notification.message}
                     </div>

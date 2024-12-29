@@ -1,8 +1,13 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../global/contexts/AuthContext";
+import { NotificationContext } from "../../global/contexts/NotificationContext";
 import { GetToken } from "../../global/utils/Token.js";
-import { fetchUserData } from "../../api/Users.js";
+import { fetchUserData } from "../../global/api/Users.js";
+import {
+  fetchNotifications,
+  markNotificationAsViewed,
+} from "../../global/api/Notifications.js";
 import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
@@ -11,6 +16,8 @@ import { FaPowerOff, FaUserCircle, FaBell, FaBuilding } from "react-icons/fa";
 import { AiFillHeart } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen }) => {
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { logout, user } = useContext(AuthContext);
   const [notifOpen, setNotifOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -25,6 +32,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
   const storedToken = GetToken();
   const notifRef = useRef(null);
   const profileRef = useRef(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,23 +52,33 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notifRef.current &&
-        !notifRef.current.contains(event.target) &&
-        profileRef.current &&
-        !profileRef.current.contains(event.target)
-      ) {
-        setNotifOpen(false);
-        setDropdownOpen(false);
+    const getNotifications = async () => {
+      try {
+        const data = await fetchNotifications();
+        setNotifications(data);
+        setUnreadCount(data.filter((n) => !n.viewed).length);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    getNotifications();
   }, []);
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.viewed) {
+      await markNotificationAsViewed(notification._id);
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notification._id ? { ...n, viewed: true } : n
+        )
+      );
+      setUnreadCount((prev) => prev - 1);
+    }
+
+    if (notification.type === "RequestVisit" && user?.userType === "Owner") {
+      navigate("/owner-dashboard"); // Navigate to the OcularVisitCalendar
+    }
+  };
 
   const handleNotifToggle = () => {
     setNotifOpen(!notifOpen);
@@ -122,7 +140,6 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
-            
             {/* Like Button */}
             <div className="relative group">
               <button
@@ -146,6 +163,9 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                 className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
               >
                 <FaBell className="text-lg" />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount}</span>
+                )}
               </button>
               <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
                 Notification
@@ -162,6 +182,14 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                       </Link>
                     </li>
                   </ul>
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      {notification.message}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -176,7 +204,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                   {user ? (
                     <img
                       src={
-                        userProfile.info.profile.link ||
+                        userProfile?.info?.profile.link ||
                         "https://via.placeholder.com/150"
                       }
                       alt="Profile"
@@ -199,7 +227,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                           <img
                             src={
-                              userProfile.info.profile.link ||
+                              userProfile?.info?.profile.link ||
                               "https://via.placeholder.com/150"
                             }
                             alt="Profile"
@@ -207,7 +235,7 @@ const Topbar = ({ toggleSidebar, isOpen }) => {
                           />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-800">
-                          {userProfile.info.firstName}
+                          {userProfile?.info?.firstName}
                         </h3>
                       </li>
                       <hr className="my-2"></hr>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GetToken } from "../global/utils/Token.js";
+import { GetToken } from "../../global/utils/Token.js";
 
 const API_BASE_URL = "http://localhost:5000/api/contracts";
 

@@ -9,8 +9,9 @@ import { AuthContext } from "../global/contexts/AuthContext";
 import { useProperty } from "../global/contexts/PropertyContext";
 import { ChatDropdownContext } from "../global/contexts/ChatDropdownContext";
 import { GetToken } from "../global/utils/Token";
-import { getOrCreateChat } from "../api/Chats";
-import { fetchUserData, fetchOwnerData, toggleLike } from "../api/Users";
+import { getOrCreateChat } from "../global/api/Chats";
+import { scheduleOcularVisit } from "../global/api/Ocular";
+import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
 
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
@@ -96,12 +97,27 @@ export const ViewListing = () => {
     }
   };
 
-  const handleRequestVisit = () => {
-    if (user) {
-      setShowOcularPopup(true);
-    } else {
-      navigate("/login");
+  const handleRequestVisit = async (selectedDate, selectedTime) => {
+    const propertyId = selectedProperty?._id;
+
+    if (!propertyId || !selectedDate || !selectedTime) {
+      alert("Please select a date and time for the visit.");
+      return;
     }
+
+    try {
+      await scheduleOcularVisit(propertyId, selectedDate, selectedTime);
+      alert("Request visit scheduled!");
+    } catch (err) {
+      console.error(
+        "Failed to request visit:",
+        err.response?.data?.message || err.message
+      );
+    }
+  };
+
+  const handleOpenPopup = () => {
+    setShowOcularPopup(true); // Open the popup
   };
 
   const closePopup = () => {
@@ -160,7 +176,7 @@ export const ViewListing = () => {
                   <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <div className="space-x-2">
                       <button
-                        onClick={handleRequestVisit}
+                        onClick={handleOpenPopup}
                         className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
                       >
                         Request Visit
@@ -305,8 +321,9 @@ export const ViewListing = () => {
 
       {showOcularPopup && (
         <RequestOcularVisit
-          propertyDetails={selectedProperty} // Pass selected property details
+          propertyDetails={selectedProperty}
           onClose={closePopup}
+          onRequestVisit={handleRequestVisit}
         />
       )}
 

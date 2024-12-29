@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CreateContract from "./CreateContract";
 import EditContract from "./EditContract";
 import ViewContract from "./ViewContract"; // Import the ViewContract component
-import { fetchContracts, downloadPdf, updateContractStatus } from "../../../api/Contracts.js"; // Import the API function to fetch and update contracts
+import { fetchContracts, downloadPdf, updateContractStatus } from "../../../global/api/Contracts.js"; // Import the API function to fetch and update contracts
 
 const ContractHub = () => {
   const [view, setView] = useState("ContractHub"); // State to toggle between views

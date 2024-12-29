@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchContractById, updateContract } from "../../../api/Contracts.js"; // Create a function to fetch a specific contract
+import { fetchContractById, updateContract } from "../../../global/api/Contracts.js"; // Create a function to fetch a specific contract
 
 const EditContract = ({ contractId, onContractUpdated }) => {
   const [formData, setFormData] = useState(null);

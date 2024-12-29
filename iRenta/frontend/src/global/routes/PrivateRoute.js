@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext.js";
-import { refreshAccessToken } from "../../api/Auth.js";
+import { refreshAccessToken } from "../api/Auth.js";
 import { GetRefreshToken } from "../utils/Token.js";
 
 const PrivateRoute = ({ children, allowedRoles }) => {

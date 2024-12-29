@@ -10,8 +10,8 @@ import { Footer } from "../components/global/Footer.js";
 
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { useProperty } from "../global/contexts/PropertyContext";
-import { toggleLike } from "../api/Users";
-import { fetchListings } from "../api/Listings.js";
+import { toggleLike } from "../global/api/Users.js";
+import { fetchListings } from "../global/api/Listings.js";
 
 const LandingPage = () => {
   const [isOpen, setIsOpen] = useState(false);

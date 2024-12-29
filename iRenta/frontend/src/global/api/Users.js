@@ -1,6 +1,6 @@
 // for users interactions such as edit profile, etc.
 import axios from "axios";
-import { GetToken } from "../global/utils/Token";
+import { GetToken } from "../utils/Token";
 
 const API_BASE_URL = "http://localhost:5000/api/users"; // Update with your backend API endpoint
 

@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { GetToken } from "../../global/utils/Token.js";
-import { fetchUserChats } from "../../api/Chats.js";
+import { fetchUserChats } from "../../global/api/Chats.js";
 
 const ChatRoom = ({ chatId, userId }) => {
   const { user } = useContext(AuthContext); // Access the user context

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { fetchUserChats } from "../../api/Chats.js";
+import { fetchUserChats } from "../../global/api/Chats.js";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
 const UserList = ({ onSelectChat, selectedChatId }) => {

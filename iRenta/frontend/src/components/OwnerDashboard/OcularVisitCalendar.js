@@ -1,6 +1,8 @@
-import React from "react"; 
+import React, { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
+import { fetchReservedDatesByOwner  } from "../../global/api/Ocular.js";
+import { GetToken } from "../../global/utils/Token.js";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 // Localization for date-fns
@@ -17,63 +19,33 @@ const localizer = dateFnsLocalizer({
 });
 
 export const OcularVisitCalendar = () => {
-  const ocularRequests = [
-    {
-      propertyName: "Modern Apartment",
-      seekerName: "John Doe",
-      requestedDate: "2024-12-05",
-      requestedTime: "10:00 AM",
-      contactInfo: "johndoe@example.com",
-      remarks: "Looking forward to visiting the property.",
-    },
-    {
-      propertyName: "Cozy Condo",
-      seekerName: "Jane Smith",
-      requestedDate: "2024-12-10",
-      requestedTime: "2:00 PM",
-      contactInfo: "janesmith@example.com",
-      remarks: "Would like to check the nearby amenities.",
-    },
-    {
-      propertyName: "Spacious Villa",
-      seekerName: "Alice Brown",
-      requestedDate: "2024-12-20",
-      requestedTime: "1:00 PM",
-      contactInfo: "alicebrown@example.com",
-      remarks: "Interested in renting this property.",
-    },
-  ];
+  const [events, setEvents] = useState([]);
+  const authToken = GetToken();
 
-  // Transform ocular requests into calendar events
-  const events = ocularRequests.map((request) => {
-    const [year, month, day] = request.requestedDate.split("-").map(Number);
-    const [hours, minutes] = request.requestedTime
-      .split(":")
-      .map((time) => parseInt(time));
-    const isPM = request.requestedTime.includes("PM") && hours !== 12;
-
-    return {
-      title: `${request.seekerName} - ${request.propertyName}`,
-      start: new Date(
-        year,
-        month - 1,
-        day,
-        isPM ? hours + 12 : hours,
-        minutes
-      ),
-      end: new Date(
-        year,
-        month - 1,
-        day,
-        isPM ? hours + 13 : hours + 1,
-        minutes
-      ), // Assuming 1-hour events
-      propertyName: request.propertyName,
-      seekerName: request.seekerName,
-      contactInfo: request.contactInfo,
-      remarks: request.remarks,
+  // Load reserved dates from the backend
+  useEffect(() => {
+    const loadReservedDates = async () => {
+      try {
+        const data = await fetchReservedDatesByOwner(authToken);
+        setEvents(
+          data.map((visit) => ({
+            title: `Visit - ${visit.propertyId}`, // You can enhance this with property details
+            start: new Date(`${visit.date}T${visit.time}`),
+            end: new Date(`${visit.date}T${visit.time}`),
+            propertyId: visit.propertyId, // Include property details for event selection
+            seekerName: visit.seekerName,
+            contactInfo: visit.contactInfo,
+            remarks: visit.remarks,
+          }))
+        );
+        console.log(events);
+      } catch (err) {
+        console.error("Failed to fetch reserved dates:", err.response?.data?.message || err.message);
+      }
     };
-  });
+
+    loadReservedDates();
+  }, [authToken]);
 
   const handleSelectEvent = (event) => {
     alert(`
@@ -85,6 +57,16 @@ export const OcularVisitCalendar = () => {
     `);
   };
 
+  useEffect(() => {
+    events.forEach((event, index) => {
+      console.log(`Event ${index}:`, {
+        title: event.title,
+        start: event.start,
+        end: event.end,
+      });
+    });
+  }, [events]);
+  
   return (
     <div className="pt-20 pb-4">
       <div className="p-4 w-full h-full bg-gray-100 rounded-md shadow overflow-hidden">

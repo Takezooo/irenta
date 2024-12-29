@@ -1,49 +1,48 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useProperty } from "../../global/contexts/PropertyContext";
-import { GetToken } from "../../global/utils/Token";
+import { useProperty } from "../../global/contexts/PropertyContext.js";
+import { GetToken } from "../../global/utils/Token.js";
+import {
+  fetchReservedDates,
+  scheduleOcularVisit,
+} from "../../global/api/Ocular.js";
 
 const RequestOcularVisit = ({ onClose }) => {
   const { selectedProperty } = useProperty();
   const [reservedDates, setReservedDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Fetch reserved dates from the backend
   useEffect(() => {
-    const fetchReservedDates = async () => {
-      if (!selectedProperty || !selectedProperty._id) return;
+    const loadReservedDates = async () => {
+      if (!selectedProperty || !selectedProperty._id) {
+        console.error("Property ID is missing or invalid.");
+        return;
+      }
 
-      const authToken = GetToken();
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/ocular/reserved-dates/${selectedProperty._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const dates = await response.json();
-          setReservedDates(dates); // Save reserved dates
-        } else {
-          console.error("Failed to fetch reserved dates:", await response.text());
-        }
+        const dates = await fetchReservedDates(selectedProperty._id);
+        setReservedDates(dates); // Save reserved dates
       } catch (err) {
-        console.error("Error fetching reserved dates:", err.message);
+        console.error(
+          "Failed to fetch reserved dates:",
+          err.response?.data?.message || err.message
+        );
       }
     };
 
-    fetchReservedDates();
+    loadReservedDates();
   }, [selectedProperty]);
 
   // Check if selected time is within the available range
   const isTimeWithinAvailability = (time) => {
-    const [startHour, startMinute] = selectedProperty.visitAvailability.startTime.split(":");
-    const [endHour, endMinute] = selectedProperty.visitAvailability.endTime.split(":");
+    const [startHour, startMinute] =
+      selectedProperty.visitAvailability.startTime.split(":");
+    const [endHour, endMinute] =
+      selectedProperty.visitAvailability.endTime.split(":");
     const [selectedHour, selectedMinute] = time.split(":");
 
     const start = new Date();
@@ -66,7 +65,7 @@ const RequestOcularVisit = ({ onClose }) => {
     }
   };
 
-  // Submit the ocular visit schedule to the backend
+  // Submit the ocular visit schedule using the API utility
   const handleSubmit = async () => {
     if (!selectedDate) {
       alert("Please select a date.");
@@ -78,37 +77,28 @@ const RequestOcularVisit = ({ onClose }) => {
       return;
     }
 
-    const authToken = GetToken();
     try {
-      const response = await fetch("http://localhost:5000/api/ocular/schedule", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          propertyId: selectedProperty._id,
-          date: selectedDate,
-          time: selectedTime,
-        }),
-      });
-
-      if (response.ok) {
-        alert("Ocular visit scheduled successfully!");
-        onClose();
-      } else {
-        const error = await response.json();
-        alert(`Failed to schedule ocular visit: ${error.message}`);
-      }
+      await scheduleOcularVisit(
+        selectedProperty._id,
+        selectedDate,
+        selectedTime
+      );
+      alert("Ocular visit scheduled successfully!");
+      onClose();
     } catch (err) {
-      alert(`An error occurred: ${err.message}`);
+      alert(
+        `Failed to schedule ocular visit: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
 
   // Disable tiles in the calendar for already reserved dates
   const isDateDisabled = ({ date }) => {
     return reservedDates.some(
-      (reserved) => new Date(reserved.date).toDateString() === date.toDateString()
+      (reserved) =>
+        new Date(reserved.date).toDateString() === date.toDateString()
     );
   };
 
@@ -127,7 +117,8 @@ const RequestOcularVisit = ({ onClose }) => {
         />
         <div className="mt-4">
           <label htmlFor="time" className="block font-medium text-gray-700">
-            Select Time (Available: {selectedProperty.visitAvailability.startTime} -{" "}
+            Select Time (Available:{" "}
+            {selectedProperty.visitAvailability.startTime} -{" "}
             {selectedProperty.visitAvailability.endTime})
           </label>
           <input

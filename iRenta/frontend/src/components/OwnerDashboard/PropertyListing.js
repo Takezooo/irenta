@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { GetToken } from "../../global/utils/Token.js"; // Import utilities
-import { fetchOwnerListings, deleteList } from "../../api/Listings.js";
-import { fetchUserData } from "../../api/Users.js";
+import { fetchOwnerListings, deleteList } from "../../global/api/Listings.js";
+import { fetchUserData } from "../../global/api/Users.js";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
 export const PropertyListing = () => {

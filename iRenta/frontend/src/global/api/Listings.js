@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GetToken } from "../global/utils/Token.js";
+import { GetToken } from "../utils/Token.js";
 
 const API_BASE_URL = "http://localhost:5000/api/listings"; // Update with your backend API endpoint
 

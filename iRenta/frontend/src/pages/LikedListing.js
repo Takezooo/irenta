@@ -8,8 +8,8 @@ import Topbar from "../components/global/Topbar";
 import { GetToken } from "../global/utils/Token";
 import { AuthContext } from "../global/contexts/AuthContext";
 import { useProperty } from "../global/contexts/PropertyContext";
-import { fetchUserData, toggleLike } from "../api/Users";
-import { fetchSpecificList } from "../api/Listings";
+import { fetchUserData, toggleLike } from "../global/api/Users";
+import { fetchSpecificList } from "../global/api/Listings";
 
 const LikedListing = () => {
   const { user } = useContext(AuthContext); // Access logged-in user
@@ -58,7 +58,7 @@ const LikedListing = () => {
     try {
       const updatedLikes = await toggleLike(listingId);
       const filteredListings = likedListings.filter(
-        (listing) => listing._id !== listingId
+        (listing) => listing?._id !== listingId
       ); // Remove unliked listing
       setLikedListings(filteredListings);
     } catch (error) {
@@ -68,7 +68,7 @@ const LikedListing = () => {
 
   const handleViewProperty = (listings) => {
     setSelectedProperty(listings);
-    navigate(`/${listings._id}`);
+    navigate(`/${listings?._id}`);
   };
 
   const openMapFullScreen = () => {
@@ -105,7 +105,7 @@ const LikedListing = () => {
               <div className="flex flex-wrap gap-4 justify-center">
                 {likedListings.map((listing) => (
                   <div
-                    key={listing._id}
+                    key={listing?._id}
                     className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all"
                   >
                     {/* Image Section */}
@@ -119,10 +119,10 @@ const LikedListing = () => {
                         onClick={() => handleViewProperty(listing)}
                       />
                       <button
-                        onClick={() => handleLikeToggle(listing._id)}
+                        onClick={() => handleLikeToggle(listing?._id)}
                         className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-gray-600 hover:text-red-500"
                       >
-                        {likedIds.includes(listing._id) ? (
+                        {likedIds.includes(listing?._id) ? (
                           <AiFillHeart size={20} className="text-red-500" />
                         ) : (
                           <AiOutlineHeart size={20} />

@@ -4,9 +4,9 @@ import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaChevronLeft } from "react-icons/fa";
 import { Footer } from "../components/global/Footer";
 import Topbar from "../components/global/Topbar";
-import { toggleLike } from "../api/Users";
-import { fetchListings } from "../api/Listings"; // API function
-import { fetchUserData } from "../api/Users";
+import { toggleLike } from "../global/api/Users";
+import { fetchListings } from "../global/api/Listings"; // API function
+import { fetchUserData } from "../global/api/Users";
 import { GetToken } from "../global/utils/Token";
 import { AuthContext } from "../global/contexts/AuthContext"; //
 import { useProperty } from "../global/contexts/PropertyContext";

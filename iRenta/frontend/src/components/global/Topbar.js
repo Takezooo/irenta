@@ -214,7 +214,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <FaUserCircle className="h-full w-full text-blue-500 text-xl" />
+                    <FaUserCircle className="h-10 w-10 text-blue-500 text-xl" />
                   )}
                 </div>
               </button>
@@ -430,7 +430,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <FaUserCircle className="h-full w-full text-blue-500 text-xl" />
+                    <FaUserCircle className="h-10 w-10 text-blue-500 text-lg" />
                   )}
                 </div>
               </button>

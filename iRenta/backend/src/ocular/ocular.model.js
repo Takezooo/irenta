@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const ocularSchema = new mongoose.Schema({
   propertyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Property',
+    ref: 'Listing',
     required: true,
   },
   userId: {

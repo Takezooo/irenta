@@ -76,7 +76,15 @@ export const GetReservedDatesByOwner = async (req, res) => {
     const propertyIds = properties.map((property) => property._id);
 
     // Fetch all ocular visits for these properties
-    const visits = await Ocular.find({ propertyId: { $in: propertyIds } });
+    const visits = await Ocular.find({ propertyId: { $in: propertyIds } })
+      .populate({
+        path: "propertyId",
+        select: "title address",
+      }) // Populate property details: title, address, and images
+      .populate({
+        path: "userId",
+        select: "info.firstName info.lastName info.phoneNumber credentials.email",
+      }); // Populate seeker details: name and email
 
     res.status(200).json(visits);
   } catch (error) {

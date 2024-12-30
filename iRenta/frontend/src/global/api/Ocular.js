@@ -55,3 +55,20 @@ export const updateOcularRequest = async (ocularId, action) => {
     throw err;
   }
 };
+
+export const checkVisitRequest = async (propertyId, userId) => {
+  const authToken = GetToken();
+  try {
+    const { data } = await axios.get(
+      `${API_BASE_URL}/check-visit-request`,
+      {
+        params: { propertyId, userId },
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+    return data;
+  } catch (err) {
+    console.error("Error checking visit request:", err);
+    throw err;
+  }
+};

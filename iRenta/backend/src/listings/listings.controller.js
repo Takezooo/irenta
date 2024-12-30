@@ -149,21 +149,38 @@ export const DeleteListing = async (req, res) => {
   try {
     const listingId = req.params.id;
 
-    // Find and delete the listing if it belongs to the logged-in user
-    const deletedListing = await Listing.findOneAndDelete({
+    // Find the listing to ensure it belongs to the logged-in user
+    const listing = await Listing.findOne({
       _id: listingId,
       userId: req.user.id, // Ensure the user is the owner
     });
 
-    if (!deletedListing) {
+    if (!listing) {
       return res.status(404).json({ message: "Listing not found or you're not authorized to delete it." });
     }
 
-    res.status(200).json({ message: "Listing deleted successfully." });
+    // Delete images from Google Drive (or storage service)
+    const deletePromises = listing.images.map((image) => {
+      if (image.id) {
+        // Assuming `driveService.DeleteFiles` is a function that deletes files by ID
+        return driveService.DeleteFiles(image.id);
+      }
+      return Promise.resolve(); // Skip files without an ID
+    });
+
+    // Wait for all images to be deleted
+    await Promise.all(deletePromises);
+
+    // Delete the listing from the database
+    await listing.deleteOne();
+
+    res.status(200).json({ message: "Listing and associated images deleted successfully." });
   } catch (err) {
+    console.error("Error deleting listing:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export default {
   GetAllListings,

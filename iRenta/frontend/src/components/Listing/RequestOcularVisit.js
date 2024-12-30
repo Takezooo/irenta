@@ -8,7 +8,7 @@ import {
   scheduleOcularVisit,
 } from "../../global/api/Ocular.js";
 
-const RequestOcularVisit = ({ onClose }) => {
+const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
   const { selectedProperty } = useProperty();
   const [reservedDates, setReservedDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -78,12 +78,7 @@ const RequestOcularVisit = ({ onClose }) => {
     }
 
     try {
-      await scheduleOcularVisit(
-        selectedProperty._id,
-        selectedDate,
-        selectedTime
-      );
-      alert("Ocular visit scheduled successfully!");
+      await onRequestVisit(selectedDate, selectedTime); // Call the parent's function
       onClose();
     } catch (err) {
       alert(

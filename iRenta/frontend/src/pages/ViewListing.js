@@ -10,14 +10,14 @@ import { useProperty } from "../global/contexts/PropertyContext";
 import { ChatDropdownContext } from "../global/contexts/ChatDropdownContext";
 import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../global/api/Chats";
-import { scheduleOcularVisit } from "../global/api/Ocular";
+import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
 
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
   const [location, setLocation] = useState("Bacoor");
   const [ownerData, setOwnerData] = useState([]);
-  const [activeChat, setActiveChat] = useState(null); // Stores current chat data
+  const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
   const { selectedProperty } = useProperty();
   const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
     useContext(ChatDropdownContext);
@@ -57,6 +57,21 @@ export const ViewListing = () => {
     };
     fetchPropOwnerData();
   }, [selectedProperty]);
+
+  // Check if the seeker has requested a visit for this listing
+  useEffect(() => {
+    const checkSeekerVisitRequest = async () => {
+      if (selectedProperty?._id && user) {
+        try {
+          const result = await checkVisitRequest(selectedProperty._id, user.id);
+          setHasRequestedVisit(result.hasRequestedVisit);
+        } catch (error) {
+          console.error("Error checking visit request status:", error);
+        }
+      }
+    };
+    checkSeekerVisitRequest();
+  }, [selectedProperty, user]);
 
   const handleLikeToggle = async (listings) => {
     if (!user) {
@@ -104,9 +119,10 @@ export const ViewListing = () => {
       alert("Please select a date and time for the visit.");
       return;
     }
-
+    
     try {
       await scheduleOcularVisit(propertyId, selectedDate, selectedTime);
+      setHasRequestedVisit(true); // This triggers a re-render
       alert("Request visit scheduled!");
     } catch (err) {
       console.error(
@@ -116,7 +132,14 @@ export const ViewListing = () => {
     }
   };
 
+  useEffect(() => {
+    setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
+  }, [hasRequestedVisit]);
+
   const handleOpenPopup = () => {
+    if (!user) {
+      navigate("/login");
+    }
     setShowOcularPopup(true); // Open the popup
   };
 
@@ -177,13 +200,22 @@ export const ViewListing = () => {
                     <div className="space-x-2">
                       <button
                         onClick={handleOpenPopup}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+                        disabled={hasRequestedVisit} // Disable based on visit request status
+                        className={`${
+                          !hasRequestedVisit
+                            ? "bg-blue-500 text-white hover:bg-blue-600"
+                            : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        } px-4 py-2 rounded-full`}
                       >
                         Request Visit
                       </button>
                       <button
-                        onClick={handleRequestVisit}
-                        className="bg-gray-100 text-black px-4 py-2 rounded-full hover:bg-gray-300"
+                        disabled={!hasRequestedVisit} // Disable based on visit request status
+                        className={`${
+                          hasRequestedVisit
+                            ? "bg-blue-500 text-white hover:bg-blue-600"
+                            : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        } px-4 py-2 rounded-full`}
                       >
                         Reserve Listing
                       </button>

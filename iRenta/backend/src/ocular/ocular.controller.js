@@ -127,3 +127,20 @@ export const UpdateOcularRemarks = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+export const CheckVisitRequest = async (req, res) => {
+  const { propertyId, userId } = req.query;
+
+  if (!propertyId || !userId) {
+    return res.status(400).json({ message: "Property ID and User ID are required." });
+  }
+
+  try {
+    const visit = await Ocular.findOne({ propertyId, userId });
+
+    res.status(200).json({ hasRequestedVisit: !!visit });
+  } catch (err) {
+    console.error("Error checking visit request:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};

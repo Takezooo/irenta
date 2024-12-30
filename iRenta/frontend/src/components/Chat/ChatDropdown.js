@@ -25,14 +25,26 @@ const ChatDropdown = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="h-full">
       {/* Chat Button with Icon */}
-      <div className="relative group">
+      <div className="hidden lg:block relative group">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
           className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
         >
           <FaCommentAlt className="text-md" />
+        </button>
+        <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+          Messages
+        </h5>
+      </div>
+
+      <div className="lg:hidden w-full h-full group mx-auto">
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="h-full w-full hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
+        >
+          <FaCommentAlt className="text-2xl" />
         </button>
         <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
           Messages

@@ -12,7 +12,7 @@ const AddListing = () => {
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName] = useState("No file chosen");
-
+  const [errorMessage, setErrorMessage] = useState(""); 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -125,6 +125,7 @@ const AddListing = () => {
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+
     const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
     const newFiles = files.filter(
       (file) =>
@@ -132,21 +133,26 @@ const AddListing = () => {
         file.type.startsWith("image/") &&
         !selectedImages.includes(file)
     );
-  
+
+    // Check for invalid file types
     if (invalidFiles.length > 0) {
-      alert(
-        `Invalid file type detected. Only PNG, JPG, and JPEG files are allowed.\nInvalid files: ${invalidFiles
+      setErrorMessage(
+        `Invalid file type detected. Only PNG, JPG, and JPEG files are allowed. Invalid files: ${invalidFiles
           .map((file) => file.name)
           .join(", ")}`
       );
+      event.target.value = ""; // Reset the input field
       return;
     }
-  
+
+    // Check for file count limit
     if (selectedImages.length + newFiles.length > 10) {
-      alert("You can only upload up to 10 images.");
+      setErrorMessage("You can only upload up to 10 images.");
       return;
     }
-  
+
+    // Clear error message and update state with valid files
+    setErrorMessage("");
     setSelectedImages((prevImages) => [...prevImages, ...newFiles]);
   };
 
@@ -202,6 +208,9 @@ const AddListing = () => {
                     : "No file chosen"}
                 </span>
               </div>
+              {errorMessage && (
+                  <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+                )}
               {/* Preview Section */}
               {selectedImages.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">

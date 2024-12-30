@@ -30,15 +30,14 @@ const LikedListing = () => {
 
         // Use Promise.all to fetch all liked listings
         const likedDetails = await Promise.all(
-          likedIds.map((id) => fetchSpecificList(id))
+          likedIds.map((id) => fetchSpecificList(id).catch(() => null)) // Handle individual fetch errors
         );
 
-        // Filter out null or undefined listings
+        // Filter out invalid or null listings
         const validListings = likedDetails.filter(
-          (listing) => listing !== null
+          (listing) => listing && listing._id
         );
         setLikedListings(validListings);
-        console.log(likedListings);
       } catch (error) {
         console.error("Error fetching liked listings:", error);
       } finally {
@@ -47,7 +46,6 @@ const LikedListing = () => {
     };
 
     fetchLikedListings();
-    console.log(likedListings);
   }, [user, authToken]);
 
   const handleLikeToggle = async (listingId) => {

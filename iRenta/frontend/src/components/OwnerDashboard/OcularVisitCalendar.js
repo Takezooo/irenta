@@ -42,7 +42,7 @@ export const OcularVisitCalendar = () => {
             propertyName: visit.propertyId.title,
             seekerName: `${visit.userId.info.firstName} ${visit.userId.info.lastName}`,
             contactInfo: visit.userId.info.phoneNumber,
-            remarks: `Email: ${visit.userId.credentials.email}`, // Add email or any additional info
+            remarks: visit.userId.credentials.email, // Add email or any additional info
           };
         });
 

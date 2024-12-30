@@ -271,7 +271,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     </ul>
                   ) : (
                     // Logged-out Dropdown
-                    <ul className="py-4">
+                    <ul className="py-3">
                       <li className="flex w-full justify-center">
                         <Link
                           to="/login"
@@ -302,8 +302,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
         </div>
 
         {/* Mobile Topbar Navigation */}
-        <div className="lg:hidden grid grid-rows-2">
-          <div className="flex items-center justify-between w-full px-4 bg-white shadow-md z-50">
+        <div className="lg:hidden grid grid-rows-2 shadow z-50">
+          <div className="flex items-center justify-between w-full px-4 bg-white shadow-md">
             {/* Sidebar Toggle and Logo */}
             <div className="flex items-center justify-start">
               {isOwnerDashboard && (
@@ -347,7 +347,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Home Button */}
             <div className="w-full group mx-auto">
               <button
-                className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
+                className={`h-full w-full py-1 ${
+                  location.pathname === "/" ? "bg-blue-100 text-blue-500" : "text-gray-500"
+                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
                 onClick={() => navigate("/")}
               >
                 <AiFillHome className="text-3xl" />
@@ -360,7 +362,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Like Button */}
             <div className="w-full group mx-auto">
               <button
-                className="h-full w-full py-4 hover:bg-gray-200 text-red-500 hover:text-red-600 flex justify-center items-center"
+                className={`h-full w-full py-1 ${
+                  location.pathname === "/liked-listing"
+                    ? "bg-blue-100 text-blue-500"
+                    : "text-gray-500"
+                } hover:bg-gray-200 hover:text-red-600 flex justify-center items-center`}
                 onClick={() => navigate("/liked-listing")}
               >
                 <AiFillHeart className="text-3xl" />
@@ -378,8 +384,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Notification Button */}
             <div className="w-full group mx-auto" ref={notifRef}>
               <button
+                className={`h-full w-full py-1 ${
+                  notifOpen ? "bg-blue-100 text-blue-500" : "text-gray-500"
+                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleNotifToggle}
-                className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
               >
                 <FaBell className="text-3xl" />
                 {unreadCount > 0 && (
@@ -390,9 +398,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Notification
               </h5>
               {notifOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
+                <div className="fixed mt-28 inset-0 bg-white mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
                   <ul className="py-2">
-                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                    <li className="flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
                       <Link
                         to="/view-contract"
                         className="block w-full text-left"
@@ -416,8 +424,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Profile Button */}
             <div className="group w-full mx-auto" ref={profileRef}>
               <button
+                className={`h-full w-full py-1 ${
+                  dropdownOpen ? "bg-blue-100 text-blue-500" : "text-gray-500"
+                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleProfileToggle}
-                className="flex items-center h-full w-full gap-2 rounded-full transition-all"
               >
                 <div className="h-full w-full flex items-center justify-center overflow-hidden">
                   {user ? (
@@ -438,11 +448,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Your Profile
               </h5>
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
+                <div className="fixed mt-28 inset-0 bg-white mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
                   {user ? (
                     // Logged-in Dropdown
-                    <ul className="py-2">
-                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <ul className="py-2 flex flex-col">
+                      <li className="flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                           <img
                             src={
@@ -461,7 +471,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       {user.userType === "Owner" && (
                         <li className="flex w-full justify-center hover:bg-gray-100">
                           <button
-                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                            className="flex items-center w-fit text-left px-4 py-1 text-sm text-gray-900"
                             onClick={handleManageListings}
                           >
                             <FaBuilding className="h-5 w-5" />
@@ -471,15 +481,14 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </button>
                         </li>
                       )}
-                      {/* Liked Button */}
-                      <hr className="my-2"></hr>
-                      <li className="flex w-full justify-center">
+                      {/* Logout Button */}
+                      <li className="flex self-end w-full justify-center">
                         <button
                           onClick={logout}
-                          className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                          className="w-full flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg p-4 text-sm text-gray-700 hover:bg-gray-100"
                         >
                           <FaPowerOff className="h-5 w-5" />
-                          <h3 className="text-sm font-semibold text-gray-100 px-4">
+                          <h3 className="text-sm font-semibold px-4">
                             Log out
                           </h3>
                         </button>
@@ -487,11 +496,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     </ul>
                   ) : (
                     // Logged-out Dropdown
-                    <ul className="py-4">
+                    <ul className="py-3">
                       <li className="flex w-full justify-center">
                         <Link
                           to="/login"
-                          className="flex items-center w-fit px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
+                          className="w-full flex gap-2 items-center justify-center text-left m-4 rounded-full p-4 bg-blue-500 text-gray-100 hover:bg-blue-600"
                         >
                           <FaPowerOff className="h-5 w-5" />
                           <span className="text-sm font-semibold text-gray-100 px-4">
@@ -502,9 +511,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <li className="flex w-full justify-center">
                         <Link
                           to="/register"
-                          className="flex items-center w-fit px-4 py-3 text-sm text-gray-100 group "
+                          className="w-full flex gap-4 items-center justify-center text-center m-4 rounded-full p-4 bg-gray-100 text-gray-100 hover:bg-gray-200"
                         >
-                          <span className="text-sm font-semibold text-gray-500 px-4 group-hover:text-gray-900">
+                          <span className="text-sm font-semibold text-gray-500 group-hover:text-gray-900">
                             Register
                           </span>
                         </Link>
@@ -515,6 +524,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </nav>

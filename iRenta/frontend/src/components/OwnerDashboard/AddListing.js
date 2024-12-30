@@ -12,7 +12,7 @@ const AddListing = () => {
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName] = useState("No file chosen");
-  const [errorMessage, setErrorMessage] = useState(""); 
+  const [errorMessage, setErrorMessage] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -20,6 +20,7 @@ const AddListing = () => {
   const [bedroomNumber, setBedroomNumber] = useState("");
   const [bathroomNumber, setBathroomNumber] = useState("");
   const [propertySize, setPropertySize] = useState("");
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [address, setAddress] = useState({
     houseNumber: "",
     street: "",
@@ -32,37 +33,81 @@ const AddListing = () => {
     startTime: "", // Default empty or preset value like "09:00"
     endTime: "", // Default empty or preset value like "18:00"
   });
-  
+
+  const handleAmenityChange = (e) => {
+    const { value, checked } = e.target;
+    setSelectedAmenities((prev) =>
+      checked ? [...prev, value] : prev.filter((amenity) => amenity !== value)
+    );
+    
+  };
+
   const handleLocationChange = async (location) => {
     try {
       const response = await axios.get(
         `/api/map/geocode?lat=${location.lat}&lng=${location.lng}`
       );
       const results = response.data.results;
-  
+
       if (results && results.length > 0) {
         const addressComponents = results[0].address_components;
-  
-        // Parse address components
-        const houseNumber = addressComponents.find((comp) =>
-          comp.types.includes("street_number")
-        )?.long_name || "";
-        const street = addressComponents.find((comp) =>
-          comp.types.includes("route")
-        )?.long_name || "";
-        const city = addressComponents.find((comp) =>
-          comp.types.includes("locality")
-        )?.long_name || "";
-        const zip = addressComponents.find((comp) =>
-          comp.types.includes("postal_code")
-        )?.long_name || "";
-  
+        console.log(addressComponents);
+
+        // Initialize addressData with default or empty values
+        let addressData = {
+          houseNumber: "",
+          street: "",
+          city: "",
+          zip: "",
+          plusName: "", // Example dynamic field, can be extended
+        };
+
+        // Flag to check if required fields are found
+        let requiredFieldsFound = {
+          houseNumber: false,
+          street: false,
+          city: false,
+        };
+
+        // Iterate over address components and dynamically populate addressData
+        addressComponents.forEach((component) => {
+          const types = component.types;
+
+          if (types.includes("street_number")) {
+            addressData.houseNumber = component.long_name;
+            requiredFieldsFound.houseNumber = true;
+          }
+          if (types.includes("route")) {
+            addressData.street = component.long_name;
+            requiredFieldsFound.street = true;
+          }
+          if (types.includes("locality")) {
+            addressData.city = component.long_name;
+            requiredFieldsFound.city = true;
+          }
+          if (types.includes("postal_code")) {
+            addressData.zip = component.long_name;
+          }
+          if (types.includes("plus_code")) {
+            // Example of another dynamic component
+            addressData.plusName = component.long_name;
+          }
+        });
+
+        // Fallback mechanism: if any of the required fields are missing, set default values
+        if (!requiredFieldsFound.houseNumber) {
+          addressData.houseNumber = "Please Input Manually"; // Or empty string / N/A
+        }
+        if (!requiredFieldsFound.street) {
+          addressData.street = "Please Input Manually"; // Or empty string / N/A
+        }
+        if (!requiredFieldsFound.city) {
+          addressData.city = "Please Input Manually"; // Or empty string / N/A
+        }
+
         // Update address state
         setAddress({
-          houseNumber,
-          street,
-          city,
-          zip,
+          ...addressData,
           lng: location.lng,
           lat: location.lat,
         });
@@ -73,8 +118,7 @@ const AddListing = () => {
       console.error("Error fetching address details:", error);
     }
   };
-  
-  
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -97,6 +141,7 @@ const AddListing = () => {
           propertySize,
           address,
           visitAvailability,
+          amenities: selectedAmenities,
         })
       );
 
@@ -126,7 +171,9 @@ const AddListing = () => {
     const files = Array.from(event.target.files);
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
 
-    const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
+    const invalidFiles = files.filter(
+      (file) => !allowedTypes.includes(file.type)
+    );
     const newFiles = files.filter(
       (file) =>
         allowedTypes.includes(file.type) &&
@@ -209,8 +256,8 @@ const AddListing = () => {
                 </span>
               </div>
               {errorMessage && (
-                  <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-                )}
+                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+              )}
               {/* Preview Section */}
               {selectedImages.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">
@@ -307,30 +354,62 @@ const AddListing = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">Amenities & Inclusions</label>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Amenities & Inclusions
+                </label>
                 <div className="space-y-2 bg-white border border-gray-300 p-2 rounded-lg">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="Fully Furnished"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">Fully Furnished</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="Semi Furnished"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">Semi Furnished</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="Aircon"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">Aircon</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="WiFi / Internet"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">WiFi / Internet</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="Electricity Bill"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">Electricity Bill</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="form-checkbox text-blue-500" />
+                    <input
+                      type="checkbox"
+                      value="Water Bill"
+                      className="form-checkbox text-blue-500"
+                      onChange={handleAmenityChange}
+                    />
                     <span className="text-gray-700">Water Bill</span>
                   </label>
                 </div>
@@ -423,7 +502,52 @@ const AddListing = () => {
 
               {/* Map Section */}
               <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
-                <MapPicker onLocationChange={handleLocationChange} />
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    House Number:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter property House Number"
+                    value={address.houseNumber}
+                    onChange={(e) =>
+                      setAddress({ ...address, houseNumber: e.target.value })
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Street:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter property Street"
+                    value={address.street}
+                    onChange={(e) =>
+                      setAddress({ ...address, street: e.target.value })
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    City:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter property Street"
+                    value={address.city}
+                    onChange={(e) =>
+                      setAddress({ ...address, city: e.target.value })
+                    }
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <MapPicker
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onLocationChange={handleLocationChange}
+                />
               </div>
             </div>
           </div>

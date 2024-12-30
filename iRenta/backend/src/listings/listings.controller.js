@@ -58,7 +58,7 @@ export const CreateListing = async (req, res) => {
     }
 
     // Destructure necessary fields from the request body
-    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = JSON.parse(body.data);
+    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address, amenities } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {
@@ -113,6 +113,7 @@ export const CreateListing = async (req, res) => {
       address,
       visitAvailability, // Include validated visit availability
       images: listingImages, // Associate images with the listing
+      amenities,
     });
 
     res.status(201).json(newListing);

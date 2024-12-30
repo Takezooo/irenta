@@ -38,3 +38,20 @@ export const fetchReservedDatesByOwner = async (authToken) => {
   });
   return response.data;
 };
+
+export const updateOcularRequest = async (ocularId, action) => {
+  const authToken = GetToken();
+  try {
+    const { data } = await axios.post(
+      `${API_BASE_URL}/update-remarks`,
+      { ocularId, action },
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+    return data;
+  } catch (err) {
+    console.error("Failed to update ocular request:", err);
+    throw err;
+  }
+};

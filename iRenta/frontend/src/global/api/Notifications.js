@@ -16,6 +16,22 @@ export const fetchNotifications = async () => {
   }
 };
 
+export const sendNotification = async (userId, notificationData) => {
+  const authToken = GetToken();
+  try {
+    await axios.post(
+      `${API_BASE_URL}/create`,
+      { userId, ...notificationData },
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+  } catch (err) {
+    console.error("Failed to send notification:", err);
+    throw err;
+  }
+};
+
 export const markNotificationAsViewed = async (notificationId) => {
   const authToken = GetToken();
   try {

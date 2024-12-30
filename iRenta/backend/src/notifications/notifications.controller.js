@@ -1,5 +1,30 @@
 import Notification from './notifications.model.js';
 
+export const createNotification = async (req, res) => {
+  try {
+    const { userId, type, message, propertyId } = req.body;
+
+    if (!userId || !type || !message) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    const newNotification = new Notification({
+      userId,
+      type,
+      message,
+      propertyId,
+      viewed: false,
+    });
+
+    await newNotification.save();
+
+    res.status(201).json({ message: 'Notification created successfully.' });
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export const getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;

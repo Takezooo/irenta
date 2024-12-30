@@ -92,3 +92,38 @@ export const GetReservedDatesByOwner = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const UpdateOcularRemarks = async (req, res) => {
+  const { ocularId, action } = req.body;
+
+  if (!ocularId || !action) {
+    return res.status(400).json({ message: 'Ocular ID and action are required.' });
+  }
+
+  try {
+    const ocular = await Ocular.findById(ocularId);
+
+    if (!ocular) {
+      return res.status(404).json({ message: 'Ocular request not found.' });
+    }
+
+    // Update remarks
+    ocular.remarks = action;
+    await ocular.save();
+
+    // Notify the seeker
+    const newNotification = new Notification({
+      userId: ocular.userId,
+      type: "VisitResponse",
+      message: `Your visit request for property ${ocular.propertyId} was ${action.toLowerCase()}.`,
+      propertyId: ocular.propertyId,
+      viewed: false,
+    });
+    await newNotification.save();
+
+    res.status(200).json({ message: `Request ${action.toLowerCase()} successfully.` });
+  } catch (error) {
+    console.error('Error updating ocular remarks:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

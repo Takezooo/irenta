@@ -122,18 +122,31 @@ const AddListing = () => {
   };
 
   const navigate = useNavigate();
-
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+    const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
     const newFiles = files.filter(
-      (file) => file.type.startsWith("image/") && !selectedImages.includes(file)
+      (file) =>
+        allowedTypes.includes(file.type) &&
+        file.type.startsWith("image/") &&
+        !selectedImages.includes(file)
     );
-
+  
+    if (invalidFiles.length > 0) {
+      alert(
+        `Invalid file type detected. Only PNG, JPG, and JPEG files are allowed.\nInvalid files: ${invalidFiles
+          .map((file) => file.name)
+          .join(", ")}`
+      );
+      return;
+    }
+  
     if (selectedImages.length + newFiles.length > 10) {
       alert("You can only upload up to 10 images.");
       return;
     }
-
+  
     setSelectedImages((prevImages) => [...prevImages, ...newFiles]);
   };
 
@@ -180,7 +193,7 @@ const AddListing = () => {
                   id="upload-images"
                   multiple
                   className="hidden"
-                  accept="image/*"
+                  accept=".png, .jpg, .jpeg"
                   onChange={handleFileChange}
                 />
                 <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-r-lg text-gray-600 flex-grow">

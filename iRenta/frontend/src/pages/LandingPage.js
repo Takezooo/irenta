@@ -104,7 +104,7 @@ const LandingPage = () => {
           <div className="mx-auto flex align-center flex-col rounded-xl mt-32 lg:mt-20 w-[90%]">
             {/* Header Section */}
             <div className="flex flex-row w-full items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Dormitories</h2>
+              <h2 className="text-xl font-bold">Properties</h2>
               <button
                 onClick={handleBrowseListing}
                 className="inline-block text-black underline"
@@ -123,13 +123,13 @@ const LandingPage = () => {
                   <div
                     key={listing._id}
                     className="flex-shrink-0 bg-white rounded-lg shadow-md border overflow-hidden"
+                    onClick={() => handleViewProperty(listing)}
                   >
                     {/* Image Section */}
                     <div className="relative flex-shrink-0 h-48 md:h-56">
                       <img
                         src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
                         alt={listing.title}
-                        onClick={() => handleViewProperty(listing)}
                         className="w-full h-full object-cover"
                       />
                       <button
@@ -147,7 +147,6 @@ const LandingPage = () => {
                     {/* Details Section */}
                     <div
                       className="p-4 flex-grow flex flex-col justify-between"
-                      onClick={() => handleViewProperty(listing)}
                     >
                       <h3 className="text-lg font-semibold truncate">
                         {listing.title}
@@ -192,7 +191,7 @@ const LandingPage = () => {
           
           <div className="mx-auto flex align-center flex-col rounded-xl mt-16 w-[90%]">
             <div className="flex flex-row w-full items-center justify-between">
-              <h2 className="text-xl font-bold mb-4">Dormitories</h2>
+              <h2 className="text-xl font-bold mb-4">Properties</h2>
               <button
                 onClick={handleBrowseListing}
                 className="mt-4 inline-block text-black underline"

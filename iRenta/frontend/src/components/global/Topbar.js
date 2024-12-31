@@ -94,6 +94,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     navigate("/owner-dashboard"); // Navigate to the Manage Listings page
   };
 
+  const handleReservations = () => {
+    navigate("/reservations"); // Navigate to the Manage Listings page
+  };
+
   const location = useLocation();
   const isOwnerDashboard = location.pathname === "/owner-dashboard";
 
@@ -242,13 +246,22 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
+                        <li className="flex w-full justify-center hover:bg-gray-100">
+                          <button
+                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                            onClick={handleReservations}
+                          >
+                            <h3 className="text-sm font-semibold text-gray-900 px-4">
+                              Reservations
+                            </h3>
+                          </button>
+                        </li>
                       {user.userType === "Owner" && (
                         <li className="flex w-full justify-center hover:bg-gray-100">
                           <button
                             className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
                             onClick={handleManageListings}
                           >
-                            <FaBuilding className="h-5 w-5" />
                             <h3 className="text-sm font-semibold text-gray-900 px-4">
                               Manage Listings
                             </h3>
@@ -474,7 +487,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                             className="flex items-center w-fit text-left px-4 py-1 text-sm text-gray-900"
                             onClick={handleManageListings}
                           >
-                            <FaBuilding className="h-5 w-5" />
                             <h3 className="text-sm font-semibold text-gray-900 px-4">
                               Manage Listings
                             </h3>

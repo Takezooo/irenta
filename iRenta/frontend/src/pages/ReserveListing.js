@@ -12,9 +12,11 @@ const ReserveListing = () => {
   const [reservations, setReservations] = useState([]); // List of reserved properties
   const [showPopout, setShowPopout] = useState(false); // Toggle Popout visibility
   const [activeProperty, setActiveProperty] = useState(null); // Track the active property
+  const [requestDetails, setRequestDetails] = useState(null); // Add state for request details
   const { setSelectedProperty } = useProperty();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const isOwner = user?.userType === "Owner"; // Determine if the user is an Owner
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +37,18 @@ const ReserveListing = () => {
   const handleViewProperty = (listing) => {
     setSelectedProperty(listing);
     navigate(`/${listing._id}`);
+  };
+
+  const handlePopoutOpen = (listing, seeker, reservation) => {
+    setActiveProperty(listing);
+    setRequestDetails({
+      requesterName: `${seeker?.info?.firstName || "Unknown"} ${
+        seeker?.info?.lastName || ""
+      }`,
+      dateTime: reservation?.createdAt || "Date not available", // Fallback if createdAt is undefined
+      status: reservation?.status || "Unknown status", // Fallback if status is undefined
+    });
+    setShowPopout(true);
   };
 
   return (
@@ -72,12 +86,11 @@ const ReserveListing = () => {
                       />
                       <div
                         className="cursor-pointer absolute top-2 right-2 bg-blue-500 rounded-full px-4 py-2 shadow-md text-gray-100"
-                        onClick={() => {
-                          setActiveProperty(listing);
-                          setShowPopout(true); // Toggle Popout on Click
-                        }}
+                        onClick={() =>
+                          handlePopoutOpen(listing, seeker, reservation)
+                        }
                       >
-                        <h5 className="text-sm">Reserved</h5>
+                        <h5 className="text-sm">{reservation.status}</h5>
                       </div>
                     </div>
 
@@ -128,6 +141,8 @@ const ReserveListing = () => {
         <ReservePopout
           property={activeProperty}
           onClose={() => setShowPopout(false)}
+          isOwner={isOwner}
+          requestDetails={requestDetails}
         />
       )}
     </div>

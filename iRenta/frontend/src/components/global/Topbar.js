@@ -83,13 +83,16 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     if (setActiveContent) {
       if (notification.type === "RequestVisit") {
         setActiveContent("content4");
-       } // Directly set the calendar as active content
+      }// Directly set the calendar as active content
     } else {
       // Fallback navigation logic if setActiveContent is not available
       if (notification.type === "RequestVisit") {
         console.warn("setActiveContent is not provided. Please define routes.");
       }
     }
+    if (notification.type === "ReservationRequest") {
+      navigate('/reservations')
+    } 
   };
 
   const handleNotifToggle = () => {

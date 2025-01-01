@@ -58,7 +58,6 @@ const App = () => {
 
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
-                  <Route path="/reservations" element={<ReserveListing />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
 
                   {/* Owner Routes */}
@@ -103,6 +102,15 @@ const App = () => {
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                         <LikedListing />
+                      </PrivateRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/reservations"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ReserveListing />
                       </PrivateRoute>
                     }
                   />

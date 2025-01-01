@@ -1,5 +1,10 @@
 import React from "react";
-import { AiOutlineClose, AiFillCheckCircle } from "react-icons/ai";
+import {
+  AiOutlineClose,
+  AiFillCheckCircle,
+  AiFillCloseCircle,
+} from "react-icons/ai";
+import { updateReservationStatus } from "../../global/api/Reservations";
 
 const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
   // Dummy property data if no property is provided
@@ -20,6 +25,19 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
 
   const displayRequestDetails = requestDetails || dummyRequestDetails;
 
+  // Handle decline action
+  const handleDecline = async () => {
+    try {
+      // Update the reservation status
+      await updateReservationStatus(displayRequestDetails.id, "Declined");
+      alert("Reservation declined and the Seeker has been notified!");
+      onClose(); // Close the popout after the operation
+    } catch (error) {
+      console.error("Error declining reservation:", error);
+      alert("Failed to decline reservation. Please try again.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
@@ -34,17 +52,31 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
         {/* Popout Content */}
         <div className="text-center">
           {/* Conditional Rendering for Icon */}
-          {!isOwner && (
+          {!isOwner && displayRequestDetails.status === "Approved" ? (
             <AiFillCheckCircle
               size={48}
               className="text-green-500 mx-auto mb-4"
+            />
+          ) : (
+            <AiFillCloseCircle
+              size={48}
+              className="text-red-500 mx-auto mb-4"
             />
           )}
 
           {/* Header Message */}
           <h2 className="text-2xl font-semibold text-gray-800">
-            {isOwner ? "Reservation Request!" : "Reservation Confirmed!"}
+            {isOwner
+              ? "Reservation Request!"
+              : displayRequestDetails.status === "Approved"
+              ? "Reservation Confirmed!"
+              : `Reservation Status: ${displayRequestDetails.status}`}
           </h2>
+          {displayRequestDetails.status === "Approved" && (
+            <p className="text-gray-700 mt-2 font-medium">
+              Please Check Your Notification to View your Contract.
+            </p>
+          )}
 
           {/* Requester Details */}
           {isOwner && (
@@ -70,7 +102,9 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
           {/* Property Details */}
           <div className="mt-4 border-t pt-4">
             <img
-              src={displayProperty.images?.[0]?.link || "/placeholder-image.jpg"}
+              src={
+                displayProperty.images?.[0]?.link || "/placeholder-image.jpg"
+              }
               alt={displayProperty.title}
               className="w-32 h-32 mx-auto rounded-md object-cover"
             />
@@ -91,7 +125,7 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
               Approve and Send Contract
             </button>
             <button
-              onClick={() => alert("Declined request!")}
+              onClick={handleDecline}
               className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded"
             >
               Decline

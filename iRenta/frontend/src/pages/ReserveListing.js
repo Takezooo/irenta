@@ -42,6 +42,7 @@ const ReserveListing = () => {
   const handlePopoutOpen = (listing, seeker, reservation) => {
     setActiveProperty(listing);
     setRequestDetails({
+      id: reservation._id,
       requesterName: `${seeker?.info?.firstName || "Unknown"} ${
         seeker?.info?.lastName || ""
       }`,

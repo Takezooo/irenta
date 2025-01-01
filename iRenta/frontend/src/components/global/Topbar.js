@@ -12,7 +12,13 @@ import ChatDropdown from "../Chat/ChatDropdown";
 
 // icons
 import { CgSidebar, CgSidebarOpen } from "react-icons/cg";
-import { FaPowerOff, FaUserCircle, FaBell, FaBuilding, FaSearch } from "react-icons/fa";
+import {
+  FaPowerOff,
+  FaUserCircle,
+  FaBell,
+  FaBuilding,
+  FaSearch,
+} from "react-icons/fa";
 import { AiFillHeart, AiFillHome } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
@@ -74,9 +80,15 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
       );
       setUnreadCount((prev) => prev - 1);
     }
-
-    if (notification.type === "RequestVisit") {
-      setActiveContent("content4"); // Directly set the calendar as active content
+    if (setActiveContent) {
+      if (notification.type === "RequestVisit") {
+        setActiveContent("content4");
+       } // Directly set the calendar as active content
+    } else {
+      // Fallback navigation logic if setActiveContent is not available
+      if (notification.type === "RequestVisit") {
+        console.warn("setActiveContent is not provided. Please define routes.");
+      }
     }
   };
 
@@ -158,7 +170,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </div>
 
             {/* Chat Dropdown */}
-            <div  className="relative">
+            <div className="relative">
               <ChatDropdown />
             </div>
 
@@ -246,16 +258,16 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                        <li className="flex w-full justify-center hover:bg-gray-100">
-                          <button
-                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
-                            onClick={handleReservations}
-                          >
-                            <h3 className="text-sm font-semibold text-gray-900 px-4">
-                              Reservations
-                            </h3>
-                          </button>
-                        </li>
+                      <li className="flex w-full justify-center hover:bg-gray-100">
+                        <button
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                          onClick={handleReservations}
+                        >
+                          <h3 className="text-sm font-semibold text-gray-900 px-4">
+                            Reservations
+                          </h3>
+                        </button>
+                      </li>
                       {user.userType === "Owner" && (
                         <li className="flex w-full justify-center hover:bg-gray-100">
                           <button
@@ -346,9 +358,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Search Bar */}
             <div className="w-full flex justify-end">
               <div className="max-w-xs">
-                <button
-                  className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center"
-                >
+                <button className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center">
                   <FaSearch className="text-2xl" />
                 </button>
               </div>
@@ -361,7 +371,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             <div className="w-full group mx-auto">
               <button
                 className={`h-full w-full py-1 ${
-                  location.pathname === "/" ? "bg-blue-100 text-blue-500" : "text-gray-500"
+                  location.pathname === "/"
+                    ? "bg-blue-100 text-blue-500"
+                    : "text-gray-500"
                 } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
                 onClick={() => navigate("/")}
               >
@@ -536,11 +548,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               )}
             </div>
           </div>
-
         </div>
       </div>
     </nav>
   );
-};                                                                                                                                           
+};
 
 export default Topbar;

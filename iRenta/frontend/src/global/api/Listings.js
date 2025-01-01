@@ -48,3 +48,19 @@ export const deleteList = async (id) => {
     console.error(err.response?.data?.message || "Error deleting listing");
   }
 };
+
+export const fetchReservedListings = async () => {
+  const authToken = GetToken();
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/reserved`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Error fetching reserved listings:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || "Failed to fetch reserved listings");
+  }
+};

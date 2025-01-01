@@ -25,6 +25,7 @@ import userRoutes from './src/users/users.route.js';
 import listingRoutes from './src/listings/listings.route.js';
 import contractRoutes from './src/contracts/contracts.route.js';
 import ocularRoutes from './src/ocular/ocular.route.js';
+import reservationsRoutes from './src/reservations/reservations.route.js'
 import chatRoutes from './src/chats/chat.route.js';
 import notifRoutes from './src/notifications/notifications.route.js'
 import mapRoutes from './src/maps/maps.routes.js'
@@ -36,8 +37,9 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/contracts", contractRoutes);
 
 // anything related to interactions with owners
-app.use("/api/chats", chatRoutes);
+app.use('/api/chats', chatRoutes);
 app.use('/api/ocular', ocularRoutes);
+app.use('/api/reservations', reservationsRoutes);
 app.use('/api/notifications', notifRoutes);
 
 // map route

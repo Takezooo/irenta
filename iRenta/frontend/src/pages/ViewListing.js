@@ -12,6 +12,7 @@ import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../global/api/Chats";
 import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
+import { createReservation } from "../global/api/Reservations";
 
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
@@ -132,6 +133,16 @@ export const ViewListing = () => {
     }
   };
 
+  const handleReserveListing = async () => {
+    try {
+      await createReservation(selectedProperty._id, selectedProperty.userId);
+      alert("Reservation request sent!");
+    } catch (error) {
+      console.error("Error sending reservation request:", error);
+    }
+  };
+  
+
   useEffect(() => {
     setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
   }, [hasRequestedVisit]);
@@ -211,6 +222,7 @@ export const ViewListing = () => {
                       </button>
                       <button
                         disabled={!hasRequestedVisit} // Disable based on visit request status
+                        onClick={handleReserveListing}
                         className={`${
                           hasRequestedVisit
                             ? "bg-blue-500 text-white hover:bg-blue-600"

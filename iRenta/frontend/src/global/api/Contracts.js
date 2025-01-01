@@ -83,3 +83,20 @@ export const fetchContracts = async () => {
       throw new Error(error.response?.data?.message || "Failed to update contract");
     }
   };
+
+  export const sendContractToSeeker = async (contractId) => {
+    const authToken = GetToken();
+    try {
+      await axios.put(
+        `${API_BASE_URL}/${contractId}/send`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+      alert("Contract sent to Seeker successfully!");
+    } catch (error) {
+      console.error("Error sending contract:", error);
+    }
+  };
+  

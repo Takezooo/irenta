@@ -38,6 +38,7 @@ const contractSchema = new mongoose.Schema({
   pdfPath: { type: String }, // Path to the generated PDF
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  isSentToSeeker: { type: Boolean, default: false },
 });
 
 const Contract = mongoose.model("Contract", contractSchema);

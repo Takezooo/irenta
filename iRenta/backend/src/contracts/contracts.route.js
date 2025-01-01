@@ -5,6 +5,7 @@ import {
   GetContractById,
   UpdateContract,
   GetPdf,
+  SendContractToSeeker,
 } from "./contracts.controller.js";
 import RequireAuth from "../../global/middlewares/RequireAuth.js";
 

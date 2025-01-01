@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { Waitlist } from "./WaitList.js";
 const ManageTenant = () => {
   const [tenants] = useState([
     {
@@ -37,6 +37,8 @@ const ManageTenant = () => {
   return (
     <div className="mt-16 flex-grow p-6 pb-4">
       <h1 className="text-2xl font-bold mb-6">Manage Tenants</h1>
+
+      <Waitlist></Waitlist>
 
       {/* Tenants Table */}
       <div className="overflow-x-auto">

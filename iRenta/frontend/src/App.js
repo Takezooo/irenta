@@ -17,26 +17,28 @@ import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
 
+// Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
 import { ChatDropdownProvider } from "./global/contexts/ChatDropdownContext";
 import { NotificationProvider } from "./global/contexts/NotificationContext.js";
+import { ThemeProvider } from "./contexts/ThemeContext.js";
 
 // Routes
 import PrivateRoute from "./global/routes/PrivateRoute.js";
 import PublicRoute from "./global/routes/PublicRoute.js";
 
-// import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
-    <>
-      <AuthProvider>
-        <PropertyProvider>
-          <ChatDropdownProvider>
-            <NotificationProvider>
-              <Router>
+    <AuthProvider>
+      <PropertyProvider>
+        <ChatDropdownProvider>
+          <NotificationProvider>
+            <Router>
+              {/* Move ThemeProvider inside Router */}
+              <ThemeProvider>
                 <Routes>
                   {/* Public Routes */}
                   <Route
@@ -55,7 +57,6 @@ const App = () => {
                       </PublicRoute>
                     }
                   />
-
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
@@ -77,7 +78,6 @@ const App = () => {
                       </PrivateRoute>
                     }
                   />
-
                   <Route
                     path="/edit-list"
                     element={
@@ -96,7 +96,6 @@ const App = () => {
                       </PrivateRoute>
                     }
                   />
-
                   <Route
                     path="/liked-listing"
                     element={
@@ -105,7 +104,6 @@ const App = () => {
                       </PrivateRoute>
                     }
                   />
-
                   <Route
                     path="/reservations"
                     element={
@@ -119,13 +117,13 @@ const App = () => {
                   <Route path="*" element={<NotAuthorized />} />
                   <Route path="/not-authorized" element={<NotAuthorized />} />
                 </Routes>
-              </Router>
-            </NotificationProvider>
-          </ChatDropdownProvider>
-        </PropertyProvider>
-      </AuthProvider>
+              </ThemeProvider>
+            </Router>
+          </NotificationProvider>
+        </ChatDropdownProvider>
+      </PropertyProvider>
       <ToastContainer />
-    </>
+    </AuthProvider>
   );
 };
 

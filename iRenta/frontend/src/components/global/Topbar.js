@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../global/contexts/AuthContext";
 import { NotificationContext } from "../../global/contexts/NotificationContext";
+import { ThemeContext } from "../../contexts/ThemeContext.js";
 import { GetToken } from "../../global/utils/Token.js";
 import { fetchUserData } from "../../global/api/Users.js";
 import {
@@ -22,8 +23,7 @@ import {
 import { AiFillHeart, AiFillHome } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const { darkMode, setDarkMode } = useContext(ThemeContext);  const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { logout, user } = useContext(AuthContext);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -42,6 +42,14 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
   const navigate = useNavigate();
 
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
+  useEffect(() => {
+    console.log("Dark mode:", darkMode);
+  }, [darkMode]);
+
   useEffect(() => {
     const fetchUser = async () => {
       if (user?.id) {
@@ -57,19 +65,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     fetchUser();
   }, [user, storedToken]);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const getNotifications = async () => {
       try {
@@ -96,7 +91,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     if (setActiveContent) {
       if (notification.type === "RequestVisit") {
         setActiveContent("content4");
-      }// Directly set the calendar as active content
+      } // Directly set the calendar as active content
     } else {
       // Fallback navigation logic if setActiveContent is not available
       if (notification.type === "RequestVisit") {
@@ -104,8 +99,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
       }
     }
     if (notification.type === "ReservationRequest") {
-      navigate('/reservations')
-    } 
+      navigate("/reservations");
+    }
   };
 
   const handleNotifToggle = () => {
@@ -119,11 +114,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   };
 
   const handleManageListings = () => {
-    navigate("/owner-dashboard"); // Navigate to the Manage Listings page
+    navigate("/owner-dashboard");
   };
 
   const handleReservations = () => {
-    navigate("/reservations"); // Navigate to the Manage Listings page
+    navigate("/reservations");
   };
 
   const location = useLocation();
@@ -131,7 +126,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
   return (
     <nav className="fixed top-0 z-50 w-full bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow">
-      <div className=""> 
+      <div className="">
         <div className="hidden lg:flex items-center justify-between px-6 py-3 lg:px-10 lg:pl-3">
           <div className="flex items-center justify-start">
             {isOwnerDashboard && (
@@ -140,9 +135,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 onClick={toggleSidebar}
               >
                 {isOpen ? (
-                  <CgSidebarOpen className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                  <CgSidebarOpen className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300" />
                 ) : (
-                  <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                  <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300" />
                 )}
               </button>
             )}
@@ -195,7 +190,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   <span className="notification-badge">{unreadCount}</span>
                 )}
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Notification
               </h5>
               {notifOpen && (
@@ -243,7 +238,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   )}
                 </div>
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Your Profile
               </h5>
               {dropdownOpen && (
@@ -268,6 +263,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <hr className="my-2"></hr>
                       <li
                         className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
+                        onClick={toggleDarkMode} // Move the onClick here
                       >
                         <span className="px-4 text-sm font-medium dark:text-gray-100">
                           {darkMode ? "Dark Mode" : "Light Mode"}
@@ -276,14 +272,13 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           className={`w-12 h-6 flex items-center ${
                             darkMode ? "bg-gray-800" : "bg-gray-300"
                           } rounded-full p-1 cursor-pointer transition-colors duration-300`}
-                          onClick={toggleDarkMode}
                         >
                           <div
                             className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
                               darkMode ? "translate-x-6" : "translate-x-0"
                             } transition-transform duration-300`}
                           ></div>
-                        </div>                       
+                        </div>
                       </li>
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
@@ -350,6 +345,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </div>
           </div>
         </div>
+
 
         {/* Mobile Topbar Navigation */}
         <div className="lg:hidden grid grid-rows-2 shadow z-50">

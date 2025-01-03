@@ -35,8 +35,8 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
       document.body.classList.remove("dark");
     }
     // Check if contentActive exists in the location state and update activeContent
-    if (location?.state.  contentActive) {
-      setActiveContent(location.state.contentActive);
+    if (location.state?.contentActive) {
+      setActiveContent(location.state?.contentActive);
     }
   }, [location.state, darkMode]); // Run this effect when location.state changes
 

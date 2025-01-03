@@ -22,6 +22,7 @@ import {
 import { AiFillHeart, AiFillHome } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
+  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { logout, user } = useContext(AuthContext);
@@ -55,6 +56,18 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
     fetchUser();
   }, [user, storedToken]);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -117,14 +130,13 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const isOwnerDashboard = location.pathname === "/owner-dashboard";
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-gray-100 border-b border-gray-200 shadow">
-      <div className="">
+    <nav className="fixed top-0 z-50 w-full bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow">
+      <div className=""> 
         <div className="hidden lg:flex items-center justify-between px-6 py-3 lg:px-10 lg:pl-3">
-          {/* Sidebar Toggle and Logo */}
           <div className="flex items-center justify-start">
             {isOwnerDashboard && (
               <button
-                className="text-gray-900 rounded-lg hover:bg-gray-200 group"
+                className="text-gray-900 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 group"
                 onClick={toggleSidebar}
               >
                 {isOpen ? (
@@ -140,29 +152,26 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 className="h-8 me-3"
                 alt="iRenta Logo"
               />
-              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
+              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
                 iRenta
               </span>
             </Link>
           </div>
 
-          {/* Search Bar */}
           <div className="flex-1 flex ml-[30%]">
             <div className="w-full max-w-xs">
               <input
                 type="text"
-                className="w-full bg-white border border-gray-300 rounded-full py-2 px-4 shadow-sm text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full py-2 px-4 shadow-sm text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Search..."
               />
             </div>
           </div>
 
-          {/* User Section */}
           <div className="flex items-center gap-3">
-            {/* Like Button */}
             <div className="relative group">
               <button
-                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-red-500 hover:text-red-600 flex justify-center items-center"
+                className="h-10 w-10 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full text-red-500 hover:text-red-600 flex justify-center items-center"
                 onClick={() => navigate("/liked-listing")}
               >
                 <AiFillHeart className="text-lg" />
@@ -172,16 +181,14 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               </h5>
             </div>
 
-            {/* Chat Dropdown */}
             <div className="relative">
               <ChatDropdown />
             </div>
 
-            {/* Notification Button */}
             <div className="relative group" ref={notifRef}>
               <button
                 onClick={handleNotifToggle}
-                className="h-10 w-10 bg-gray-200 hover:bg-gray-300 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
+                className="h-10 w-10 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full text-blue-500 hover:text-blue-600 flex justify-center items-center"
               >
                 <FaBell className="text-lg" />
                 {unreadCount > 0 && (
@@ -192,9 +199,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Notification
               </h5>
               {notifOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-md z-50">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md z-50">
                   <ul className="py-2">
-                    <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                    <li className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                       <Link
                         to="/view-contract"
                         className="block w-full text-left"
@@ -207,7 +214,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
-                      className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-100 cursor-pointer bg-gray-100"
+                      className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600 cursor-pointer bg-gray-100 dark:bg-gray-800"
                     >
                       {notification.message}
                     </div>
@@ -216,13 +223,12 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               )}
             </div>
 
-            {/* Profile Button */}
             <div className="relative group" ref={profileRef}>
               <button
                 onClick={handleProfileToggle}
-                className="flex items-center gap-2 rounded-full hover:ring-blue-500 hover:ring-4 transition-all"
+                className="flex items-center gap-2 rounded-full hover:ring-blue-500 dark:hover:ring-gray-600 hover:ring-4 transition-all"
               >
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                   {user ? (
                     <img
                       src={
@@ -241,12 +247,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Your Profile
               </h5>
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-md">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md">
                   {user ? (
-                    // Logged-in Dropdown
                     <ul className="py-2">
-                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
                               userProfile?.info?.profile.link ||
@@ -256,34 +261,52 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-800">
+                        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                           {userProfile?.info?.firstName}
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li className="flex w-full justify-center hover:bg-gray-100">
+                      <li
+                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
+                      >
+                        <span className="px-4 text-sm font-medium dark:text-gray-100">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                          onClick={toggleDarkMode}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>                       
+                      </li>
+                      <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
-                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
                           onClick={handleReservations}
                         >
-                          <h3 className="text-sm font-semibold text-gray-900 px-4">
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                             Reservations
                           </h3>
                         </button>
                       </li>
                       {user.userType === "Owner" && (
-                        <li className="flex w-full justify-center hover:bg-gray-100">
+                        <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                           <button
-                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900"
+                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
                             onClick={handleManageListings}
                           >
-                            <h3 className="text-sm font-semibold text-gray-900 px-4">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                               Manage Listings
                             </h3>
                           </button>
                         </li>
                       )}
-                      {/* Liked Button */}
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button
@@ -298,7 +321,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       </li>
                     </ul>
                   ) : (
-                    // Logged-out Dropdown
                     <ul className="py-3">
                       <li className="flex w-full justify-center">
                         <Link
@@ -331,18 +353,18 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
         {/* Mobile Topbar Navigation */}
         <div className="lg:hidden grid grid-rows-2 shadow z-50">
-          <div className="flex items-center justify-between w-full px-4 bg-white shadow-md">
+          <div className="flex items-center justify-between w-full px-4 bg-white dark:bg-gray-800 shadow-md">
             {/* Sidebar Toggle and Logo */}
             <div className="flex items-center justify-start">
               {isOwnerDashboard && (
                 <button
-                  className="text-gray-900 rounded-lg hover:bg-gray-200 group"
+                  className="text-gray-900 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 group"
                   onClick={toggleSidebar}
                 >
                   {isOpen ? (
-                    <CgSidebarOpen className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                    <CgSidebarOpen className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300" />
                   ) : (
-                    <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900" />
+                    <CgSidebar className="text-center text-3xl text-blue-800 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300" />
                   )}
                 </button>
               )}
@@ -353,7 +375,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   alt="iRenta Logo"
                 />
               </Link>
-              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
+              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
                 iRenta
               </span>
             </div>
@@ -361,7 +383,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             {/* Search Bar */}
             <div className="w-full flex justify-end">
               <div className="max-w-xs">
-                <button className="h-full w-full py-4 hover:bg-gray-200 text-blue-500 hover:text-blue-600 flex justify-center items-center">
+                <button className="h-full w-full py-4 hover:bg-gray-200 dark:hover:bg-gray-600 text-blue-500 hover:text-blue-600 flex justify-center items-center">
                   <FaSearch className="text-2xl" />
                 </button>
               </div>
@@ -369,20 +391,20 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
           </div>
 
           {/* Mobile Nav bar */}
-          <div className="grid grid-cols-5 w-full bg-white shadow-md z-50">
+          <div className="grid grid-cols-5 w-full bg-white dark:bg-gray-800 shadow-md z-50">
             {/* Home Button */}
             <div className="w-full group mx-auto">
               <button
                 className={`h-full w-full py-1 ${
                   location.pathname === "/"
-                    ? "bg-blue-100 text-blue-500"
-                    : "text-gray-500"
-                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
+                    ? "bg-blue-100 dark:bg-blue-800 text-blue-500"
+                    : "text-gray-500 dark:text-gray-300"
+                } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-600 flex justify-center items-center`}
                 onClick={() => navigate("/")}
               >
                 <AiFillHome className="text-3xl" />
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Home
               </h5>
             </div>
@@ -392,14 +414,14 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               <button
                 className={`h-full w-full py-1 ${
                   location.pathname === "/liked-listing"
-                    ? "bg-blue-100 text-blue-500"
-                    : "text-gray-500"
-                } hover:bg-gray-200 hover:text-red-600 flex justify-center items-center`}
+                    ? "bg-blue-100 dark:bg-blue-800 text-blue-500"
+                    : "text-gray-500 dark:text-gray-300"
+                } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-red-600 flex justify-center items-center`}
                 onClick={() => navigate("/liked-listing")}
               >
                 <AiFillHeart className="text-3xl" />
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Liked Listings
               </h5>
             </div>
@@ -413,8 +435,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             <div className="w-full group mx-auto" ref={notifRef}>
               <button
                 className={`h-full w-full py-1 ${
-                  notifOpen ? "bg-blue-100 text-blue-500" : "text-gray-500"
-                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
+                  notifOpen ? "bg-blue-100 dark:bg-blue-800 text-blue-500" : "text-gray-500 dark:text-gray-300"
+                } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleNotifToggle}
               >
                 <FaBell className="text-3xl" />
@@ -422,13 +444,13 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   <span className="notification-badge">{unreadCount}</span>
                 )}
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Notification
               </h5>
               {notifOpen && (
-                <div className="fixed mt-28 inset-0 bg-white mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
+                <div className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
                   <ul className="py-2">
-                    <li className="flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                    <li className="flex gap-4 items-center text-left m-4 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                       <Link
                         to="/view-contract"
                         className="block w-full text-left"
@@ -441,6 +463,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
+                      className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600 cursor-pointer bg-gray-100 dark:bg-gray-800"
                     >
                       {notification.message}
                     </div>
@@ -453,8 +476,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             <div className="group w-full mx-auto" ref={profileRef}>
               <button
                 className={`h-full w-full py-1 ${
-                  dropdownOpen ? "bg-blue-100 text-blue-500" : "text-gray-500"
-                } hover:bg-gray-200 hover:text-blue-600 flex justify-center items-center`}
+                  dropdownOpen ? "bg-blue-100 dark:bg-blue-800 text-blue-500" : "text-gray-500 dark:text-gray-300"
+                } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleProfileToggle}
               >
                 <div className="h-full w-full flex items-center justify-center overflow-hidden">
@@ -472,16 +495,16 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   )}
                 </div>
               </button>
-              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 p-1 rounded-lg opacity-90 cursor-default">
+              <h5 className="hidden group-hover:block absolute top-full left-1/2 transform -translate-x-1/2 text-nowrap mt-2 text-sm text-white bg-gray-500 dark:bg-gray-700 p-1 rounded-lg opacity-90 cursor-default">
                 Your Profile
               </h5>
               {dropdownOpen && (
-                <div className="fixed mt-28 inset-0 bg-white mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
+                <div className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
                   {user ? (
                     // Logged-in Dropdown
                     <ul className="py-2 flex flex-col">
-                      <li className="flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <li className="flex gap-4 items-center text-left m-4 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
                               userProfile?.info?.profile.link ||
@@ -491,18 +514,37 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-800">
+                        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                           {userProfile?.info?.firstName}
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
+                      <li
+                        className="flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                          onClick={toggleDarkMode}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>
+                        <span className="text-sm py-2 font-medium dark:text-white">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                      </li>
                       {user.userType === "Owner" && (
-                        <li className="flex w-full justify-center hover:bg-gray-100">
+                        <li className="flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                           <button
-                            className="flex items-center w-fit text-left px-4 py-1 text-sm text-gray-900"
+                            className="flex items-center w-fit text-left px-4 py-1 text-sm text-gray-900 dark:text-gray-300"
                             onClick={handleManageListings}
                           >
-                            <h3 className="text-sm font-semibold text-gray-900 px-4">
+                            <h3 className="text-sm font-semibold py-1 text-gray-900 dark:text-gray-300 px-4">
                               Manage Listings
                             </h3>
                           </button>
@@ -512,7 +554,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <li className="flex self-end w-full justify-center">
                         <button
                           onClick={logout}
-                          className="w-full flex gap-4 items-center text-left m-4 bg-gray-100 rounded-lg p-4 text-sm text-gray-700 hover:bg-gray-100"
+                          className="w-full flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                         >
                           <FaPowerOff className="h-5 w-5" />
                           <h3 className="text-sm font-semibold px-4">
@@ -538,9 +580,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <li className="flex w-full justify-center">
                         <Link
                           to="/register"
-                          className="w-full flex gap-4 items-center justify-center text-center m-4 rounded-full p-4 bg-gray-100 text-gray-100 hover:bg-gray-200"
+                          className="w-full flex gap-4 items-center justify-center text-center m-4 rounded-full p-4 bg-gray-100 dark:bg-gray-700 text-gray-100 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                         >
-                          <span className="text-sm font-semibold text-gray-500 group-hover:text-gray-900">
+                          <span className="text-sm font-semibold text-gray-500 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100">
                             Register
                           </span>
                         </Link>
@@ -552,6 +594,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </div>
           </div>
         </div>
+
       </div>
     </nav>
   );

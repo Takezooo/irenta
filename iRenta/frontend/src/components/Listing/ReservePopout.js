@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AiOutlineClose,
   AiFillCheckCircle,
   AiFillCloseCircle,
 } from "react-icons/ai";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import { updateReservationStatus } from "../../global/api/Reservations";
 
-const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
+const ReservePopout = ({
+  property,
+  onClose,
+  isOwner,
+  requestDetails,
+  setActiveContent,
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   // Dummy property data if no property is provided
   const dummyProperty = {
     title: "Modern Beachside Villa",
@@ -35,6 +44,27 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
     } catch (error) {
       console.error("Error declining reservation:", error);
       alert("Failed to decline reservation. Please try again.");
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!displayRequestDetails.id) {
+      alert("Reservation ID is missing. Cannot approve the request.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Update reservation status to Approved
+      await updateReservationStatus(displayRequestDetails.id, "Approved");
+
+      // Redirect to ContractHub content5 with context
+      navigate("/owner-dashboard", { state: { contentActive: "content5" } });
+    } catch (error) {
+      console.error("Error approving reservation:", error);
+      alert("Failed to approve reservation. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,7 +149,7 @@ const ReservePopout = ({ property, onClose, isOwner, requestDetails }) => {
         {isOwner && (
           <div className="mt-6 flex justify-around">
             <button
-              onClick={() => alert("Approved and contract sent!")}
+              onClick={handleApprove}
               className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
             >
               Approve and Send Contract

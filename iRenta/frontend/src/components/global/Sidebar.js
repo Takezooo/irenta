@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
 
 import { IoHome } from "react-icons/io5";
@@ -25,7 +25,6 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
   const { logout, user } = useContext(AuthContext);
 
   const isActive = (content) => activeContent === content;
-
   // Show sidebar only on `/owner-dashboard` routes
   const isOwnerDashboard = location.pathname.startsWith("/owner-dashboard");
 
@@ -35,7 +34,11 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
     } else {
       document.body.classList.remove("dark");
     }
-  }, [darkMode]);
+    // Check if contentActive exists in the location state and update activeContent
+    if (location?.state.  contentActive) {
+      setActiveContent(location.state.contentActive);
+    }
+  }, [location.state, darkMode]); // Run this effect when location.state changes
 
   if (!isOwnerDashboard) {
     return null; // Hide Sidebar for other routes
@@ -150,8 +153,12 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
             )}
           </div>
 
-          <div className={`${isOpen ? "w-full" : "w-20"} flex flex-col items-center`}>
-            <hr className="w-full my-2 border-gray-300 dark:border-gray-600" />
+          <div
+            className={`${
+              isOpen ? "w-full" : "w-20"
+            } flex flex-col items-center`}
+          >
+            <hr className="w-full my-2" />
             <button
               onClick={logout}
               className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 dark:hover:bg-gray-600 group`}
@@ -217,7 +224,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
             }`}
           >
             <FaFileContract size={24} />
-            <span className="text-xs dark:text-white">Contracts</span>
+            <span className="text-xs">Contracts</span>
           </button>
         </div>
       </div>

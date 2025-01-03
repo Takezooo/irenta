@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import CreateContract from "./CreateContract";
-import EditContract from "./EditContract";
-import ViewContract from "./ViewContract"; // Import the ViewContract component
-import { fetchContracts, downloadPdf, updateContractStatus } from "../../../global/api/Contracts.js"; // Import the API function to fetch and update contracts
+import CreateContract from "./CreateLease.js";
+import EditContract from "./EditLease.js";
+import ViewContract from "./ViewLease.js"; // Import the ViewContract component
+import { fetchContracts, downloadPdf, updateContractStatus } from "../../../global/api/Leases.js"; // Import the API function to fetch and update contracts
 
-const ContractHub = () => {
+const LeaseHub = () => {
   const [view, setView] = useState("ContractHub"); // State to toggle between views
   const [contracts, setContracts] = useState([]); // State to store fetched contracts
   const [selectedContractId, setSelectedContractId] = useState(null); // Track the contract being edited or viewed
@@ -210,4 +210,4 @@ const ContractHub = () => {
   );
 };
 
-export default ContractHub;
+export default LeaseHub;

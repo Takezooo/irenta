@@ -1,4 +1,4 @@
-import Contract from "./contracts.model.js";
+import Contract from "./leases.model.js";
 import generatePdf from "../../global/utils/PdfGenerator.js";
 import fs from "fs";
 import path from "path";

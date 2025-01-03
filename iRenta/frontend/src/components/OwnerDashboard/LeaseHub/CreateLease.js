@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 
-import { createContract } from "../../../global/api/Contracts.js";
+import { createContract } from "../../../global/api/Leases.js";
 import { fetchUserData } from "../../../global/api/Users.js";
 
 import { AuthContext } from "../../../global/contexts/AuthContext.js";

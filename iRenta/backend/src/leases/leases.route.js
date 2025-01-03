@@ -6,7 +6,7 @@ import {
   UpdateContract,
   GetPdf,
   SendContractToSeeker,
-} from "./contracts.controller.js";
+} from "./leases.controller.js";
 import RequireAuth from "../../global/middlewares/RequireAuth.js";
 
 const router = express.Router();

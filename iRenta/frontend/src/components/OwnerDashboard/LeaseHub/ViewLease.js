@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchContractById } from "../../../global/api/Contracts.js"; // Create a function to fetch a specific contract
+import { fetchContractById } from "../../../global/api/Leases.js"; // Create a function to fetch a specific contract
 
 const ViewContract = ({ contractId }) => {
   const [contractDetails, setContractDetails] = useState([]);

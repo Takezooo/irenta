@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { fetchContractById, updateContract } from "../../../global/api/Leases.js"; // Create a function to fetch a specific contract
+import { fetchLeaseById, updateLease } from "../../../global/api/Leases.js";
+import { fetchTermsTemplates } from "../../../global/api/Terms.js";
 
-const EditContract = ({ contractId, onContractUpdated }) => {
+const EditLease = ({ leaseId, onLeaseUpdated }) => {
   const [formData, setFormData] = useState(null);
+  const [termsTemplates, setTermsTemplates] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const getContract = async () => {
+    const getLease = async () => {
       try {
-        const fetchedContract = await fetchContractById(contractId);
-        if (fetchedContract.status !== "Pending") {
-          setError("Only contracts with status 'Passive' can be edited.");
+        const fetchedLease = await fetchLeaseById(leaseId);
+        if (fetchedLease.status !== "Pending") {
+          setError("Only leases with status 'Pending' can be edited.");
         } else {
-          setFormData(fetchedContract);
+          setFormData(fetchedLease);
         }
       } catch (err) {
-        console.error("Failed to fetch contract:", err);
-        setError("Failed to fetch contract data.");
+        console.error("Failed to fetch lease:", err);
+        setError("Failed to fetch lease data.");
       }
     };
 
-    getContract();
-  }, [contractId]);
+    getLease();
+  }, [leaseId]);
+
+  useEffect(() => {
+    const getTermsTemplates = async () => {
+      try {
+        const templates = await fetchTermsTemplates();
+        setTermsTemplates(templates);
+      } catch (err) {
+        console.error("Failed to fetch terms templates:", err);
+      }
+    };
+
+    getTermsTemplates();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +49,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
 
         keys.forEach((key, index) => {
           if (index === keys.length - 1) {
-            nestedData[key] = value; // Set the value at the last key
+            nestedData[key] = value;
           } else {
             if (!nestedData[key]) nestedData[key] = {};
             nestedData = nestedData[key];
@@ -51,42 +66,20 @@ const EditContract = ({ contractId, onContractUpdated }) => {
     }
   };
 
-  const [status, setStatus] = useState("Pending"); // Default status
-
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value); // Update the selected status
-  };
-
-  // Determine the text color based on the selected status
-  const getTextColor = () => {
-    switch (status) {
-      case "Pending":
-        return "text-orange-500";
-      case "Active":
-        return "text-blue-500";
-      case "Terminated":
-        return "text-red-500";
-      case "Completed":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (formData.status === "Pending") {
-        const updatedContract = await updateContract(contractId, formData);
-        alert("Contract updated successfully!");
-        console.log("Updated contract:", updatedContract);
-        onContractUpdated(); // Refresh the contract list
+        const updatedLease = await updateLease(leaseId, formData);
+        alert("Lease updated successfully!");
+        console.log("Updated lease:", updatedLease);
+        onLeaseUpdated();
       } else {
-        alert("Only inactive contracts can be edited.");
+        alert("Only leases with status 'Pending' can be edited.");
       }
     } catch (error) {
-      console.error("Error updating contract:", error);
-      alert("Failed to update the contract. Please try again.");
+      console.error("Error updating lease:", error);
+      alert("Failed to update the lease. Please try again.");
     }
   };
 
@@ -102,7 +95,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
     <div className="flex-grow">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
-          Edit Contract
+          Edit Lease
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -113,7 +106,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="property.name"
-                value={formData.property.name}
+                value={formData.property.name || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -125,13 +118,14 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="tenant"
-                value={formData.tenant}
+                value={formData.tenant || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
           </div>
 
+          {/* Address Section */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -140,7 +134,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="property.address.houseNumber"
-                value={formData.property.address.houseNumber}
+                value={formData.property.address.houseNumber || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -152,7 +146,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="property.address.street"
-                value={formData.property.address.street}
+                value={formData.property.address.street || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -164,7 +158,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="property.address.city"
-                value={formData.property.address.city}
+                value={formData.property.address.city || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -176,27 +170,15 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="text"
                 name="property.address.zip"
-                value={formData.property.address.zip}
+                value={formData.property.address.zip || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
           </div>
 
+          {/* Contract Details Section */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Landlord
-              </label>
-              <input
-                type="text"
-                name="landlordName"
-                value={formData.landlordName}
-                readOnly
-                onClick={(e) => e.preventDefault()}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Start Date
@@ -204,7 +186,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="date"
                 name="contractDetails.startDate"
-                value={formData.contractDetails.startDate}
+                value={formData.contractDetails.startDate || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
@@ -216,57 +198,50 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               <input
                 type="date"
                 name="contractDetails.endDate"
-                value={formData.contractDetails.endDate}
+                value={formData.contractDetails.endDate || ""}
                 onChange={handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                Status
+              <label className="block text-sm font-medium text-gray-700">
+                Rent Amount
               </label>
-              <select
-                className={`w-full mt-1 border border-gray-300 rounded px-2 py-2 text-sm font-medium ${getTextColor()}`}
-                value={status}
-                onChange={handleStatusChange}
-              >
-                <option className="text-orange-500" value="Pending">Pending</option>
-                <option className="text-blue-500" value="Active">Active</option>
-                <option className="text-red-500" value="Terminated">Terminated</option>
-                <option className="text-green-500" value="Completed">Completed</option>
-              </select>
+              <input
+                type="number"
+                name="contractDetails.rentAmount"
+                value={formData.contractDetails.rentAmount || ""}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              />
             </div>
           </div>
 
+          {/* Terms Templates Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Terms and Conditions
+              Terms and Conditions Template
             </label>
-            <textarea
+            <select
               name="contractDetails.termsAndConditions"
-              value={formData.contractDetails.termsAndConditions}
+              value={formData.contractDetails.termsAndConditions || ""}
               onChange={handleChange}
-              rows="4"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-            />
+            >
+              <option value="">Select a template</option>
+              {termsTemplates.map((template) => (
+                <option key={template._id} value={template.content}>
+                  {template.title}
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Rules and Regulations
-            </label>
-            <textarea
-              name="contractDetails.rulesAndRegulations"
-              value={formData.contractDetails.rulesAndRegulations}
-              onChange={handleChange}
-              rows="4"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-            />
-          </div>
+
           <button
             type="submit"
             className="w-full mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
           >
-            Update Contract
+            Update Lease
           </button>
         </form>
       </div>
@@ -274,4 +249,4 @@ const EditContract = ({ contractId, onContractUpdated }) => {
   );
 };
 
-export default EditContract;
+export default EditLease;

@@ -14,7 +14,7 @@ import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
 import ManageTenants from "../OwnerDashboard/Tenants/ManageTenants.js";
 import OcularVisitCalendar from "../OwnerDashboard/OcularVisitCalendar.js";
-import LeaseHub from "../OwnerDashboard/LeaseHub/LeaseHub.js";
+import ManageLease from "../OwnerDashboard/Lease/ManageLease.js";
 import TermsManagement from "../OwnerDashboard/ManageTerms.js";
 
 import { AuthContext } from "../../global/contexts/AuthContext.js";
@@ -164,7 +164,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
                   />
                   {isOpen && (
                     <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black dark:text-white ms-3 whitespace-nowrap">
-                      LeaseHub
+                      Manage Lease
                     </span>
                   )}
                 </button>
@@ -243,7 +243,16 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
             }`}
           >
             <FaFileContract size={24} />
-            <span className="text-xs">Contracts</span>
+            <span className="text-xs">Manage Terms</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content5")}
+            className={`flex flex-col items-center text-blue-500 dark:text-blue-400 ${
+              isActive("content6") ? "text-blue-900 dark:text-blue-500" : ""
+            }`}
+          >
+            <FaFileContract size={24} />
+            <span className="text-xs">Manage Lease</span>
           </button>
         </div>
       </div>
@@ -259,7 +268,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
         {activeContent === "content3" && <ManageTenants />}
         {activeContent === "content4" && <OcularVisitCalendar />}
         {activeContent === "content5" && <TermsManagement />}
-        {activeContent === "content6" && <LeaseHub />}
+        {activeContent === "content6" && <ManageLease />}
       </div>
     </div>
   );

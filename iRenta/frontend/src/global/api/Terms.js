@@ -27,3 +27,16 @@ export const createTermsTemplate = async (data) => {
     throw error;
   }
 };
+
+export const updateTermsTemplate = async (id, updatedData) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.put(`${API_BASE_URL}/${id}`, updatedData, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating terms template:", error);
+    throw error;
+  }
+};

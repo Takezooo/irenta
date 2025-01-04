@@ -5,7 +5,11 @@ const leaseSchema = new mongoose.Schema(
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true, // Changed to ObjectId to establish a proper relationship with the User collection
+      required: false, // Not required since tenantPlaceholder can be used
+    },
+    tenantPlaceholder: {
+      name: { type: String, required: false }, // Optional placeholder for tenant name
+      email: { type: String, required: false }, // Optional placeholder for tenant email
     },
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,11 +38,11 @@ const leaseSchema = new mongoose.Schema(
       depositAmount: { type: Number, required: true },
       termsAndConditionsId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "TermsAndConditions", // Reference to the TermsAndConditions collection
-        required: false, // Optional if the landlord provides custom terms
+        ref: "TermsAndConditions",
+        required: false,
       },
       customTermsAndConditions: {
-        type: String, // If the landlord uses custom terms, this field will be filled
+        type: String,
         required: false,
       },
       rulesAndRegulations: { type: String, required: false },
@@ -48,16 +52,26 @@ const leaseSchema = new mongoose.Schema(
       enum: ["Pending", "Active", "Terminated", "Completed"],
       default: "Pending",
     },
-    pdfPath: { type: String }, // Path to the generated PDF
+    pdfPath: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     isSentToSeeker: { type: Boolean, default: false },
-    isSignedBySeeker: { type: Boolean, default: false }, // Tracks if the lease is signed by the Seeker
-    isSignedByLandlord: { type: Boolean, default: false }, // Tracks if the lease is signed by the Landlord
-    uploadedAgreementPath: { type: String }, // For storing custom lease agreement files
+    isSignedBySeeker: { type: Boolean, default: false },
+    isSignedByLandlord: { type: Boolean, default: false },
+    uploadedAgreementPath: { type: String },
   },
-  { timestamps: true } // Adds createdAt and updatedAt fields automatically
+  { timestamps: true }
 );
+
+// Custom validation to ensure at least one of `tenant` or `tenantPlaceholder` is provided
+leaseSchema.pre("save", function (next) {
+  if (!this.tenant && (!this.tenantPlaceholder || !this.tenantPlaceholder.name || !this.tenantPlaceholder.email)) {
+    return next(
+      new Error("Either tenant (User reference) or tenantPlaceholder (name and email) must be provided.")
+    );
+  }
+  next();
+});
 
 const Lease = mongoose.model("Lease", leaseSchema);
 

@@ -12,36 +12,55 @@ const __dirname = path.dirname(__filename);
 // Create a new lease
 export const CreateLease = async (req, res) => {
   try {
-    const { property, leaseDetails, landlordName, termsTemplateId } = req.body;
+    const { tenant, tenantPlaceholder, property, contractDetails, landlordName, termsTemplateId } = req.body;
 
     // Validation
     if (!landlordName) {
       return res.status(400).json({ message: "Landlord name is required" });
     }
-    if (!property?.name || !property?.address?.street) {
+
+    if (
+      !property?.name ||
+      !property?.address?.houseNumber ||
+      !property?.address?.street ||
+      !property?.address?.city ||
+      !property?.address?.zip
+    ) {
       return res.status(400).json({ message: "Property details are incomplete" });
     }
-    if (!leaseDetails?.startDate || !leaseDetails?.rentAmount) {
+
+    if (
+      !contractDetails?.startDate ||
+      !contractDetails?.endDate ||
+      !contractDetails?.rentAmount ||
+      !contractDetails?.depositAmount
+    ) {
       return res.status(400).json({ message: "Lease details are incomplete" });
     }
 
-    // Fetch the selected terms template if provided
-    let termsContent = "";
+    // Validate tenant or tenantPlaceholder
+    if (!tenant && (!tenantPlaceholder || !tenantPlaceholder.name || !tenantPlaceholder.email)) {
+      return res.status(400).json({
+        message: "Either tenant (User reference) or tenantPlaceholder (name and email) must be provided",
+      });
+    }
+
+    // Handle tenant field for MongoDB
+    const leaseData = {
+      ...req.body,
+      tenant: tenant || undefined, // Ensure tenant is either a valid ObjectId or undefined
+    };
+
+    // Fetch terms template content if provided
     if (termsTemplateId) {
       const termsTemplate = await Terms.findById(termsTemplateId);
       if (!termsTemplate) {
         return res.status(404).json({ message: "Terms template not found" });
       }
-      termsContent = termsTemplate.content;
+      leaseData.contractDetails.termsAndConditions = termsTemplate.content;
     }
 
-    // Include terms content in the lease
-    const leaseData = {
-      ...req.body,
-      termsAndConditions: termsContent,
-    };
-
-    // Create Lease
+    // Create the lease
     const lease = await Lease.create(leaseData);
 
     res.status(201).json(lease);
@@ -50,6 +69,7 @@ export const CreateLease = async (req, res) => {
     res.status(500).json({ message: "Failed to create lease" });
   }
 };
+
 
 // Fetch all leases created by the landlord
 export const GetCreatedLeases = async (req, res) => {

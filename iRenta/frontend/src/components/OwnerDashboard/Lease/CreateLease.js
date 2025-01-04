@@ -27,8 +27,13 @@ const CreateLease = () => {
         zip: "",
       },
     },
-    tenant: "", // Selected tenant (ObjectId from database)
-    landlord: user.id, // Current logged-in landlord
+    tenant: "",
+    tenantPlaceholder: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+    },
+    landlord: user.id,
     landlordName: "",
     contractDetails: {
       startDate: "",
@@ -42,7 +47,8 @@ const CreateLease = () => {
     },
   });
 
-  const [preloadedTerms, setPreloadedTerms] = useState([]); // Preloaded terms from backend
+  const [usePlaceholderTenant, setUsePlaceholderTenant] = useState(false);
+  const [preloadedTerms, setPreloadedTerms] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -58,7 +64,7 @@ const CreateLease = () => {
 
     const fetchPreloadedTerms = async () => {
       try {
-        const terms = await fetchTermsTemplates(); // Fetch predefined terms from backend
+        const terms = await fetchTermsTemplates();
         setPreloadedTerms(terms);
       } catch (err) {
         console.error("Failed to fetch terms and conditions:", err);
@@ -97,11 +103,30 @@ const CreateLease = () => {
     }
   };
 
+  const validateDates = () => {
+    const { startDate, endDate } = formData.contractDetails;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+
+    if (start < today) {
+      alert("The start date cannot be in the past.");
+      return false;
+    }
+
+    const durationInDays = (end - start) / (1000 * 60 * 60 * 24);
+    if (durationInDays < 30) {
+      alert("The lease duration must be at least 1 month.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.contractDetails.startDate || !formData.contractDetails.endDate || !formData.contractDetails.rentAmount) {
-      alert("Please fill out all required fields.");
+    if (!validateDates()) {
       return;
     }
 
@@ -123,7 +148,7 @@ const CreateLease = () => {
   };
 
   return (
-<div className="flex-grow">
+    <div className="flex-grow">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
           Create Lease
@@ -194,19 +219,73 @@ const CreateLease = () => {
           </div>
 
           {/* Tenant Details */}
-          <div className="grid grid-cols-1">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tenant
-              </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Tenant Details
+            </label>
+            <div className="flex items-center mb-2">
               <input
-                type="text"
-                name="tenant"
-                value={formData.tenant}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                type="checkbox"
+                id="usePlaceholderTenant"
+                checked={usePlaceholderTenant}
+                onChange={() => setUsePlaceholderTenant((prev) => !prev)}
+                className="mr-2"
               />
+              <label htmlFor="usePlaceholderTenant" className="text-sm">
+                Use Placeholder Tenant Details
+              </label>
             </div>
+            {usePlaceholderTenant ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Placeholder Name
+                  </label>
+                  <input
+                    type="text"
+                    name="tenantPlaceholder.name"
+                    value={formData.tenantPlaceholder.name}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Placeholder Email
+                  </label>
+                  <input
+                    type="email"
+                    name="tenantPlaceholder.email"
+                    value={formData.tenantPlaceholder.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Placeholder Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="tenantPlaceholder.phoneNumber"
+                    value={formData.tenantPlaceholder.phoneNumber}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="text"
+                  name="tenant"
+                  value={formData.tenant}
+                  onChange={handleChange}
+                  placeholder="Enter Tenant ID"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                />
+              </div>
+            )}
           </div>
 
           {/* Lease Details */}

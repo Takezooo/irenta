@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
 import MapPicker from "../Mapping/MapPicker.js";
 import { GetToken } from "../../global/utils/Token.js";
+import { ThemeContext } from "../../contexts/ThemeContext";
 
 const API_LINK = "http://localhost:5000/api";
 
 const AddListing = () => {
+  const { darkMode } = useContext(ThemeContext);
   const storedToken = GetToken();
   const [selectedImages, setSelectedImages] = useState([]);
   const [fileName] = useState("No file chosen");
-
+  const [errorMessage, setErrorMessage] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -20,6 +22,7 @@ const AddListing = () => {
   const [bedroomNumber, setBedroomNumber] = useState("");
   const [bathroomNumber, setBathroomNumber] = useState("");
   const [propertySize, setPropertySize] = useState("");
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [address, setAddress] = useState({
     houseNumber: "",
     street: "",
@@ -29,40 +32,83 @@ const AddListing = () => {
     lat: null,
   });
   const [visitAvailability, setVisitAvailability] = useState({
-    startTime: "", // Default empty or preset value like "09:00"
-    endTime: "", // Default empty or preset value like "18:00"
+    startTime: "",
+    endTime: "",
   });
-  
+
+  const handleAmenityChange = (e) => {
+    const { value, checked } = e.target;
+    setSelectedAmenities((prev) =>
+      checked ? [...prev, value] : prev.filter((amenity) => amenity !== value)
+    );
+  };
+
   const handleLocationChange = async (location) => {
     try {
       const response = await axios.get(
         `/api/map/geocode?lat=${location.lat}&lng=${location.lng}`
       );
       const results = response.data.results;
-  
+
       if (results && results.length > 0) {
         const addressComponents = results[0].address_components;
-  
-        // Parse address components
-        const houseNumber = addressComponents.find((comp) =>
-          comp.types.includes("street_number")
-        )?.long_name || "";
-        const street = addressComponents.find((comp) =>
-          comp.types.includes("route")
-        )?.long_name || "";
-        const city = addressComponents.find((comp) =>
-          comp.types.includes("locality")
-        )?.long_name || "";
-        const zip = addressComponents.find((comp) =>
-          comp.types.includes("postal_code")
-        )?.long_name || "";
-  
+        console.log(addressComponents);
+
+        // Initialize addressData with default or empty values
+        let addressData = {
+          houseNumber: "",
+          street: "",
+          city: "",
+          zip: "",
+          plusName: "", // Example dynamic field, can be extended
+        };
+
+        // Flag to check if required fields are found
+        let requiredFieldsFound = {
+          houseNumber: false,
+          street: false,
+          city: false,
+        };
+
+        // Iterate over address components and dynamically populate addressData
+        addressComponents.forEach((component) => {
+          const types = component.types;
+
+          if (types.includes("street_number")) {
+            addressData.houseNumber = component.long_name;
+            requiredFieldsFound.houseNumber = true;
+          }
+          if (types.includes("route")) {
+            addressData.street = component.long_name;
+            requiredFieldsFound.street = true;
+          }
+          if (types.includes("locality")) {
+            addressData.city = component.long_name;
+            requiredFieldsFound.city = true;
+          }
+          if (types.includes("postal_code")) {
+            addressData.zip = component.long_name;
+          }
+          if (types.includes("plus_code")) {
+            // Example of another dynamic component
+            addressData.plusName = component.long_name;
+          }
+        });
+
+        // Fallback mechanism: if any of the required fields are missing, set default values
+        if (!requiredFieldsFound.houseNumber) {
+          addressData.houseNumber = "Please Input Manually"; // Or empty string / N/A
+        }
+        if (!requiredFieldsFound.street) {
+          addressData.street = "Please Input Manually"; // Or empty string / N/A
+        }
+        if (!requiredFieldsFound.city) {
+          addressData.city = "Please Input Manually"; // Or empty string / N/A
+        }
+
         // Update address state
         setAddress({
-          houseNumber,
-          street,
-          city,
-          zip,
+          ...addressData,
           lng: location.lng,
           lat: location.lat,
         });
@@ -73,8 +119,7 @@ const AddListing = () => {
       console.error("Error fetching address details:", error);
     }
   };
-  
-  
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -97,6 +142,7 @@ const AddListing = () => {
           propertySize,
           address,
           visitAvailability,
+          amenities: selectedAmenities,
         })
       );
 
@@ -122,18 +168,38 @@ const AddListing = () => {
   };
 
   const navigate = useNavigate();
-
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
-    const newFiles = files.filter(
-      (file) => file.type.startsWith("image/") && !selectedImages.includes(file)
-    );
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
 
-    if (selectedImages.length + newFiles.length > 10) {
-      alert("You can only upload up to 10 images.");
+    const invalidFiles = files.filter(
+      (file) => !allowedTypes.includes(file.type)
+    );
+    const newFiles = files.filter(
+      (file) =>
+        allowedTypes.includes(file.type) &&
+        file.type.startsWith("image/") &&
+        !selectedImages.includes(file)
+    );
+    // Check for invalid file types
+    if (invalidFiles.length > 0) {
+      setErrorMessage(
+        `Invalid file type detected. Only PNG, JPG, and JPEG files are allowed. Invalid files: ${invalidFiles
+          .map((file) => file.name)
+          .join(", ")}`
+      );
+      event.target.value = ""; // Reset the input field
       return;
     }
 
+    // Check for file count limit
+    if (selectedImages.length + newFiles.length > 10) {
+      setErrorMessage("You can only upload up to 10 images.");
+      return;
+    }
+
+    // Clear error message and update state with valid files
+    setErrorMessage("");
     setSelectedImages((prevImages) => [...prevImages, ...newFiles]);
   };
 
@@ -144,34 +210,59 @@ const AddListing = () => {
 
   return (
     <div>
-      <div className="relative flex flex-col lg:flex-row h-screen">
-        <div className="w-full lg:w-96 h-screen bg-gray-50 flex flex-col text-sm">
-          {/* Fixed Header */}
-          <div className="p-6 bg-gray-50 border-b">
+      <div
+        className={`relative flex flex-col lg:flex-row h-screen ${
+          darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"
+        }`}
+      >
+        <div className="relative w-full lg:w-96 h-screen flex flex-col text-sm">
+          <div
+            className={`p-6 border-b ${
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-gray-50 border-gray-300"
+            }`}
+          >
             <button
-              className="fixed right-10 bg-gray-200 rounded-full p-2 text-gray-400 hover:bg-gray-400 hover:text-gray-600 transition"
+              className={`fixed right-10 rounded-full p-2 ${
+                darkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
+                  : "bg-gray-200 text-gray-400 hover:bg-gray-300 hover:text-gray-600"
+              } transition`}
               onClick={() => {
                 navigate("/owner-dashboard");
               }}
             >
               <AiOutlineClose className="w-6 h-6" />
             </button>
-            <h2 className="text-lg font-bold text-gray-800">Add a Listing</h2>
+            <h2 className="text-lg font-bold">Add a Listing</h2>
           </div>
 
-          {/* Scrollable Content */}
           <div className="flex-grow overflow-y-auto p-6 space-y-6">
             {/* Photo Upload Section */}
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <p className="text-sm mb-2 text-gray-600">
+            <div
+              className={`p-4 rounded-lg ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-gray-100 border-gray-300"
+              }`}
+            >
+              <p
+                className={`text-sm mb-2 ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 Photos • {selectedImages.length} / 10 • You can add up to 10
                 photos.
               </p>
-              {/* File Input */}
               <div className="flex items-center">
                 <label
                   htmlFor="upload-images"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-l-lg cursor-pointer hover:bg-blue-600"
+                  className={`px-4 py-2 rounded-l-lg cursor-pointer ${
+                    darkMode
+                      ? "bg-blue-600 text-white hover:bg-blue-500"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
                 >
                   Choose Files
                 </label>
@@ -180,268 +271,568 @@ const AddListing = () => {
                   id="upload-images"
                   multiple
                   className="hidden"
-                  accept="image/*"
+                  accept=".png, .jpg, .jpeg"
                   onChange={handleFileChange}
                 />
-                <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-r-lg text-gray-600 flex-grow">
+                <span
+                  className={`px-3 py-2 rounded-r-lg flex-grow ${
+                    darkMode
+                      ? "bg-gray-700 text-gray-300 border border-gray-600"
+                      : "bg-gray-100 text-gray-600 border border-gray-300"
+                  }`}
+                >
                   {selectedImages.length > 0
                     ? `${selectedImages.length} file(s) selected`
                     : "No file chosen"}
                 </span>
               </div>
-              {/* Preview Section */}
-              {selectedImages.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {selectedImages.map((image, index) => (
-                    <div
-                      key={index}
-                      className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
-                    >
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Preview ${index}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
-                        onClick={() => handleRemoveImage(index)}
-                      >
-                        <IoClose className="w-6 h-6" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              {errorMessage && (
+                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
               )}
-            </div>
-
-            {/* Input Fields */}
-            <div className="space-y-4">
-              {/* Property name */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Property Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter property name"
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                {/* Preview Section */}
+                {selectedImages.length > 0 && (
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    {selectedImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
+                      >
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
+                          onClick={() => handleRemoveImage(index)}
+                        >
+                          <IoClose className="w-6 h-6" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Rental Type */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Rental Type
-                </label>
-                <select
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select rental type</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="house">House</option>
-                  <option value="condo">Condo</option>
-                </select>
-              </div>
-
-              {/* Number of Bedrooms */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Number of Bedrooms
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter number of bedrooms"
-                  onChange={(e) => setBedroomNumber(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Number of Bathrooms */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Number of Bathrooms
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter number of bathrooms"
-                  onChange={(e) => setBathroomNumber(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Price per Month */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Price per Month
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter price per month"
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Property Square Feet */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Property Square Feet
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter property size in square feet"
-                  onChange={(e) => setPropertySize(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Visit Availability Section */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Visit Availability - Start Time
-                </label>
-                <input
-                  type="time"
-                  placeholder="Enter start time (e.g., 09:00)"
-                  onChange={(e) =>
-                    setVisitAvailability((prev) => ({
-                      ...prev,
-                      startTime: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Visit Availability - End Time
-                </label>
-                <input
-                  type="time"
-                  placeholder="Enter end time (e.g., 18:00)"
-                  onChange={(e) =>
-                    setVisitAvailability((prev) => ({
-                      ...prev,
-                      endTime: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Rental Description */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Rental Description
-                </label>
-                <textarea
-                  placeholder="Enter a description of the rental"
-                  rows={4}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-
-              {/* File Input Styled as Choose File */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Upload Business Permit
-                </label>
-                <div className="flex items-center">
+              {/* Input Fields */}
+              <div className="space-y-4">
+                {/* Property Name */}
+                <div>
                   <label
-                    htmlFor="upload-permit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-l-lg cursor-pointer hover:bg-blue-600"
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
                   >
-                    Choose File
+                    Property Name
                   </label>
                   <input
-                    type="file"
-                    id="upload-permit"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    type="text"
+                    placeholder="Enter property name"
+                    onChange={(e) => setTitle(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
                   />
-                  <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-r-lg text-gray-600 flex-grow">
-                    {fileName}
-                  </span>
+                </div>
+
+                {/* Rental Type */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Rental Type
+                  </label>
+                  <select
+                    onChange={(e) => setType(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  >
+                    <option value="">Select rental type</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="house">House</option>
+                    <option value="condo">Condo</option>
+                  </select>
+                </div>
+
+                {/* Number of Bedrooms */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Number of Bedrooms
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Enter number of bedrooms"
+                    onChange={(e) => setBedroomNumber(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
+                {/* Number of Bathrooms */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Number of Bathrooms
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Enter number of bathrooms"
+                    onChange={(e) => setBathroomNumber(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
+                {/* Price per Month */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Price per Month
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter price per month"
+                    onChange={(e) => setPrice(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
+                {/* Amenities & Inclusions */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Amenities & Inclusions
+                  </label>
+                  <div
+                    className={`space-y-2 rounded-lg p-2 border ${
+                      darkMode
+                        ? "bg-gray-800 text-gray-300 border-gray-700"
+                        : "bg-white text-gray-700 border-gray-300"
+                    }`}
+                  >
+                    {[
+                      "Fully Furnished",
+                      "Semi Furnished",
+                      "Aircon",
+                      "WiFi / Internet",
+                      "Electricity Bill",
+                      "Water Bill",
+                    ].map((amenity) => (
+                      <label
+                        key={amenity}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          value={amenity}
+                          className={`form-checkbox ${
+                            darkMode ? "text-blue-400" : "text-blue-500"
+                          }`}
+                          onChange={handleAmenityChange}
+                        />
+                        <span>{amenity}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Property Size */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Property Size (sq ft)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter property size in square feet"
+                    onChange={(e) => setPropertySize(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
+                {/* Visit Availability */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Visit Availability
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      type="time"
+                      placeholder="Start Time"
+                      onChange={(e) =>
+                        setVisitAvailability((prev) => ({
+                          ...prev,
+                          startTime: e.target.value,
+                        }))
+                      }
+                      className={`w-full p-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    />
+                    <input
+                      type="time"
+                      placeholder="End Time"
+                      onChange={(e) =>
+                        setVisitAvailability((prev) => ({
+                          ...prev,
+                          endTime: e.target.value,
+                        }))
+                      }
+                      className={`w-full p-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Rental Description */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Rental Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Enter a description of the rental"
+                    onChange={(e) => setDescription(e.target.value)}
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  ></textarea>
+                </div>
+
+                {/* File Input Styled as Choose File */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Upload Business Permit
+                  </label>
+                  <div className="flex items-center">
+                    <label
+                      htmlFor="upload-permit"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-l-lg cursor-pointer hover:bg-blue-600"
+                    >
+                      Choose File
+                    </label>
+                    <input
+                      type="file"
+                      id="upload-permit"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    />
+                    <span
+                      className={`flex-grow p-2 rounded-e-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    >
+                      {fileName}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Map Section */}
+                <div
+                  className={`rounded-lg h-45 overflow-hidden ${
+                    darkMode
+                      ? "bg-gray-800 text-gray-300"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  <div>
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      House Number:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter property House Number"
+                      value={address.houseNumber}
+                      onChange={(e) =>
+                        setAddress({ ...address, houseNumber: e.target.value })
+                      }
+                      className={`w-full p-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      Street:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter property Street"
+                      value={address.street}
+                      onChange={(e) =>
+                        setAddress({ ...address, street: e.target.value })
+                      }
+                      className={`w-full p-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      City:
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter property City"
+                      value={address.city}
+                      onChange={(e) =>
+                        setAddress({ ...address, city: e.target.value })
+                      }
+                      className={`w-full p-3 rounded-lg border ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                          : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                      }`}
+                    />
+                  </div>
+                  <MapPicker
+                    className={`w-full p-3 border rounded-lg ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600"
+                        : "bg-white text-gray-800 border-gray-300"
+                    }`}
+                    onLocationChange={handleLocationChange}
+                  />
                 </div>
               </div>
-
-              {/* Map Section */}
-              <div className="bg-gray-100 rounded-lg h-45 overflow-hidden">
-                <MapPicker onLocationChange={handleLocationChange} />
-              </div>
             </div>
-          </div>
 
           {/* Fixed Footer */}
-          <div className="p-6 bg-gray-50 border-t">
+          <div
+            className={`absolute bottom-0 left-0 right-0 p-6 ${
+              darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
+            }`}
+          >
             <button
-              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"
+              className={`w-full py-3 rounded-lg ${
+                darkMode
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
               onClick={handleFormSubmit}
             >
               Add Listing
             </button>
           </div>
+
+          </div>
         </div>
 
         {/* Preview Section (Hidden on Phones) */}
         <div className="hidden lg:flex flex-grow justify-center p-6 overflow-y-auto">
-          <div className="flex flex-col items-center justify-center gap-8">
-            <div className="bg-white rounded-lg shadow-md p-6 border w-full max-w-4xl">
+          <div
+            className={`flex flex-col items-center justify-center gap-8 ${
+              darkMode ? "text-gray-300" : "text-gray-800"
+            }`}
+          >
+            <div
+              className={`rounded-lg shadow-md p-6 border w-full max-w-4xl ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
+              }`}
+            >
               <h1 className="mb-4 font-bold text-xl text-center">PREVIEW</h1>
               <div className="flex flex-col xl:flex-row gap-6">
                 {/* Image Gallery */}
                 <div className="w-full xl:w-1/2">
                   <div className="relative">
-                    <div className="h-60 sm:h-80 bg-gray-200 rounded-lg shadow-md mb-4 flex items-center justify-center">
-                      <span className="text-gray-500">Main Image</span>
+                    <div
+                      className={`h-60 sm:h-80 rounded-lg shadow-md mb-4 flex items-center justify-center ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      <span>Main Image</span>
                     </div>
                     {/* Thumbnail Images */}
                     <div className="flex justify-between space-x-2 overflow-x-auto">
-                      <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                      <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                      <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
-                      <div className="h-16 w-20 sm:h-20 sm:w-24 bg-gray-300 rounded-md"></div>
+                      <div
+                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                          darkMode ? "bg-gray-600" : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                          darkMode ? "bg-gray-600" : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                          darkMode ? "bg-gray-600" : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                          darkMode ? "bg-gray-600" : "bg-gray-300"
+                        }`}
+                      ></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Details Section */}
                 <div className="w-full xl:w-1/2 flex flex-col">
-                  <div className="border-b pb-4 mb-4">
-                    <h2 className="text-xl sm:text-2xl font-bold text-blue-600">
+                  <div
+                    className={`border-b pb-4 mb-4 ${
+                      darkMode ? "border-gray-600" : "border-gray-300"
+                    }`}
+                  >
+                    <h2
+                      className={`text-xl sm:text-2xl font-bold ${
+                        darkMode ? "text-blue-400" : "text-blue-600"
+                      }`}
+                    >
                       Placeholder Title
                     </h2>
-                    <p className="text-gray-600 mt-2">Ermita, Manila</p>
+                    <p
+                      className={`mt-2 ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Ermita, Manila
+                    </p>
                   </div>
 
-                  <div className="border-b pb-4 mb-2">
-                    <h3 className="text-lg sm:text-2xl font-semibold mb-4">
+                  <div
+                    className={`border-b pb-4 mb-2 ${
+                      darkMode ? "border-gray-600" : "border-gray-300"
+                    }`}
+                  >
+                    <h3
+                      className={`text-lg sm:text-2xl font-semibold mb-4 ${
+                        darkMode ? "text-gray-300" : "text-gray-800"
+                      }`}
+                    >
                       ₱4,000 / head / month
                     </h3>
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">
+                      <button
+                        className={`px-4 py-2 rounded-full ${
+                          darkMode
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
+                      >
                         Request Visit
                       </button>
-                      <button className="border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100">
+                      <button
+                        className={`border px-4 py-2 rounded-full ${
+                          darkMode
+                            ? "border-gray-600 hover:bg-gray-700"
+                            : "border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
                         Add to Wishlist
                       </button>
                     </div>
-                    <p className="text-gray-500 text-sm mt-2">
+                    <p
+                      className={`text-sm mt-2 ${
+                        darkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       Note: 10% of the principal amount is required to book.
                     </p>
                   </div>
 
                   {/* Amenities and Payment Terms */}
-                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-6 border border-gray-300 rounded-lg p-4">
+                  <div
+                    className={`mt-2 grid grid-cols-1 sm:grid-cols-2 gap-6 border rounded-lg p-4 ${
+                      darkMode
+                        ? "border-gray-600 bg-gray-700"
+                        : "border-gray-300 bg-white"
+                    }`}
+                  >
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-2">
+                      <h4
+                        className={`font-semibold mb-2 ${
+                          darkMode ? "text-gray-300" : "text-gray-800"
+                        }`}
+                      >
                         Amenities & Inclusions
                       </h4>
-                      <ul className="text-gray-600 space-y-1">
+                      <ul
+                        className={`space-y-1 ${
+                          darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
                         <li>Fully Furnished</li>
                         <li>6 Bed and Bedframe</li>
                         <li>Aircon</li>
@@ -451,10 +842,18 @@ const AddListing = () => {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-2">
+                      <h4
+                        className={`font-semibold mb-2 ${
+                          darkMode ? "text-gray-300" : "text-gray-800"
+                        }`}
+                      >
                         Payment Terms
                       </h4>
-                      <ul className="text-gray-600 space-y-1">
+                      <ul
+                        className={`space-y-1 ${
+                          darkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
                         <li>Advance Payment: 1 month</li>
                         <li>Lease Term: 6 months</li>
                         <li>Pay Period: Monthly</li>

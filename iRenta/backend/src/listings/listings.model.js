@@ -30,6 +30,7 @@ const listingSchema = new mongoose.Schema({
     startTime: { type: String }, // e.g., "09:00"
     endTime: { type: String }, // e.g., "18:00"
   },
+  amenities: [{ type: String }], 
   createdAt: { type: Date, default: Date.now },
 });
 

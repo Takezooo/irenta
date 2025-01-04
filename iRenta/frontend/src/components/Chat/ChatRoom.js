@@ -3,9 +3,9 @@ import { useRef } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { GetToken } from "../../global/utils/Token.js";
-import { fetchUserChats } from "../../api/Chats.js";
+import { fetchUserChats } from "../../global/api/Chats.js";
 
-const ChatRoom = ({ chatId, userId }) => {
+const ChatRoom = ({ chatId, userId, darkMode }) => {
   const { user } = useContext(AuthContext); // Access the user context
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -28,8 +28,10 @@ const ChatRoom = ({ chatId, userId }) => {
     });
 
     if (chatId) {
-      newSocket.emit("joinRoom", { chatId });
-      console.log(`Joining room: ${chatId}`);
+      newSocket.on("connect", () => {
+        console.log("Socket connected. Joining room...");
+        newSocket.emit("joinRoom", { chatId });
+      });
     }
 
     setSocket(newSocket);
@@ -100,12 +102,20 @@ const ChatRoom = ({ chatId, userId }) => {
     }
   };
 
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
-    <div className="h-full flex flex-col bg-white border border-gray-200 rounded-t-lg shadow-lg">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-t-lg shadow-lg">
       {/* Chat Messages */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4"
+        className="flex-1 overflow-y-auto p-4 dark:bg-gray-700 dark:text-white"
       >
         {messages.map((msg, index) => {
           const senderId = msg.senderId || msg.sender?._id; // Handle both formats
@@ -117,7 +127,7 @@ const ChatRoom = ({ chatId, userId }) => {
             <div key={index}>
               {/* Display receiver name on top of other user's messages if it's the first message in a sequence */}
               {!isCurrentUser && !isPreviousMessageFromSameUser && (
-                <div className="text-sm text-gray-500 font-semibold mb-1">
+                <div className="text-sm text-gray-500 dark:text-gray-300 font-semibold mb-1">
                   {receiverName}
                 </div>
               )}
@@ -129,8 +139,8 @@ const ChatRoom = ({ chatId, userId }) => {
                 <div
                   className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
                     isCurrentUser
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-black"
+                      ? "bg-blue-500 dark:bg-blue-600 text-white"
+                      : "bg-gray-200 dark:bg-gray-600 text-black dark:text-white"
                   }`}
                 >
                   {msg.content || msg.message}
@@ -142,18 +152,18 @@ const ChatRoom = ({ chatId, userId }) => {
       </div>
 
       {/* Chat Input */}
-      <div className="border-t p-2 flex items-center">
+      <div className="border-t dark:border-gray-600 p-2 flex items-center dark:bg-gray-800">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
-          className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
         />
         <button
           onClick={handleSendMessage}
-          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+          className="ml-2 bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-600 dark:hover:bg-blue-700"
         >
           Send
         </button>

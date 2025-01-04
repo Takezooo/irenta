@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { fetchUserChats } from "../../api/Chats.js";
+import { fetchUserChats } from "../../global/api/Chats.js";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
-const UserList = ({ onSelectChat, selectedChatId }) => {
-
+const UserList = ({ onSelectChat, selectedChatId, darkMode }) => {
   const [chats, setChats] = useState([]);
   const { user } = useContext(AuthContext);
 
@@ -20,8 +19,16 @@ const UserList = ({ onSelectChat, selectedChatId }) => {
     fetchChats();
   }, []);
 
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   return (
-    <ul className="p-4">
+    <ul className="p-4 dark:bg-gray-800 dark:text-white">
       {chats.map((chat) => {
         // Filter out the current user to get the other participant
         const otherParticipant = chat.participants.find(
@@ -35,12 +42,16 @@ const UserList = ({ onSelectChat, selectedChatId }) => {
             style={{
               cursor: "pointer",
               backgroundColor:
-                chat._id === selectedChatId ? "#ddd" : "transparent",
+                chat._id === selectedChatId
+                  ? darkMode
+                    ? "#374151"
+                    : "#ddd"
+                  : "transparent",
               padding: "10px",
               borderRadius: "8px",
               marginBottom: "8px",
             }}
-            className="hover:bg-gray-200 transition duration-300"
+            className="hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-300"
           >
             {/* Display Other Participant's Name */}
             <div>
@@ -53,7 +64,7 @@ const UserList = ({ onSelectChat, selectedChatId }) => {
 
             {/* Conditionally Display Property Title */}
             {chat.listing && (
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 Property: {chat.listing.title}
               </div>
             )}

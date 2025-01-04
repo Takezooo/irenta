@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 const API_LINK = "http://localhost:5000/api";
 
 const Register = () => {
-
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -72,9 +72,24 @@ const Register = () => {
 
   const handleUploadImage = (e) => {
     e.preventDefault();
-    setProfile(e.target.files[0]);
-  };
+    const file = e.target.files[0];
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
 
+    if (!file) {
+      setErrorMessage(""); // Clear error message if no file is selected
+      return;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      setErrorMessage(`Invalid file type. Only PNG, JPG, and JPEG are allowed.`);
+      e.target.value = ""; // Reset the input field to clear the file name
+      return;
+    }
+
+    setErrorMessage(""); // Clear error message on valid file
+    setProfile(file); // Save the valid file
+  };
+  
   const handleChangeUserType = (role) => {
     setUser((prev) => ({
       ...prev,
@@ -240,8 +255,12 @@ const Register = () => {
               block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 bg-gray-200 focus:outline-none"
               type="file"
               name="profile"
+              accept=".png, .jpg, .jpeg"
               onChange={handleUploadImage}
             />
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
 
             <hr className="w-full mt-2"></hr>
             {/* Role Selection (Seeker or Owner) */}

@@ -1,4 +1,5 @@
-import Listing from './listings.model.js';
+import Listing from "./listings.model.js";
+import Reservation from "../reservations/reservations.model.js";
 import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 import driveService from "../../global/utils/Drive.js";
 import dotenv from "dotenv";
@@ -8,7 +9,7 @@ dotenv.config(); // Load environment variables
 export const GetAllListings = async (req, res) => {
   try {
     const ownerId = req.user.id; // Get the owner's ID from the decoded token (authenticate middleware)
-    
+
     // Fetch only listings created by this owner
     const listings = await Listing.find({ userId: ownerId });
 
@@ -20,21 +21,23 @@ export const GetAllListings = async (req, res) => {
 
 export const GetListingById = async (req, res) => {
   try {
-    const listingId = req.params.listingId; // Get the listing ID from URL params
+    const listingId = req.params.id; // Get the listing ID from URL params
 
-    // Fetch the specific listing by ID
+    console.log("Fetching listing with ID:", listingId); // Debug log
+
     const listing = await Listing.findById(listingId);
 
     if (!listing) {
-      return res.status(404).json({ message: 'Listing not found' });
+      console.error("Listing not found:", listingId); // Log missing ID
+      return res.status(404).json({ message: "Listing not found" });
     }
 
     res.status(200).json(listing);
   } catch (err) {
+    console.error("Error fetching listing:", err.message); // Log error
     res.status(400).json({ message: err.message });
   }
 };
-
 export const DisplayListings = async (req, res) => {
   try {
     // Fetch all listings (no authentication required)
@@ -45,23 +48,36 @@ export const DisplayListings = async (req, res) => {
   }
 };
 
-
 export const CreateListing = async (req, res) => {
   try {
     const { body, files } = req;
 
     // Check if the logged-in user is an "owner"
     if (req.user.userType !== "Owner") {
-      return res.status(403).json({ message: "Only owners can create listings." });
+      return res
+        .status(403)
+        .json({ message: "Only owners can create listings." });
     }
 
     // Destructure necessary fields from the request body
-    const { title, description, price, type, bedroomNumber, bathroomNumber, visitAvailability, propertySize, address } = JSON.parse(body.data);
+    const {
+      title,
+      description,
+      price,
+      type,
+      bedroomNumber,
+      bathroomNumber,
+      visitAvailability,
+      propertySize,
+      address,
+      amenities,
+    } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {
       return res.status(400).json({
-        message: "Address is incomplete. Ensure houseNumber, street, and city are provided.",
+        message:
+          "Address is incomplete. Ensure houseNumber, street, and city are provided.",
       });
     }
 
@@ -71,18 +87,22 @@ export const CreateListing = async (req, res) => {
 
       // Ensure both times are provided
       if (!startTime || !endTime) {
-        return res.status(400).json({ message: "Visit availability requires both startTime and endTime." });
+        return res.status(400).json({
+          message: "Visit availability requires both startTime and endTime.",
+        });
       }
 
       // Ensure startTime is earlier than endTime
       if (moment(startTime, "HH:mm").isSameOrAfter(moment(endTime, "HH:mm"))) {
-        return res.status(400).json({ message: "Start time must be earlier than end time." });
+        return res
+          .status(400)
+          .json({ message: "Start time must be earlier than end time." });
       }
     }
 
     // Handle image uploads
     let listingImages = [];
-    
+
     if (files && files.length > 0) {
       for (const file of files) {
         const { id: fileId, name: fileName } = await driveService.UploadFiles(
@@ -111,6 +131,7 @@ export const CreateListing = async (req, res) => {
       address,
       visitAvailability, // Include validated visit availability
       images: listingImages, // Associate images with the listing
+      amenities,
     });
 
     res.status(201).json(newListing);
@@ -133,7 +154,9 @@ export const UpdateListing = async (req, res) => {
 
     // Check if the listing was found and updated
     if (!updatedListing) {
-      return res.status(404).json({ message: "Listing not found or you're not authorized to update it." });
+      return res.status(404).json({
+        message: "Listing not found or you're not authorized to update it.",
+      });
     }
 
     res.status(200).json(updatedListing); // Return the updated listing
@@ -146,19 +169,79 @@ export const DeleteListing = async (req, res) => {
   try {
     const listingId = req.params.id;
 
-    // Find and delete the listing if it belongs to the logged-in user
-    const deletedListing = await Listing.findOneAndDelete({
+    // Find the listing to ensure it belongs to the logged-in user
+    const listing = await Listing.findOne({
       _id: listingId,
       userId: req.user.id, // Ensure the user is the owner
     });
 
-    if (!deletedListing) {
-      return res.status(404).json({ message: "Listing not found or you're not authorized to delete it." });
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found or you're not authorized to delete it.",
+      });
     }
 
-    res.status(200).json({ message: "Listing deleted successfully." });
+    // Delete images from Google Drive (or storage service)
+    const deletePromises = listing.images.map((image) => {
+      if (image.id) {
+        // Assuming `driveService.DeleteFiles` is a function that deletes files by ID
+        return driveService.DeleteFiles(image.id);
+      }
+      return Promise.resolve(); // Skip files without an ID
+    });
+
+    // Wait for all images to be deleted
+    await Promise.all(deletePromises);
+
+    // Delete the listing from the database
+    await listing.deleteOne();
+
+    res
+      .status(200)
+      .json({ message: "Listing and associated images deleted successfully." });
   } catch (err) {
+    console.error("Error deleting listing:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+export const FetchReservedListings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userType = req.user.userType;
+
+    let reservations;
+
+    if (userType === "Seeker") {
+      // Fetch reservations for the seeker
+      reservations = await Reservation.find({ seekerId: userId })
+        .populate({
+          path: "listingId",
+          select: "title images price description",
+        })
+        .populate({
+          path: "seekerId",
+          select: "firstName lastName",
+        })
+        .exec();
+    } else if (userType === "Owner") {
+      // Fetch reservations for the owner
+      reservations = await Reservation.find({ ownerId: userId })
+        .populate({
+          path: "listingId",
+          select: "title images price description",
+        })
+        .populate({
+          path: "seekerId",
+          select: "info.firstName info.lastName",
+        })
+        .exec();
+    }
+
+    res.status(200).json(reservations);
+  } catch (error) {
+    console.error("Error fetching reserved listings:", error);
+    res.status(500).json({ message: "Failed to fetch reserved listings" });
   }
 };
 
@@ -169,4 +252,5 @@ export default {
   DeleteListing,
   DisplayListings,
   GetListingById,
+  FetchReservedListings,
 };

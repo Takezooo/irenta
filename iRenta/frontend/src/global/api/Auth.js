@@ -5,7 +5,7 @@ import {
   RemoveToken,
   SaveRefreshToken,
   GetRefreshToken,
-} from "../global/utils/Token.js";
+} from "../utils/Token.js";
 
 // Base API URL
 const API_BASE_URL = "http://localhost:5000/api/users"; // Update with your backend API endpoint

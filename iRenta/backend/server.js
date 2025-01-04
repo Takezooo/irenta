@@ -23,20 +23,26 @@ app.use(cors({
 // Import routes
 import userRoutes from './src/users/users.route.js';
 import listingRoutes from './src/listings/listings.route.js';
-import contractRoutes from './src/contracts/contracts.route.js';
+import termRoutes from './src/terms/terms.route.js';
+import leaseRoutes from './src/leases/leases.route.js';
 import ocularRoutes from './src/ocular/ocular.route.js';
+import reservationsRoutes from './src/reservations/reservations.route.js'
 import chatRoutes from './src/chats/chat.route.js';
+import notifRoutes from './src/notifications/notifications.route.js'
 import mapRoutes from './src/maps/maps.routes.js'
 
 app.use("/api/users", userRoutes);
 
 // anything related to litings
 app.use("/api/listings", listingRoutes);
-app.use("/api/contracts", contractRoutes);
+app.use("/api/terms", termRoutes);
+app.use("/api/leases", leaseRoutes);
 
 // anything related to interactions with owners
-app.use("/api/chats", chatRoutes);
+app.use('/api/chats', chatRoutes);
 app.use('/api/ocular', ocularRoutes);
+app.use('/api/reservations', reservationsRoutes);
+app.use('/api/notifications', notifRoutes);
 
 // map route
 app.use("/api/map", mapRoutes);

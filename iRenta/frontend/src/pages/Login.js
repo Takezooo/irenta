@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLogin } from "../api/Auth.js";
+import { loginUser, googleLogin } from "../global/api/Auth.js";
 import { AuthContext } from "../global/contexts/AuthContext.js";
 
 const Login = () => {

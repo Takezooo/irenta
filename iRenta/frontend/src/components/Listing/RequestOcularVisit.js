@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useProperty } from "../../global/contexts/PropertyContext";
-import { GetToken } from "../../global/utils/Token";
+import { useProperty } from "../../global/contexts/PropertyContext.js";
+import { GetToken } from "../../global/utils/Token.js";
+import {
+  fetchReservedDates,
+  scheduleOcularVisit,
+} from "../../global/api/Ocular.js";
+import { ThemeContext } from "../../contexts/ThemeContext";
 
-const RequestOcularVisit = ({ onClose }) => {
+const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
+  const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const { selectedProperty } = useProperty();
   const [reservedDates, setReservedDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -12,38 +18,31 @@ const RequestOcularVisit = ({ onClose }) => {
 
   // Fetch reserved dates from the backend
   useEffect(() => {
-    const fetchReservedDates = async () => {
-      if (!selectedProperty || !selectedProperty._id) return;
+    const loadReservedDates = async () => {
+      if (!selectedProperty || !selectedProperty._id) {
+        console.error("Property ID is missing or invalid.");
+        return;
+      }
 
-      const authToken = GetToken();
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/ocular/reserved-dates/${selectedProperty._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const dates = await response.json();
-          setReservedDates(dates); // Save reserved dates
-        } else {
-          console.error("Failed to fetch reserved dates:", await response.text());
-        }
+        const dates = await fetchReservedDates(selectedProperty._id);
+        setReservedDates(dates); // Save reserved dates
       } catch (err) {
-        console.error("Error fetching reserved dates:", err.message);
+        console.error(
+          "Failed to fetch reserved dates:",
+          err.response?.data?.message || err.message
+        );
       }
     };
 
-    fetchReservedDates();
+    loadReservedDates();
   }, [selectedProperty]);
 
-  // Check if selected time is within the available range
   const isTimeWithinAvailability = (time) => {
-    const [startHour, startMinute] = selectedProperty.visitAvailability.startTime.split(":");
-    const [endHour, endMinute] = selectedProperty.visitAvailability.endTime.split(":");
+    const [startHour, startMinute] =
+      selectedProperty.visitAvailability.startTime.split(":");
+    const [endHour, endMinute] =
+      selectedProperty.visitAvailability.endTime.split(":");
     const [selectedHour, selectedMinute] = time.split(":");
 
     const start = new Date();
@@ -66,7 +65,6 @@ const RequestOcularVisit = ({ onClose }) => {
     }
   };
 
-  // Submit the ocular visit schedule to the backend
   const handleSubmit = async () => {
     if (!selectedDate) {
       alert("Please select a date.");
@@ -78,37 +76,22 @@ const RequestOcularVisit = ({ onClose }) => {
       return;
     }
 
-    const authToken = GetToken();
     try {
-      const response = await fetch("http://localhost:5000/api/ocular/schedule", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          propertyId: selectedProperty._id,
-          date: selectedDate,
-          time: selectedTime,
-        }),
-      });
-
-      if (response.ok) {
-        alert("Ocular visit scheduled successfully!");
-        onClose();
-      } else {
-        const error = await response.json();
-        alert(`Failed to schedule ocular visit: ${error.message}`);
-      }
+      await onRequestVisit(selectedDate, selectedTime);
+      onClose();
     } catch (err) {
-      alert(`An error occurred: ${err.message}`);
+      alert(
+        `Failed to schedule ocular visit: ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
 
-  // Disable tiles in the calendar for already reserved dates
   const isDateDisabled = ({ date }) => {
     return reservedDates.some(
-      (reserved) => new Date(reserved.date).toDateString() === date.toDateString()
+      (reserved) =>
+        new Date(reserved.date).toDateString() === date.toDateString()
     );
   };
 
@@ -117,17 +100,32 @@ const RequestOcularVisit = ({ onClose }) => {
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+    <div
+      className={`fixed top-0 left-0 w-full h-full ${
+        darkMode ? "bg-gray-900 bg-opacity-80" : "bg-gray-800 bg-opacity-50"
+      } flex justify-center items-center z-50`}
+    >
+      <div
+        className={`${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        } rounded-lg shadow-lg p-6 w-96`}
+      >
         <h2 className="text-xl font-bold mb-4">Schedule Ocular Visit</h2>
         <Calendar
           onChange={setSelectedDate}
           tileDisabled={isDateDisabled}
           value={selectedDate}
+          className={darkMode ? "text-black react-calendar react-calendar-dark" : "react-calendar"}
         />
         <div className="mt-4">
-          <label htmlFor="time" className="block font-medium text-gray-700">
-            Select Time (Available: {selectedProperty.visitAvailability.startTime} -{" "}
+          <label
+            htmlFor="time"
+            className={`block font-medium ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            Select Time (Available:{" "}
+            {selectedProperty.visitAvailability.startTime} -{" "}
             {selectedProperty.visitAvailability.endTime})
           </label>
           <input
@@ -135,19 +133,31 @@ const RequestOcularVisit = ({ onClose }) => {
             id="time"
             value={selectedTime}
             onChange={handleTimeChange}
-            className="w-full mt-2 p-2 border rounded"
+            className={`w-full mt-2 p-2 border rounded ${
+              darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-black border-gray-300"
+            }`}
           />
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
+              darkMode
+                ? "bg-gray-700 text-white hover:bg-gray-600"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
+              darkMode
+                ? "bg-blue-600 text-white hover:bg-blue-500"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
           >
             Confirm
           </button>

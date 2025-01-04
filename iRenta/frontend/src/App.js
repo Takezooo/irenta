@@ -12,99 +12,127 @@ import NotAuthorized from "./pages/Unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
-import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.js";
+import ViewContract from "./components/OwnerDashboard/Lease/ViewLease.js";
 import EditListing from "./components/OwnerDashboard/EditListing.js";
-import LikedListing from "./components/Listing/LikedListing.js";
+import LikedListing from "./pages/LikedListing.js";
+import ReserveListing from "./pages/ReserveListing.js";
+import ReservationPage from "./pages/ReservationPage.js";
 
+// Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
 import { PropertyProvider } from "./global/contexts/PropertyContext";
 import { ChatDropdownProvider } from "./global/contexts/ChatDropdownContext";
+import { NotificationProvider } from "./global/contexts/NotificationContext.js";
+import { ThemeProvider } from "./contexts/ThemeContext.js";
 
 // Routes
 import PrivateRoute from "./global/routes/PrivateRoute.js";
 import PublicRoute from "./global/routes/PublicRoute.js";
 
-// import Chat from "./components/Chat";
 import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
-    <>
-      <AuthProvider>
-        <PropertyProvider>
-          <ChatDropdownProvider>
+    <AuthProvider>
+      <PropertyProvider>
+        <ChatDropdownProvider>
+          <NotificationProvider>
             <Router>
-              <Routes>
-                {/* Public Routes */}
-                <Route
-                  path="/login"
-                  element={
-                    <PublicRoute>
-                      <Login />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/register"
-                  element={
-                    <PublicRoute>
-                      <Register />
-                    </PublicRoute>
-                  }
-                />
+              {/* Move ThemeProvider inside Router */}
+              <ThemeProvider>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route
+                    path="/login"
+                    element={
+                      <PublicRoute>
+                        <Login />
+                      </PublicRoute>
+                    }
+                  />
+                  <Route
+                    path="/register"
+                    element={
+                      <PublicRoute>
+                        <Register />
+                      </PublicRoute>
+                    }
+                  />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/browse-listing" element={<BrowseListing />} />
+                  <Route path="/:propertyId" element={<ViewListing />} />
 
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/browse-listing" element={<BrowseListing />} />
-                <Route path="/:propertyId" element={<ViewListing />} />
-                <Route path="/liked-listing" element={<LikedListing />} />
+                  {/* Owner Routes */}
+                  <Route
+                    path="/owner-dashboard"
+                    element={
+                      <PrivateRoute allowedRoles={["Owner"]}>
+                        <OwnerDashboard />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/create-list"
+                    element={
+                      <PrivateRoute allowedRoles={["Owner"]}>
+                        <AddListing />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit-list"
+                    element={
+                      <PrivateRoute allowedRoles={["Owner"]}>
+                        <EditListing />
+                      </PrivateRoute>
+                    }
+                  />
 
-                {/* Owner Routes */}
-                <Route
-                  path="/owner-dashboard"
-                  element={
-                    <PrivateRoute allowedRoles={["Owner"]}>
-                      <OwnerDashboard />
-                    </PrivateRoute>
-                  }
-                />
-                <Route
-                  path="/create-list"
-                  element={
-                    <PrivateRoute allowedRoles={["Owner"]}>
-                      <AddListing />
-                    </PrivateRoute>
-                  }
-                />
+                  {/* Seeker and Owner Routes */}
+                  <Route
+                    path="/view-contract"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ViewContract />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/liked-listing"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <LikedListing />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/reservations"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ReserveListing />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/reservation"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ReservationPage />
+                      </PrivateRoute>
+                    }
+                  />
 
-                <Route
-                  path="/edit-list"
-                  element={
-                    <PrivateRoute allowedRoles={["Owner"]}>
-                      <EditListing />
-                    </PrivateRoute>
-                  }
-                />
-
-                {/* Seeker and Owner Routes */}
-                <Route
-                  path="/view-contract"
-                  element={
-                    <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                      <ViewContract />
-                    </PrivateRoute>
-                  }
-                />
-
-                {/* Fallback Route */}
-                <Route path="*" element={<NotAuthorized />} />
-                <Route path="/not-authorized" element={<NotAuthorized />} />
-              </Routes>
+                  {/* Fallback Route */}
+                  <Route path="*" element={<NotAuthorized />} />
+                  <Route path="/not-authorized" element={<NotAuthorized />} />
+                </Routes>
+              </ThemeProvider>
             </Router>
-          </ChatDropdownProvider>
-        </PropertyProvider>
-      </AuthProvider>
+          </NotificationProvider>
+        </ChatDropdownProvider>
+      </PropertyProvider>
       <ToastContainer />
-    </>
+    </AuthProvider>
   );
 };
 

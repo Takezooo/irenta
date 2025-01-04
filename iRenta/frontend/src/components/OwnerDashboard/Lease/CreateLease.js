@@ -344,7 +344,7 @@ const CreateLease = () => {
                 id="usePlaceholderTenant"
                 checked={usePlaceholderTenant}
                 onChange={() => setUsePlaceholderTenant((prev) => !prev)}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                className={`mt-1 mr-2 block border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                     : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
@@ -357,7 +357,10 @@ const CreateLease = () => {
             {usePlaceholderTenant ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                     Placeholder Name
                   </label>
                   <input
@@ -365,11 +368,18 @@ const CreateLease = () => {
                     name="tenantPlaceholder.name"
                     value={formData.tenantPlaceholder.name}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-                  />
+                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                     Placeholder Email
                   </label>
                   <input
@@ -377,11 +387,18 @@ const CreateLease = () => {
                     name="tenantPlaceholder.email"
                     value={formData.tenantPlaceholder.email}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-                  />
+                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                     Placeholder Phone
                   </label>
                   <input
@@ -389,8 +406,12 @@ const CreateLease = () => {
                     name="tenantPlaceholder.phoneNumber"
                     value={formData.tenantPlaceholder.phoneNumber}
                     onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-                  />
+                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              />
                 </div>
               </div>
             ) : (
@@ -401,7 +422,11 @@ const CreateLease = () => {
                   value={formData.tenant}
                   onChange={handleChange}
                   placeholder="Enter Tenant ID"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                  className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                      : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                  }`}
                 />
               </div>
             )}
@@ -410,7 +435,10 @@ const CreateLease = () => {
           {/* Lease Details */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Start Date
               </label>
               <input
@@ -446,7 +474,10 @@ const CreateLease = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Rent Amount
               </label>
               <input
@@ -454,11 +485,18 @@ const CreateLease = () => {
                 name="contractDetails.rentAmount"
                 value={formData.contractDetails.rentAmount}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Deposit Amount
               </label>
               <input
@@ -466,18 +504,29 @@ const CreateLease = () => {
                 name="contractDetails.depositAmount"
                 value={formData.contractDetails.depositAmount}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Payment Frequency
               </label>
               <select
                 name="contractDetails.paymentFrequency"
                 value={formData.contractDetails.paymentFrequency}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               >
                 <option value="">Select Frequency Terms</option>
                 <option value="Monthly">Monthly</option>

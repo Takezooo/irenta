@@ -10,6 +10,7 @@ const leaseSchema = new mongoose.Schema(
     tenantPlaceholder: {
       name: { type: String, required: false }, // Optional placeholder for tenant name
       email: { type: String, required: false }, // Optional placeholder for tenant email
+      phoneNumber: { type: String, required: false }, // Optional placeholder for tenant phone number
     },
     landlord: {
       type: mongoose.Schema.Types.ObjectId,

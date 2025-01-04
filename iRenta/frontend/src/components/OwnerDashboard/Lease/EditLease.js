@@ -13,8 +13,8 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
     const getLease = async () => {
       try {
         const fetchedLease = await fetchLeaseById(leaseId);
-        if (fetchedLease.status !== "Draft") {
-          setError("Only leases with status 'Draft' can be edited.");
+        if (fetchedLease.status !== "Draft" && fetchedLease.status !== "Ready") {
+          setError("Only leases with status 'Draft' or 'Ready' can be edited.");
         } else {
           setFormData(fetchedLease);
         }
@@ -71,7 +71,7 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.status === "Draft") {
+      if (formData.status === "Draft" || formData.status === "Ready") {
         const updatedLease = await updateLease(leaseId, formData);
         alert("Lease updated successfully!");
         console.log("Updated lease:", updatedLease);

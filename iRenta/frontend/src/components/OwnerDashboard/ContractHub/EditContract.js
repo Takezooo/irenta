@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { fetchContractById, updateContract } from "../../../global/api/Contracts.js"; // Create a function to fetch a specific contract
+import React, { useState, useEffect, useContext } from "react";
+import { fetchContractById, updateContract } from "../../../global/api/Contracts.js";
+import { ThemeContext } from "../../../contexts/ThemeContext";
 
 const EditContract = ({ contractId, onContractUpdated }) => {
+  const { darkMode } = useContext(ThemeContext); // Access dark mode context
   const [formData, setFormData] = useState(null);
   const [error, setError] = useState("");
 
@@ -10,7 +12,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
       try {
         const fetchedContract = await fetchContractById(contractId);
         if (fetchedContract.status !== "Pending") {
-          setError("Only contracts with status 'Passive' can be edited.");
+          setError("Only contracts with status 'Pending' can be edited.");
         } else {
           setFormData(fetchedContract);
         }
@@ -57,22 +59,6 @@ const EditContract = ({ contractId, onContractUpdated }) => {
     setStatus(e.target.value); // Update the selected status
   };
 
-  // Determine the text color based on the selected status
-  const getTextColor = () => {
-    switch (status) {
-      case "Pending":
-        return "text-orange-500";
-      case "Active":
-        return "text-blue-500";
-      case "Terminated":
-        return "text-red-500";
-      case "Completed":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -82,7 +68,7 @@ const EditContract = ({ contractId, onContractUpdated }) => {
         console.log("Updated contract:", updatedContract);
         onContractUpdated(); // Refresh the contract list
       } else {
-        alert("Only inactive contracts can be edited.");
+        alert("Only contracts with status 'Pending' can be edited.");
       }
     } catch (error) {
       console.error("Error updating contract:", error);
@@ -91,23 +77,35 @@ const EditContract = ({ contractId, onContractUpdated }) => {
   };
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className={`${darkMode ? "text-red-400" : "text-red-500"}`}>{error}</div>;
   }
 
   if (!formData) {
-    return <div>Loading...</div>;
+    return <div className={`${darkMode ? "text-white" : "text-black"}`}>Loading...</div>;
   }
 
   return (
     <div className="flex-grow">
-      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
-        <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
+      <div
+        className={`${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        } shadow-md rounded-lg p-8 max-w-full mx-auto`}
+      >
+        <h1
+          className={`text-3xl font-bold text-center mb-6 ${
+            darkMode ? "text-blue-400" : "text-blue-600"
+          }`}
+        >
           Edit Contract
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Property Name
               </label>
               <input
@@ -115,11 +113,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="property.name"
                 value={formData.property.name}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Tenant
               </label>
               <input
@@ -127,14 +133,22 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="tenant"
                 value={formData.tenant}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 House Number
               </label>
               <input
@@ -142,11 +156,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="property.address.houseNumber"
                 value={formData.property.address.houseNumber}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Street
               </label>
               <input
@@ -154,11 +176,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="property.address.street"
                 value={formData.property.address.street}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 City
               </label>
               <input
@@ -166,11 +196,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="property.address.city"
                 value={formData.property.address.city}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 ZIP
               </label>
               <input
@@ -178,14 +216,22 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="property.address.zip"
                 value={formData.property.address.zip}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Landlord
               </label>
               <input
@@ -194,11 +240,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 value={formData.landlordName}
                 readOnly
                 onClick={(e) => e.preventDefault()}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Start Date
               </label>
               <input
@@ -206,11 +260,19 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="contractDetails.startDate"
                 value={formData.contractDetails.startDate}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 End Date
               </label>
               <input
@@ -218,28 +280,53 @@ const EditContract = ({ contractId, onContractUpdated }) => {
                 name="contractDetails.endDate"
                 value={formData.contractDetails.endDate}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Status
               </label>
               <select
-                className={`w-full mt-1 border border-gray-300 rounded px-2 py-2 text-sm font-medium ${getTextColor()}`}
+                className={`w-full mt-1 border rounded-md px-2 py-2 sm:text-sm font-medium ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-black border-gray-300"
+                }`}
                 value={status}
                 onChange={handleStatusChange}
               >
-                <option className="text-orange-500" value="Pending">Pending</option>
-                <option className="text-blue-500" value="Active">Active</option>
-                <option className="text-red-500" value="Terminated">Terminated</option>
-                <option className="text-green-500" value="Completed">Completed</option>
+                <option className="text-orange-500" value="Pending">
+                  Pending
+                </option>
+                <option className="text-blue-500" value="Active">
+                  Active
+                </option>
+                <option className="text-red-500" value="Terminated">
+                  Terminated
+                </option>
+                <option className="text-green-500" value="Completed">
+                  Completed
+                </option>
               </select>
             </div>
           </div>
 
+          {/* Terms and Conditions */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Terms and Conditions
             </label>
             <textarea
@@ -247,11 +334,21 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               value={formData.contractDetails.termsAndConditions}
               onChange={handleChange}
               rows="4"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             />
           </div>
+
+          {/* Rules and Regulations */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Rules and Regulations
             </label>
             <textarea
@@ -259,12 +356,21 @@ const EditContract = ({ contractId, onContractUpdated }) => {
               value={formData.contractDetails.rulesAndRegulations}
               onChange={handleChange}
               rows="4"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             />
           </div>
+
           <button
             type="submit"
-            className="w-full mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
+            className={`w-full mt-4 px-4 py-2 rounded shadow ${
+              darkMode
+                ? "bg-blue-600 text-white hover:bg-blue-500"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
           >
             Update Contract
           </button>

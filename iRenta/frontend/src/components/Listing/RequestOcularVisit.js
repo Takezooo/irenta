@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useProperty } from "../../global/contexts/PropertyContext.js";
@@ -7,13 +7,14 @@ import {
   fetchReservedDates,
   scheduleOcularVisit,
 } from "../../global/api/Ocular.js";
+import { ThemeContext } from "../../contexts/ThemeContext";
 
-const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
+const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
+  const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const { selectedProperty } = useProperty();
   const [reservedDates, setReservedDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
-  const [loading, setLoading] = useState(true);
 
   // Fetch reserved dates from the backend
   useEffect(() => {
@@ -37,7 +38,6 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
     loadReservedDates();
   }, [selectedProperty]);
 
-  // Check if selected time is within the available range
   const isTimeWithinAvailability = (time) => {
     const [startHour, startMinute] =
       selectedProperty.visitAvailability.startTime.split(":");
@@ -65,7 +65,6 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
     }
   };
 
-  // Submit the ocular visit schedule using the API utility
   const handleSubmit = async () => {
     if (!selectedDate) {
       alert("Please select a date.");
@@ -78,7 +77,7 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
     }
 
     try {
-      await onRequestVisit(selectedDate, selectedTime); // Call the parent's function
+      await onRequestVisit(selectedDate, selectedTime);
       onClose();
     } catch (err) {
       alert(
@@ -89,7 +88,6 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
     }
   };
 
-  // Disable tiles in the calendar for already reserved dates
   const isDateDisabled = ({ date }) => {
     return reservedDates.some(
       (reserved) =>
@@ -102,16 +100,30 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+    <div
+      className={`fixed top-0 left-0 w-full h-full ${
+        darkMode ? "bg-gray-900 bg-opacity-80" : "bg-gray-800 bg-opacity-50"
+      } flex justify-center items-center z-50`}
+    >
+      <div
+        className={`${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        } rounded-lg shadow-lg p-6 w-96`}
+      >
         <h2 className="text-xl font-bold mb-4">Schedule Ocular Visit</h2>
         <Calendar
           onChange={setSelectedDate}
           tileDisabled={isDateDisabled}
           value={selectedDate}
+          className={darkMode ? "text-black react-calendar react-calendar-dark" : "react-calendar"}
         />
         <div className="mt-4">
-          <label htmlFor="time" className="block font-medium text-gray-700">
+          <label
+            htmlFor="time"
+            className={`block font-medium ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
             Select Time (Available:{" "}
             {selectedProperty.visitAvailability.startTime} -{" "}
             {selectedProperty.visitAvailability.endTime})
@@ -121,19 +133,31 @@ const RequestOcularVisit = ({ onClose, onRequestVisit  }) => {
             id="time"
             value={selectedTime}
             onChange={handleTimeChange}
-            className="w-full mt-2 p-2 border rounded"
+            className={`w-full mt-2 p-2 border rounded ${
+              darkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-black border-gray-300"
+            }`}
           />
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
+              darkMode
+                ? "bg-gray-700 text-white hover:bg-gray-600"
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
+              darkMode
+                ? "bg-blue-600 text-white hover:bg-blue-500"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
           >
             Confirm
           </button>

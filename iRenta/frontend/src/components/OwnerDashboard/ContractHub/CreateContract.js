@@ -4,10 +4,12 @@ import { createContract } from "../../../global/api/Contracts.js";
 import { fetchUserData } from "../../../global/api/Users.js";
 
 import { AuthContext } from "../../../global/contexts/AuthContext.js";
+import { ThemeContext } from "../../../contexts/ThemeContext.js"; // Import ThemeContext for dark mode
 import { GetToken } from "../../../global/utils/Token.js";
 
 const CreateContract = () => {
   const { user } = useContext(AuthContext);
+  const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const storedToken = GetToken();
 
   const [userProfile, setUserProfile] = useState({
@@ -43,8 +45,8 @@ const CreateContract = () => {
         zip: "",
       },
     },
-    tenant: "", // Must be an ObjectId from the database
-    landlord: user.id, // Must be an ObjectId from the database
+    tenant: "",
+    landlord: user.id,
     landlordName: "",
     contractDetails: {
       startDate: "",
@@ -88,15 +90,14 @@ const CreateContract = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Clean up payload to remove duplicate keys
     const cleanedPayload = {
       property: {
         name: formData.property.name,
         address: { ...formData.property.address },
       },
       tenant: formData.tenant,
-      landlord: user.id, // Use the logged-in user's ID
-      landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`, // Ensure landlordName is set
+      landlord: user.id,
+      landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
       contractDetails: { ...formData.contractDetails },
     };
 
@@ -120,15 +121,31 @@ const CreateContract = () => {
   };
 
   return (
-    <div className="flex-grow">
-      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
-        <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
+    <div
+      className={`flex-grow ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      }`}
+    >
+      <div
+        className={`shadow-md rounded-lg p-8 max-w-full mx-auto ${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        }`}
+      >
+        <h1
+          className={`text-3xl font-bold text-center mb-6 ${
+            darkMode ? "text-blue-400" : "text-blue-600"
+          }`}
+        >
           Create Contract
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Property Name
               </label>
               <input
@@ -136,11 +153,19 @@ const CreateContract = () => {
                 name="property.name"
                 value={formData.property.name}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 House Number
               </label>
               <input
@@ -148,11 +173,19 @@ const CreateContract = () => {
                 name="property.address.houseNumber"
                 value={formData.property.address.houseNumber}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Street
               </label>
               <input
@@ -160,11 +193,19 @@ const CreateContract = () => {
                 name="property.address.street"
                 value={formData.property.address.street}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 City
               </label>
               <input
@@ -172,11 +213,19 @@ const CreateContract = () => {
                 name="property.address.city"
                 value={formData.property.address.city}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 ZIP
               </label>
               <input
@@ -184,11 +233,19 @@ const CreateContract = () => {
                 name="property.address.zip"
                 value={formData.property.address.zip}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Tenant
               </label>
               <input
@@ -196,27 +253,21 @@ const CreateContract = () => {
                 name="tenant"
                 value={formData.tenant}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Landlord
-              </label>
-              <input
-                type="text"
-                name="landlordName"
-                value={`${userProfile.info.firstName} ${userProfile.info.lastName}`}
-                readOnly
-                onClick={(e) => e.preventDefault()} // Prevent modification
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Start Date
               </label>
               <input
@@ -224,11 +275,19 @@ const CreateContract = () => {
                 name="contractDetails.startDate"
                 value={formData.contractDetails.startDate}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 End Date
               </label>
               <input
@@ -236,55 +295,21 @@ const CreateContract = () => {
                 name="contractDetails.endDate"
                 value={formData.contractDetails.endDate}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Rent Amount
-              </label>
-              <input
-                type="number"
-                name="contractDetails.rentAmount"
-                value={formData.contractDetails.rentAmount}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Payment Frequency
-              </label>
-              <select
-                name="contractDetails.paymentFrequency"
-                value={formData.contractDetails.paymentFrequency}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-              >
-                <option value="Monthly">Monthly</option>
-                <option value="Quarterly">Quarterly</option>
-                <option value="Yearly">Yearly</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Deposit Amount
-              </label>
-              <input
-                type="number"
-                name="contractDetails.depositAmount"
-                value={formData.contractDetails.depositAmount}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Terms and Conditions
             </label>
             <textarea
@@ -292,11 +317,19 @@ const CreateContract = () => {
               value={formData.contractDetails.termsAndConditions}
               onChange={handleChange}
               rows="4"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+              }`}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Rules and Regulations
             </label>
             <textarea
@@ -304,12 +337,21 @@ const CreateContract = () => {
               value={formData.contractDetails.rulesAndRegulations}
               onChange={handleChange}
               rows="4"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+              }`}
             />
           </div>
+          
           <button
             type="submit"
-            className="w-full mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
+            className={`w-full mt-4 px-4 py-2 rounded text-sm font-medium ${
+              darkMode
+                ? "bg-blue-600 text-white hover:bg-blue-500"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
           >
             Submit Contract
           </button>

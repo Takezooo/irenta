@@ -4,6 +4,7 @@ import {
   createTermsTemplate,
   updateTermsTemplate,
 } from "../../global/api/Terms.js";
+import { attachTermsToListing } from "../../global/api/Terms.js"; // API to attach terms to listings
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 const TermsManagement = () => {
@@ -11,7 +12,11 @@ const TermsManagement = () => {
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [editingTemplateId, setEditingTemplateId] = useState(null);
+  const [listings, setListings] = useState([]); // Listings fetched from backend
+  const [selectedListingId, setSelectedListingId] = useState(""); // Selected listing for attaching terms
+  const [selectedTermsId, setSelectedTermsId] = useState(""); // Selected terms template for attaching
 
+  // Fetch terms templates and listings
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
@@ -22,7 +27,18 @@ const TermsManagement = () => {
       }
     };
 
+    const fetchListings = async () => {
+      try {
+        const response = await fetch("/api/listings"); // Adjust API route if needed
+        const data = await response.json();
+        setListings(data);
+      } catch (error) {
+        console.error("Failed to fetch listings:", error);
+      }
+    };
+
     fetchTemplates();
+    fetchListings();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -54,6 +70,27 @@ const TermsManagement = () => {
   const handleCancelEdit = () => {
     setFormData({ title: "", content: "" });
     setEditingTemplateId(null);
+  };
+
+  // Handle attaching terms to a listing
+  const handleAttachTerms = async () => {
+    if (!selectedListingId || !selectedTermsId) {
+      alert("Please select both a listing and a terms template.");
+      return;
+    }
+
+    try {
+      await attachTermsToListing({
+        listingId: selectedListingId,
+        termsAndConditionsId: selectedTermsId,
+      });
+      alert("Terms and Conditions attached successfully!");
+      setSelectedListingId(""); // Clear selection
+      setSelectedTermsId(""); // Clear selection
+    } catch (error) {
+      console.error("Failed to attach terms to listing:", error);
+      alert("Failed to attach terms to listing.");
+    }
   };
 
   return (
@@ -159,7 +196,9 @@ const TermsManagement = () => {
         <div className="overflow-x-auto">
           <table
             className={`min-w-full border shadow-md rounded-lg ${
-              darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              darkMode
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
@@ -223,6 +262,77 @@ const TermsManagement = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Attach Terms to Listing Section */}
+        <h2
+          className={`text-2xl font-semibold mt-8 mb-4 ${
+            darkMode ? "text-gray-300" : "text-gray-800"
+          }`}
+        >
+          Attach Terms to Listing
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Select Listing
+            </label>
+            <select
+              value={selectedListingId}
+              onChange={(e) => setSelectedListingId(e.target.value)}
+              className={`mt-1 block w-full border rounded-md shadow-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
+            >
+              <option value="">Select a Listing</option>
+              {listings.map((listing) => (
+                <option key={listing._id} value={listing._id}>
+                  {listing.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Select Terms Template
+            </label>
+            <select
+              value={selectedTermsId}
+              onChange={(e) => setSelectedTermsId(e.target.value)}
+              className={`mt-1 block w-full border rounded-md shadow-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
+            >
+              <option value="">Select a Terms Template</option>
+              {termsTemplates.map((term) => (
+                <option key={term._id} value={term._id}>
+                  {term.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <button
+          onClick={handleAttachTerms}
+          className={`w-full mt-4 px-4 py-2 rounded font-medium ${
+            darkMode
+              ? "bg-blue-600 text-white hover:bg-blue-500"
+              : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
+        >
+          Attach Terms to Listing
+        </button>
       </div>
     </div>
   );

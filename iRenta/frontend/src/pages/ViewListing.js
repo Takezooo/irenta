@@ -135,12 +135,7 @@ export const ViewListing = () => {
   };
 
   const handleReserveListing = async () => {
-    try {
-      await createReservation(selectedProperty._id, selectedProperty.userId);
-      alert("Reservation request sent!");
-    } catch (error) {
-      console.error("Error sending reservation request:", error);
-    }
+    navigate('/request-reservation', {state: {selectedProperty}});
   };
 
   useEffect(() => {

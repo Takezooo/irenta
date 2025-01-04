@@ -40,3 +40,16 @@ export const updateTermsTemplate = async (id, updatedData) => {
     throw error;
   }
 };
+
+export const attachTermsToListing = async (payload) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/attach-terms`, payload, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to attach terms to listing:", error);
+    throw error;
+  }
+};

@@ -1,8 +1,12 @@
-import React, { useState } from "react";
-import { Waitlist } from "./WaitList.js";
+import React, { useState, useContext } from "react";
+import { Waitlist } from "./WaitList";
+import { ThemeContext } from "../../../contexts/ThemeContext";
+
 const ManageTenant = () => {
+  const { darkMode } = useContext(ThemeContext); // Access dark mode context
   const [tenants] = useState([
     {
+      _id: "1",
       propertyName: "Sunrise Apartments",
       name: "John Doe",
       gender: "Male",
@@ -13,6 +17,7 @@ const ManageTenant = () => {
       requests: "Requested for painting the walls",
     },
     {
+      _id: "2",
       propertyName: "Downtown Condo",
       name: "Jane Smith",
       gender: "Female",
@@ -23,6 +28,7 @@ const ManageTenant = () => {
       requests: "Requested for new furniture",
     },
     {
+      _id: "3",
       propertyName: "Lakeside Villa",
       name: "Mark Johnson",
       gender: "Male",
@@ -35,67 +41,80 @@ const ManageTenant = () => {
   ]);
 
   return (
-    <div className="mt-16 flex-grow p-6 pb-4">
+    <div
+      className={`mt-16 flex-grow p-6 pb-4 ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      }`}
+    >
       <h1 className="text-2xl font-bold mb-6">Manage Tenants</h1>
 
-      <Waitlist></Waitlist>
+      {/* Waitlist Section */}
+      <div className="mb-8">
+        <Waitlist reservations={tenants} />
+      </div>
 
       {/* Tenants Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
-          <thead className="bg-gray-100 rounded-lg">
+        <table
+          className={`min-w-full border shadow-md rounded-lg ${
+            darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          }`}
+        >
+          <thead
+            className={`${
+              darkMode ? "bg-gray-700 text-gray-300" : "bg-gray-100 text-gray-600"
+            }`}
+          >
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Property Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Gender
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Start Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                End Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Date of Payment
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Remarks
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Requests
-              </th>
+              {[
+                "Property Name",
+                "Name",
+                "Gender",
+                "Start Date",
+                "End Date",
+                "Date of Payment",
+                "Remarks",
+                "Requests",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {tenants.map((tenant, index) => (
-              <tr key={index} className="border-b">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              <tr
+                key={index}
+                className={`border-b ${
+                  darkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+              >
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.propertyName}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.gender}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.startDate}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.endDate}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.paymentDate}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.remarks}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {tenant.requests}
                 </td>
               </tr>

@@ -64,6 +64,16 @@ const App = () => {
                   <Route path="/about-us" element={<AboutPage />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
 
+                  {/* Seeker Routes */}
+                  <Route
+                    path="/request-reservation"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker"]}>
+                        <ReservationPage />
+                      </PrivateRoute>
+                    }
+                  />
+
                   {/* Owner Routes */}
                   <Route
                     path="/owner-dashboard"
@@ -112,14 +122,6 @@ const App = () => {
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                         <ReserveListing />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/reservation"
-                    element={
-                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                        <ReservationPage />
                       </PrivateRoute>
                     }
                   />

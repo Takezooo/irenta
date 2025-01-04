@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { fetchLeaseById, downloadPdf } from "../../../global/api/Leases.js"; // Import API functions
-
+import { ThemeContext } from "../../../contexts/ThemeContext.js";
 const ViewLease = ({ leaseId }) => {
   const [leaseDetails, setLeaseDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const { darkMode } = useContext(ThemeContext); // Access dark mode state
 
   useEffect(() => {
     const getLease = async () => {

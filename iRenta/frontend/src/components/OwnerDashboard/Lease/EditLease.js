@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { fetchLeaseById, updateLease } from "../../../global/api/Leases.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
+import { ThemeContext } from "../../../contexts/ThemeContext.js";
 
 const EditLease = ({ leaseId, onLeaseUpdated }) => {
   const [formData, setFormData] = useState(null);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [error, setError] = useState("");
+  const { darkMode } = useContext(ThemeContext); // Access dark mode state
 
   useEffect(() => {
     const getLease = async () => {

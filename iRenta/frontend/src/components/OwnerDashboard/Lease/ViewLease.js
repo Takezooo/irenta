@@ -43,7 +43,7 @@ const ViewLease = ({ leaseId }) => {
 
   return (
     <div className="flex-grow">
-      <div className="bg-white shadow-md rounded-lg p-8 max-w-full mx-auto">
+      <div className="bg-gray-100 shadow-md rounded-lg p-8 max-w-full mx-auto">
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
           View Lease
         </h1>

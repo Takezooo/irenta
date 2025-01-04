@@ -83,7 +83,7 @@ export const PropertyListing = () => {
   return (
     <div
       className={`pt-20 pb-4 mx-2 flex flex-col xl:flex-row-reverse ${
-        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
       }`}
     >
       {/* Right Side: Profile */}
@@ -178,7 +178,7 @@ export const PropertyListing = () => {
             <div
               key={listing._id}
               className={`mb-8 flex justify-center items-center ${
-                darkMode ? "bg-gray-900" : "bg-white"
+                darkMode ? "bg-gray-900" : "bg-gray-200"
               }`}
             >
               <div

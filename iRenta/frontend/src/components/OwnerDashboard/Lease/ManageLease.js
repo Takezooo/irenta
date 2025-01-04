@@ -62,7 +62,7 @@ const ManageLease = () => {
   return (
     <div
       className={`mt-16 flex-grow p-6 pb-4 ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
       }`}
     >
       {view === "LeaseHub" ? (

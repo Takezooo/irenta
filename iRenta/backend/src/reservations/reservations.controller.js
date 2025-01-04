@@ -1,35 +1,53 @@
 import Reservation from "./reservations.model.js";
 import Notification from "../notifications/notifications.model.js";
 import User from "../users/users.model.js";
+import Listing from "../listings/listings.model.js";
+import multer from "multer";
+import sharp from "sharp";
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+export const uploadMiddleware = upload.single("validIdFile");
 
 export const createReservation = async (req, res) => {
-  const { listingId, ownerId, moveInDate } = req.body; // Include moveInDate in the request body
+  const { listingId, ownerId, moveInDate, shortMessage, agreedToTerms } =
+    req.body;
   const seekerId = req.user.id;
 
   try {
-    // Ensure moveInDate is provided
-    if (!moveInDate) {
-      return res.status(400).json({ message: "Move-in date is required." });
-    }
+    const uploadedValidId = req.file
+      ? {
+          data: req.file.buffer, // Save file buffer
+          contentType: req.file.mimetype, // Save MIME type
+        }
+      : null;
 
     const reservation = new Reservation({
       seekerId,
       ownerId,
       listingId,
-      moveInDate, // Add moveInDate to the reservation document
+      moveInDate,
+      shortMessage: shortMessage || null,
+      agreedToTerms,
+      uploadedValidId,
     });
-    await reservation.save();
 
+    await reservation.save();
+    const seeker = await User.findById(seekerId);
+    const listings = await Listing.findById(listingId);
     // Notify Owner
     const notification = new Notification({
       userId: ownerId,
       type: "ReservationRequest",
-      message: `You have a new reservation request for listing ID: ${listingId}.`,
+      message: `You have a new reservation request for: ${listings.title} from: ${seeker.info.firstName} ${seeker.info.lastName}.`,
       propertyId: listingId,
     });
     await notification.save();
 
-    res.status(201).json({ message: "Reservation request sent successfully." });
+    res
+      .status(201)
+      .json({ message: "Reservation created successfully.", reservation });
   } catch (error) {
     console.error("Error creating reservation:", error);
     res.status(500).json({ message: error.message });

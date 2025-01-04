@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useContext } from "react";
+import imageCompression from "browser-image-compression";
 import { ThemeContext } from "../contexts/ThemeContext";
 import Topbar from "../components/global/Topbar";
 import { useProperty } from "../global/contexts/PropertyContext";
 import { fetchTermsById } from "../global/api/Terms";
+import { createReservation, uploadValidId } from "../global/api/Reservations";
 
 const ReservationPage = () => {
   const { darkMode } = useContext(ThemeContext);
   const [moveInDate, setMoveInDate] = useState("");
   const [terms, setTerms] = useState([]);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedFile, setUploadedFile] = useState(null);
   const [message, setMessage] = useState("");
   const [agreed, setAgreed] = useState(false);
   const { selectedProperty } = useProperty();
+  const [isLoading, setIsLoading] = useState(false);
+
+  console.log(selectedProperty);
 
   useEffect(() => {
     const getTerms = async () => {
@@ -31,20 +36,72 @@ const ReservationPage = () => {
     }
   }, [selectedProperty.termsAndConditionsId]);
 
-  const handleFileUpload = (e) => {
-    setUploadedFiles([...e.target.files]);
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const options = {
+      maxSizeMB: 1, // Compress to 1MB
+      maxWidthOrHeight: 1024, // Resize dimensions
+      useWebWorker: true,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      setUploadedFile(compressedFile); // Save the compressed file for upload
+      alert("File compressed successfully!");
+    } catch (error) {
+      console.error("Error compressing file:", error);
+      alert("Failed to compress the file.");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agreed) {
-      alert("You must agree to the terms before submitting.");
-      console.log(selectedProperty);
+
+    if (checkIfTermsExist()) {
+      if (!agreed && selectedProperty?.termsAndConditionsId) {
+        alert("You must agree to the terms before submitting.");
+        return;
+      }
+    }
+
+    if (!moveInDate) {
+      alert("Move-in date is required.");
       return;
     }
 
-    // Submit logic here
-    alert("Reservation request submitted successfully!");
+    setIsLoading(true);
+
+    try {
+      let formData = new FormData();
+
+      // Add the file to the FormData object if a file is provided
+      if (uploadedFile) {
+        formData.append("validIdFile", uploadedFile);
+      }
+
+      // Add other reservation fields to FormData
+      formData.append("listingId", selectedProperty._id);
+      formData.append("ownerId", selectedProperty.userId);
+      formData.append("moveInDate", moveInDate);
+      formData.append("shortMessage", message);
+
+      await createReservation(formData);
+
+      alert("Reservation request submitted successfully!");
+      setIsLoading(false);
+      setMoveInDate("");
+      setUploadedFile(null);
+      setMessage("");
+      setAgreed(false);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error submitting reservation:", error);
+      alert("An error occurred while submitting your reservation.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const checkIfTermsExist = () => {
@@ -124,18 +181,21 @@ const ReservationPage = () => {
             </div>
           )}
           {/* Submit Additional Documents */}
-          {selectedProperty?.isDocumentRequest === true && (
+          {selectedProperty?.askForValidId === true && (
             <div>
               <label
                 className={`block text-sm font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
-                Upload Additional Documents (e.g., IDs, Proof of Income)
+                Upload Valid ID
+                <span className="text-xs">
+                  (make sure that the signature is visible)
+                </span>
               </label>
               <input
                 type="file"
-                multiple
+                accept=".jpg,.jpeg,.png,.pdf" // Restrict file types
                 onChange={handleFileUpload}
                 className={`mt-1 block w-full border rounded-md px-4 py-2 ${
                   darkMode
@@ -194,13 +254,14 @@ const ReservationPage = () => {
           <div className="text-center">
             <button
               type="submit"
+              disabled={isLoading}
               className={`px-6 py-2 rounded-md font-medium ${
                 darkMode
                   ? "bg-blue-600 text-white hover:bg-blue-500"
                   : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
+              }  ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Submit Reservation Request
+              {isLoading ? "Submitting..." : "Submit Reservation Request"}
             </button>
           </div>
         </form>

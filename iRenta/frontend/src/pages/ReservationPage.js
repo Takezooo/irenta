@@ -49,8 +49,8 @@ const ReservationPage = () => {
 
   const checkIfTermsExist = () => {
     if (
-      selectedProperty?.termsAndConditionsId !== undefined &&
-      selectedProperty?.customTermsAndConditions !== undefined
+      selectedProperty.termsAndConditionsId === undefined &&
+      selectedProperty.customTermsAndConditions === undefined
     ) {
       return false;
     } else {
@@ -103,7 +103,7 @@ const ReservationPage = () => {
           </div>
 
           {/* Agreement Review */}
-          {checkIfTermsExist() ? (
+          {checkIfTermsExist() && (
             <div>
               <label
                 className={`block text-sm font-medium ${
@@ -122,9 +122,9 @@ const ReservationPage = () => {
                 {terms.content}
               </p>
             </div>
-          ) : null}
+          )}
           {/* Submit Additional Documents */}
-          {selectedProperty?.isDocumentRequest === true ? (
+          {selectedProperty?.isDocumentRequest === true && (
             <div>
               <label
                 className={`block text-sm font-medium ${
@@ -144,7 +144,7 @@ const ReservationPage = () => {
                 }`}
               />
             </div>
-          ) : null}
+          )}
 
           {/* Message Field */}
           <div>
@@ -168,25 +168,27 @@ const ReservationPage = () => {
           </div>
 
           {/* Agree Checkbox */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className={`mr-2 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-gray-50 border-gray-300 text-black"
-              }`}
-            />
-            <label
-              className={`text-sm ${
-                darkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              I agree to the terms and conditions
-            </label>
-          </div>
+          {checkIfTermsExist() && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className={`mr-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-gray-50 border-gray-300 text-black"
+                }`}
+              />
+              <label
+                className={`text-sm ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                I agree to the terms and conditions
+              </label>
+            </div>
+          )}
 
           {/* Submit Button */}
           <div className="text-center">

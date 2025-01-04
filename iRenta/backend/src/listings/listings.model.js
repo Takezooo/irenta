@@ -40,7 +40,7 @@ const listingSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  isDocumentRequest: {
+  askForValidId: {
     type: Boolean,
     default: false,
     required: false,

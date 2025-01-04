@@ -16,7 +16,9 @@ const ReservationPage = () => {
   useEffect(() => {
     const getTerms = async () => {
       try {
-        const termsData = await fetchTermsById(selectedProperty?.termsAndConditionsId);
+        const termsData = await fetchTermsById(
+          selectedProperty?.termsAndConditionsId
+        );
         setTerms(termsData);
       } catch (error) {
         console.error("Error loading terms:", error);
@@ -122,25 +124,27 @@ const ReservationPage = () => {
             </div>
           ) : null}
           {/* Submit Additional Documents */}
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                darkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Upload Additional Documents (e.g., IDs, Proof of Income)
-            </label>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileUpload}
-              className={`mt-1 block w-full border rounded-md px-4 py-2 ${
-                darkMode
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-gray-50 text-black border-gray-300"
-              }`}
-            />
-          </div>
+          {selectedProperty?.isDocumentRequest === true ? (
+            <div>
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Upload Additional Documents (e.g., IDs, Proof of Income)
+              </label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileUpload}
+                className={`mt-1 block w-full border rounded-md px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-gray-50 text-black border-gray-300"
+                }`}
+              />
+            </div>
+          ) : null}
 
           {/* Message Field */}
           <div>

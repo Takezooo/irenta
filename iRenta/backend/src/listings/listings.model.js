@@ -40,6 +40,11 @@ const listingSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  isDocumentRequest: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

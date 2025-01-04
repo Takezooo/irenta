@@ -3,11 +3,21 @@ import Notification from "../notifications/notifications.model.js";
 import User from "../users/users.model.js";
 
 export const createReservation = async (req, res) => {
-  const { listingId, ownerId } = req.body;
+  const { listingId, ownerId, moveInDate } = req.body; // Include moveInDate in the request body
   const seekerId = req.user.id;
 
   try {
-    const reservation = new Reservation({ seekerId, ownerId, listingId });
+    // Ensure moveInDate is provided
+    if (!moveInDate) {
+      return res.status(400).json({ message: "Move-in date is required." });
+    }
+
+    const reservation = new Reservation({
+      seekerId,
+      ownerId,
+      listingId,
+      moveInDate, // Add moveInDate to the reservation document
+    });
     await reservation.save();
 
     // Notify Owner
@@ -21,6 +31,7 @@ export const createReservation = async (req, res) => {
 
     res.status(201).json({ message: "Reservation request sent successfully." });
   } catch (error) {
+    console.error("Error creating reservation:", error);
     res.status(500).json({ message: error.message });
   }
 };

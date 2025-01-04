@@ -1,5 +1,5 @@
 import Terms from "./terms.model.js";
-
+import Listing from "../listings/listings.model.js";
 // Fetch all terms templates
 export const fetchTermsTemplates = async (req, res) => {
   try {
@@ -47,6 +47,30 @@ export const updateTermsTemplate = async (req, res) => {
   } catch (error) {
     console.error("Error updating template:", error);
     res.status(500).json({ message: "Failed to update template" });
+  }
+};
+
+export const attachTermsToListing = async (req, res) => {
+  const { listingId, termsAndConditionsId } = req.body;
+
+  try {
+    const listing = await Listing.findById(listingId);
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found." });
+    }
+
+    const terms = await Terms.findById(termsAndConditionsId);
+    if (!terms) {
+      return res.status(404).json({ message: "Terms and Conditions not found." });
+    }
+
+    listing.termsAndConditionsId = termsAndConditionsId; // Attach the template
+    await listing.save();
+
+    res.status(200).json({ message: "Terms and Conditions attached successfully.", listing });
+  } catch (error) {
+    console.error("Error attaching terms to listing:", error);
+    res.status(500).json({ message: "Failed to attach terms to listing." });
   }
 };
 

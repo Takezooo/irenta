@@ -14,6 +14,19 @@ export const fetchTermsTemplates = async () => {
   }
 };
 
+export const fetchTermsById = async (id) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${id}`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching terms by ID:", error);
+    throw error;
+  }
+};
+
 // Create a new terms template
 export const createTermsTemplate = async (data) => {
   const authToken = GetToken();

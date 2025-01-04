@@ -135,7 +135,7 @@ export const ViewListing = () => {
   };
 
   const handleReserveListing = async () => {
-    navigate('/request-reservation', {state: {selectedProperty}});
+    navigate('/request-reservation');
   };
 
   useEffect(() => {

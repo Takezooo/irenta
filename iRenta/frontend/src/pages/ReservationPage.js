@@ -1,13 +1,33 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ThemeContext } from "../contexts/ThemeContext";
 import Topbar from "../components/global/Topbar";
+import { useProperty } from "../global/contexts/PropertyContext";
+import { fetchTermsById } from "../global/api/Terms";
 
 const ReservationPage = () => {
   const { darkMode } = useContext(ThemeContext);
   const [moveInDate, setMoveInDate] = useState("");
+  const [terms, setTerms] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [message, setMessage] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const { selectedProperty } = useProperty();
+
+  useEffect(() => {
+    const getTerms = async () => {
+      try {
+        const termsData = await fetchTermsById(selectedProperty?.termsAndConditionsId);
+        setTerms(termsData);
+      } catch (error) {
+        console.error("Error loading terms:", error);
+      }
+    };
+
+    if (checkIfTermsExist()) {
+      getTerms();
+      console.log(terms);
+    }
+  }, [selectedProperty.termsAndConditionsId]);
 
   const handleFileUpload = (e) => {
     setUploadedFiles([...e.target.files]);
@@ -17,11 +37,23 @@ const ReservationPage = () => {
     e.preventDefault();
     if (!agreed) {
       alert("You must agree to the terms before submitting.");
+      console.log(selectedProperty);
       return;
     }
 
     // Submit logic here
     alert("Reservation request submitted successfully!");
+  };
+
+  const checkIfTermsExist = () => {
+    if (
+      selectedProperty?.termsAndConditionsId !== undefined &&
+      selectedProperty?.customTermsAndConditions !== undefined
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   return (
@@ -69,26 +101,26 @@ const ReservationPage = () => {
           </div>
 
           {/* Agreement Review */}
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                darkMode ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              Agreement Review
-            </label>
-            <p
-              className={`mt-1 block w-full border rounded-md px-4 py-2 ${
-                darkMode
-                  ? "bg-gray-700 text-gray-300 border-gray-600"
-                  : "bg-gray-50 text-gray-700 border-gray-300"
-              }`}
-            >
-              Please review the terms and conditions carefully before submitting
-              your request.
-            </p>
-          </div>
-
+          {checkIfTermsExist() ? (
+            <div>
+              <label
+                className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Terms & Conditions
+              </label>
+              <p
+                className={`mt-1 block w-full border rounded-md px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-gray-300 border-gray-600"
+                    : "bg-gray-50 text-gray-700 border-gray-300"
+                }`}
+              >
+                {terms.content}
+              </p>
+            </div>
+          ) : null}
           {/* Submit Additional Documents */}
           <div>
             <label

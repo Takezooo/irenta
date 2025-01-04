@@ -50,6 +50,23 @@ export const updateTermsTemplate = async (req, res) => {
   }
 };
 
+export const fetchTermsById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Find the terms by ID
+    const terms = await Terms.findById(id);
+    if (!terms) {
+      return res.status(404).json({ message: "Terms and Conditions not found" });
+    }
+
+    res.status(200).json(terms);
+  } catch (error) {
+    console.error("Error fetching terms by ID:", error);
+    res.status(500).json({ message: "Failed to fetch Terms and Conditions" });
+  }
+};
+
 export const attachTermsToListing = async (req, res) => {
   const { listingId, termsAndConditionsId } = req.body;
 

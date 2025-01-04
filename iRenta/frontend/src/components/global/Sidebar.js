@@ -14,7 +14,8 @@ import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
 import ManageTenants from "../OwnerDashboard/Tenants/ManageTenants.js";
 import OcularVisitCalendar from "../OwnerDashboard/OcularVisitCalendar.js";
-import ContractHub from "../OwnerDashboard/ContractHub/ContractHub.js";
+import ManageLease from "../OwnerDashboard/Lease/ManageLease.js";
+import TermsManagement from "../OwnerDashboard/ManageTerms.js";
 
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 
@@ -145,7 +146,25 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
                   />
                   {isOpen && (
                     <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black dark:text-white ms-3 whitespace-nowrap">
-                      ContractHub
+                      Manage Terms
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setActiveContent("content6")}
+                  className={`flex items-center w-full py-3 px-6 hover:bg-gray-200 dark:hover:bg-gray-600 group ${
+                    isActive("content6") ? "bg-gray-300 dark:bg-gray-700" : ""
+                  }`}
+                >
+                  <FaFileContract
+                    className={`text-xl text-blue-700 dark:text-blue-400 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300 ${
+                      isOpen ? "" : "mx-auto"
+                    }`}
+                  />
+                  {isOpen && (
+                    <span className="ml-2 p-1 opacity-90 text-sm font-medium text-black dark:text-white ms-3 whitespace-nowrap">
+                      Manage Lease
                     </span>
                   )}
                 </button>
@@ -224,7 +243,16 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
             }`}
           >
             <FaFileContract size={24} />
-            <span className="text-xs">Contracts</span>
+            <span className="text-xs">Manage Terms</span>
+          </button>
+          <button
+            onClick={() => setActiveContent("content5")}
+            className={`flex flex-col items-center text-blue-500 dark:text-blue-400 ${
+              isActive("content6") ? "text-blue-900 dark:text-blue-500" : ""
+            }`}
+          >
+            <FaFileContract size={24} />
+            <span className="text-xs">Manage Lease</span>
           </button>
         </div>
       </div>
@@ -239,7 +267,8 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
         {activeContent === "content2" && <PropertyListing />}
         {activeContent === "content3" && <ManageTenants />}
         {activeContent === "content4" && <OcularVisitCalendar />}
-        {activeContent === "content5" && <ContractHub />}
+        {activeContent === "content5" && <TermsManagement />}
+        {activeContent === "content6" && <ManageLease />}
       </div>
     </div>
   );

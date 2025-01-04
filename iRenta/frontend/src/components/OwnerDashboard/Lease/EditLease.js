@@ -11,8 +11,8 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
     const getLease = async () => {
       try {
         const fetchedLease = await fetchLeaseById(leaseId);
-        if (fetchedLease.status !== "Pending") {
-          setError("Only leases with status 'Pending' can be edited.");
+        if (fetchedLease.status !== "Draft") {
+          setError("Only leases with status 'Draft' can be edited.");
         } else {
           setFormData(fetchedLease);
         }

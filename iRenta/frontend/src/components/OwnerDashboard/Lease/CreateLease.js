@@ -123,8 +123,18 @@ const CreateLease = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (action, event) => {
+    event.preventDefault();
+
+    if (
+      action === "saveAndSend" &&
+      (!formData.contractDetails.startDate ||
+        !formData.contractDetails.endDate ||
+        !formData.contractDetails.rentAmount)
+    ) {
+      alert("Please fill out all required fields.");
+      return;
+    }
 
     if (!validateDates()) {
       return;
@@ -132,19 +142,63 @@ const CreateLease = () => {
 
     const payload = {
       ...formData,
-      landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
+      landlordName: `${userProfile?.info?.firstName} ${userProfile?.info?.lastName}`,
+      tenant: formData.tenant || null,
+      action, // Send the action type to the backend
     };
 
     console.log("Submitting Payload:", payload);
 
     try {
       const lease = await createLease(payload);
-      alert("Lease created successfully!");
+      alert(
+        action === "saveAndSend"
+          ? "Lease marked ready to send!"
+          : "Lease saved as draft!"
+      );
       console.log(lease);
+      handleClearForm();
     } catch (err) {
       console.error("Error creating lease:", err.response?.data || err.message);
-      alert(`Failed to create lease: ${err.response?.data?.message || "Unknown error"}`);
+      alert(
+        `Failed to create lease: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
     }
+  };
+
+  const handleClearForm = () => {
+    // Reset formData to initial values
+    setFormData({
+      property: {
+        name: "",
+        address: {
+          houseNumber: "",
+          street: "",
+          city: "",
+          zip: "",
+        },
+      },
+      tenant: "",
+      tenantPlaceholder: {
+        name: "",
+        email: "",
+        phoneNumber: "",
+      },
+      landlord: user.id,
+      landlordName: "",
+      contractDetails: {
+        startDate: "",
+        endDate: "",
+        rentAmount: "",
+        paymentFrequency: "Monthly",
+        depositAmount: "",
+        termsAndConditionsId: "",
+        customTermsAndConditions: "",
+        rulesAndRegulations: "",
+      },
+    });
   };
 
   return (
@@ -153,7 +207,10 @@ const CreateLease = () => {
         <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
           Create Lease
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={(e) => handleSubmit("saveAndSend", e)}
+          className="space-y-6"
+        >
           {/* Property Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
@@ -338,6 +395,22 @@ const CreateLease = () => {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Payment Frequency
+              </label>
+              <select
+                name="contractDetails.paymentFrequency"
+                value={formData.contractDetails.paymentFrequency}
+                onChange={handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+              >
+                <option value="">Select Frequency Terms</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+            </div>
           </div>
 
           {/* Preloaded Terms & Conditions */}
@@ -376,10 +449,18 @@ const CreateLease = () => {
 
           {/* Submit Button */}
           <button
+            type="button"
+            onClick={(e) => handleSubmit("saveAsDraft", e)}
+            className="w-full mt-4 px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600"
+          >
+            Save as Draft
+          </button>
+          <button
             type="submit"
+            onClick={(e) => handleSubmit("saveAndSend", e)}
             className="w-full mt-4 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600"
           >
-            Submit Lease
+            Save and Mark Ready to Send
           </button>
         </form>
       </div>

@@ -27,15 +27,15 @@ const leaseSchema = new mongoose.Schema(
       },
     },
     contractDetails: {
-      startDate: { type: Date, required: true },
-      endDate: { type: Date, required: true },
-      rentAmount: { type: Number, required: true },
+      startDate: { type: Date, required: false },
+      endDate: { type: Date, required: false },
+      rentAmount: { type: Number, required: false },
       paymentFrequency: {
         type: String,
         enum: ["Monthly", "Quarterly", "Yearly"],
         required: true,
       },
-      depositAmount: { type: Number, required: true },
+      depositAmount: { type: Number, required: false },
       termsAndConditionsId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "TermsAndConditions",
@@ -49,8 +49,17 @@ const leaseSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Active", "Terminated", "Completed"],
-      default: "Pending",
+      enum: [
+        "Draft",
+        "Ready",
+        "Pending",
+        "Active",
+        "Completed",
+        "Terminated",
+        "Renewed",
+        "Modified",
+      ],
+      default: "Draft",
     },
     pdfPath: { type: String },
     createdAt: { type: Date, default: Date.now },
@@ -65,9 +74,16 @@ const leaseSchema = new mongoose.Schema(
 
 // Custom validation to ensure at least one of `tenant` or `tenantPlaceholder` is provided
 leaseSchema.pre("save", function (next) {
-  if (!this.tenant && (!this.tenantPlaceholder || !this.tenantPlaceholder.name || !this.tenantPlaceholder.email)) {
+  if (
+    !this.tenant &&
+    (!this.tenantPlaceholder ||
+      !this.tenantPlaceholder.name ||
+      !this.tenantPlaceholder.email)
+  ) {
     return next(
-      new Error("Either tenant (User reference) or tenantPlaceholder (name and email) must be provided.")
+      new Error(
+        "Either tenant (User reference) or tenantPlaceholder (name and email) must be provided."
+      )
     );
   }
   next();

@@ -202,18 +202,32 @@ export const PropertyListing = () => {
                           }
                           alt={listing.title}
                           className="h-full w-full object-cover rounded-lg"
-                        />                        
+                        />
                         {/* <span className="text-gray-500">Main Image</span> */}
-                        </div>
-                        <div className="flex justify-evenly space-x-2 overflow-x-auto scrollbar-hide">
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md">
-  
-  
+                      </div>
+                      <div className="flex justify-evenly space-x-2 overflow-x-auto scrollbar-hide">
+                        {listing.images?.slice(0, 4).map((image, index) => (
+                          <div
+                            key={index}
+                            className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"
+                          >
+                            <img
+                              src={image.link || "/placeholder-image.jpg"}
+                              alt={`${listing.title || "Listing Image"} - ${index + 1}`}
+                              className="h-full w-full object-cover rounded-md"
+                            />
                           </div>
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"></div>
-                        </div>
+                        ))}
+
+                        {/* Add empty divs if images are less than 4 */}
+                        {Array.from({ length: 4 - (listing.images?.length || 0) }).map((_, index) => (
+                          <div
+                            key={`placeholder-${index}`}
+                            className="h-16 w-16 sm:h-20 sm:w-20 bg-gray-300 rounded-md"
+                          ></div>
+                        ))}
+                      </div>
+
                     </div>
                   </div>
                   <div className="col-span-3 flex flex-col justify-between">

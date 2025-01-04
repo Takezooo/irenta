@@ -195,7 +195,7 @@ const ReservationPage = () => {
               </label>
               <input
                 type="file"
-                accept=".jpg,.jpeg,.png,.pdf" // Restrict file types
+                accept=".jpg,.jpeg,.png" // Restrict file types
                 onChange={handleFileUpload}
                 className={`mt-1 block w-full border rounded-md px-4 py-2 ${
                   darkMode

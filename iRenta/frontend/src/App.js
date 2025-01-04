@@ -17,6 +17,7 @@ import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
 import ReservationPage from "./pages/ReservationPage.js";
+import AboutPage from "./pages/AboutPage.js";
 
 // Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -60,6 +61,7 @@ const App = () => {
                   />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
+                  <Route path="/about-us" element={<AboutPage />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
 
                   {/* Owner Routes */}

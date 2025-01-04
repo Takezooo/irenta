@@ -71,7 +71,7 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.status === "Pending") {
+      if (formData.status === "Draft") {
         const updatedLease = await updateLease(leaseId, formData);
         alert("Lease updated successfully!");
         console.log("Updated lease:", updatedLease);

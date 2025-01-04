@@ -54,7 +54,7 @@ const ReservePopout = ({
     setIsLoading(true);
     try {
       await updateReservationStatus(displayRequestDetails.id, "Approved");
-      navigate("/owner-dashboard", { state: { contentActive: "content5" } });
+      navigate("/owner-dashboard", { state: { contentActive: "content6" } });
     } catch (error) {
       console.error("Error approving reservation:", error);
       alert("Failed to approve reservation. Please try again.");

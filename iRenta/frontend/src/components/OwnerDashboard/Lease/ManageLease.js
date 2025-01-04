@@ -2,7 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 import CreateLease from "./CreateLease.js";
 import EditLease from "./EditLease.js";
 import ViewLease from "./ViewLease.js";
-import { fetchLeases, downloadPdf, updateLease } from "../../../global/api/Leases.js";
+import {
+  fetchLeases,
+  downloadPdf,
+  updateLease,
+} from "../../../global/api/Leases.js";
 import { ThemeContext } from "../../../contexts/ThemeContext";
 
 const ManageLease = () => {
@@ -111,23 +115,34 @@ const ManageLease = () => {
             >
               <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
                 <tr>
-                  {["Property Name", "Tenant", "Landlord", "Rent Amount", "Status", "Actions", "File"].map(
-                    (header) => (
-                      <th
-                        key={header}
-                        className={`px-6 py-3 text-center text-xs font-medium uppercase tracking-wider ${
-                          darkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        {header}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "Property Name",
+                    "Tenant",
+                    "Landlord",
+                    "Rent Amount",
+                    "Status",
+                    "Actions",
+                    "File",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className={`px-6 py-3 text-center text-xs font-medium uppercase tracking-wider ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredLeases.map((lease) => (
-                  <tr key={lease?._id} className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
+                  <tr
+                    key={lease?._id}
+                    className={`border-b ${
+                      darkMode ? "border-gray-700" : "border-gray-200"
+                    }`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.property.name}
                     </td>
@@ -170,7 +185,18 @@ const ManageLease = () => {
                       >
                         View
                       </button>
-                      {lease?.status === "Draft" && (
+                      {lease?.status === "Draft" ? (
+                        <button
+                          className={`ml-2 px-4 py-2 text-xs font-bold rounded ${
+                            darkMode
+                              ? "bg-red-600 text-white hover:bg-red-500"
+                              : "bg-red-500 text-white hover:bg-red-600"
+                          }`}
+                          onClick={() => handleSend(lease._id)}
+                        >
+                          Del
+                        </button>
+                      ) : (
                         <button
                           className={`ml-2 px-4 py-2 text-xs font-bold rounded ${
                             darkMode

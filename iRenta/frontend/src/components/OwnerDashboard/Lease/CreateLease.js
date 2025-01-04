@@ -10,7 +10,8 @@ const CreateLease = () => {
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const storedToken = GetToken();
-
+  const [usePlaceholderTenant, setUsePlaceholderTenant] = useState(false);
+  const [preloadedTerms, setPreloadedTerms] = useState([]);
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",
@@ -49,8 +50,6 @@ const CreateLease = () => {
     },
   });
 
-  const [usePlaceholderTenant, setUsePlaceholderTenant] = useState(false);
-  const [preloadedTerms, setPreloadedTerms] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -142,10 +141,18 @@ const CreateLease = () => {
       return;
     }
 
+    const selectedTerms = preloadedTerms.find(
+      (term) => term._id === formData.contractDetails.termsAndConditionsId
+    );
+
     const payload = {
       ...formData,
       landlordName: `${userProfile?.info?.firstName} ${userProfile?.info?.lastName}`,
       tenant: formData.tenant || null,
+      contractDetails: {
+        ...formData.contractDetails,
+        customTermsAndConditions: selectedTerms ? selectedTerms.content : "",
+      },
       action, // Send the action type to the backend
     };
 

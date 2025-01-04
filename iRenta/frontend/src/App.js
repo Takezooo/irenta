@@ -16,6 +16,7 @@ import ViewContract from "./components/OwnerDashboard/ContractHub/ViewContract.j
 import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
+import ReservationPage from "./pages/ReservationPage.js";
 
 // Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -109,6 +110,14 @@ const App = () => {
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                         <ReserveListing />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/reservation"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ReservationPage />
                       </PrivateRoute>
                     }
                   />

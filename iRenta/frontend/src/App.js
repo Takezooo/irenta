@@ -18,6 +18,7 @@ import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
 import ReservationPage from "./pages/ReservationPage.js";
 import AboutPage from "./pages/AboutPage.js";
+import TenantDashboard from "./pages/TenantDashboard.js";
 
 // Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -61,6 +62,7 @@ const App = () => {
                   />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
+                  <Route path="/tenant-dashboard" element={<TenantDashboard />} />
                   <Route path="/about-us" element={<AboutPage />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
 

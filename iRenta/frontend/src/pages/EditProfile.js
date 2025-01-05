@@ -89,54 +89,55 @@ const EditProfile = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Prepare the updated user data
     const updatedUser = {
-      credentials: {
-        username: userProfile.credentials.username,
-        email: userProfile.credentials.email,
-        ...(userProfile.credentials.password && {
-          password: userProfile.credentials.password,
-        }),
-      },
-      info: {
-        firstName: userProfile.info.firstName,
-        middleName: userProfile.info.middleName,
-        lastName: userProfile.info.lastName,
-        birthDate: userProfile.info.birthDate,
-        gender: userProfile.info.gender,
-        phoneNumber: userProfile.info.phoneNumber,
-        address: userProfile.info.address,
-        userType: userProfile.info.userType,
-        profile: userProfile.info.profile,
-      },
+        credentials: {
+            username: userProfile.credentials.username,
+            email: userProfile.credentials.email,
+        },
+        info: {
+            firstName: userProfile.info.firstName,
+            middleName: userProfile.info.middleName,
+            lastName: userProfile.info.lastName,
+            birthDate: userProfile.info.birthDate,
+            gender: userProfile.info.gender,
+            phoneNumber: userProfile.info.phoneNumber,
+            address: userProfile.info.address,
+            userType: userProfile.info.userType,
+            profile: userProfile.info.profile,
+        },
     };
 
     try {
-      const formData = new FormData();
-      formData.append("user", JSON.stringify(updatedUser));
-      if (profilePictureFile) {
-        formData.append("file", profilePictureFile);
-      }
-
-      const response = await axios.patch(
-        `${API_BASE_URL}/${userId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${authToken}`,
-          },
+        const formData = new FormData();
+        formData.append("user", JSON.stringify(updatedUser));
+        if (profilePictureFile) {
+            formData.append("file", profilePictureFile);
         }
-      );
 
-      toast.success("Profile updated successfully.");
-      setUserProfile(response.data);
+        const response = await axios.patch(
+            `${API_BASE_URL}/${userId}`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            }
+        );
+
+        // Update state with the new user data
+        setUserProfile(response.data);
+
+        toast.success("Profile updated successfully.");
     } catch (error) {
-      console.error("Failed to update user data:", error);
-      toast.error("Failed to update profile. Please try again.");
+        console.error("Failed to update user data:", error);
+        toast.error("Failed to update profile. Please try again.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
+
 
   return (
     <div>

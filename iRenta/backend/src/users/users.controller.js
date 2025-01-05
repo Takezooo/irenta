@@ -139,14 +139,19 @@ const UpdateUser = async (req, res) => {
       }
     }
 
-    // Construct the update object
+    // Retrieve the existing user from the database to ensure the password is preserved
+    const existingUser = await Users.findById(id);
+
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Construct the update object and preserve the current password
     const updateData = {
       credentials: {
         username: user.credentials.username,
         email: user.credentials.email,
-        ...(user.credentials.password && {
-          password: await BCrypt.hash(user.credentials.password),
-        }),
+        password: existingUser.credentials.password, // Preserve the current password
       },
       info: {
         firstName: user.info.firstName,

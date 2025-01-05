@@ -138,19 +138,41 @@ const ReservePopout = ({
             <img
               src={displayProperty.images?.[0]?.link || "/placeholder-image.jpg"}
               alt={displayProperty.title}
-              className="w-32 h-32 mx-auto rounded-md object-cover"
+              className="w-32 h-32 mx-auto mb-2 rounded-md object-cover"
             />
-            <p className={`mt-2 font-medium ${darkMode ? "text-white" : "text-gray-700"}`}>
-              {displayProperty.title}
+            <p className={`font-medium text-lg ${darkMode ? "text-white" : "text-gray-700"}`}>
+            {displayProperty.title}
             </p>
             <p className={`${darkMode ? "text-gray-400" : "text-gray-500"}`}>
               {displayProperty.price} / night
             </p>
           </div>
+
+          <div className="flex mt-4 border-t pt-4 justify-evenly items-center">
+            <div>
+              <img
+                src={displayProperty.images?.[0]?.link || "/placeholder-image.jpg"}
+                alt= "Valid ID"
+                className="w-48 h-32 rounded-md object-cover"
+              />
+            </div>
+            <div className="text-left">
+              <button
+                onClick={handleApprove}
+                className={`font-medium py-2 px-4 rounded ${
+                  darkMode
+                    ? "bg-blue-600 hover:bg-blue-500 text-white"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}
+              >
+                Download
+              </button>
+            </div>
+          </div>
         </div>
 
         {isOwner && (
-          <div className="mt-6 flex justify-around">
+          <div className="mt-6 border-t pt-4 flex justify-around">
             <button
               onClick={handleApprove}
               className={`font-medium py-2 px-4 rounded ${

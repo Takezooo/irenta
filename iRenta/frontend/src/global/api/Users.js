@@ -50,3 +50,23 @@ export const toggleLike = async (listingId) => {
     throw error;
   }
 };
+
+export const updateUserData = async (id, updatedData) => {
+  const authToken = GetToken();
+
+  console.log("API URL:", `${API_BASE_URL}/${id}`);
+  console.log("Updated Data:", updatedData);
+
+  try {
+    const response = await axios.patch(`${API_BASE_URL}/${id}`, updatedData, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user data:", error.response?.data || error);
+    throw error;
+  }
+};

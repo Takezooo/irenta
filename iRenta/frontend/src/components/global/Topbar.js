@@ -245,7 +245,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md">
                   {user ? (
                     <ul className="py-2">
-                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 cursor-default">
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
@@ -261,24 +261,15 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li
-                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
-                        onClick={toggleDarkMode} // Move the onClick here
-                      >
-                        <span className="px-4 text-sm font-medium dark:text-gray-100">
-                          {darkMode ? "Dark Mode" : "Light Mode"}
-                        </span>
-                        <div
-                          className={`w-12 h-6 flex items-center ${
-                            darkMode ? "bg-gray-800" : "bg-gray-300"
-                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                      <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <button
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
+                          onClick={() => navigate("/view-profile")}
                         >
-                          <div
-                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
-                              darkMode ? "translate-x-6" : "translate-x-0"
-                            } transition-transform duration-300`}
-                          ></div>
-                        </div>
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
+                            Your Profile
+                          </h3>
+                        </button>
                       </li>
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
@@ -302,6 +293,25 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </button>
                         </li>
                       )}
+                      <li
+                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
+                        onClick={toggleDarkMode} // Move the onClick here
+                      >
+                        <span className="px-4 text-sm font-medium dark:text-gray-100">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>
+                      </li>
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button

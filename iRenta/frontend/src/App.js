@@ -19,6 +19,8 @@ import ReserveListing from "./pages/ReserveListing.js";
 import ReservationPage from "./pages/ReservationPage.js";
 import AboutPage from "./pages/AboutPage.js";
 import TenantDashboard from "./pages/TenantDashboard.js";
+import ViewProfile from "./pages/ViewProfile.js";
+import EditProfile from "./pages/EditProfile.js";
 
 // Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -124,6 +126,22 @@ const App = () => {
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
                         <ReserveListing />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/view-profile"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <ViewProfile />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit-profile"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <EditProfile />
                       </PrivateRoute>
                     }
                   />

@@ -8,6 +8,9 @@ import {
   updateLease,
 } from "../../../global/api/Leases.js";
 import { ThemeContext } from "../../../contexts/ThemeContext";
+import { AiFillEdit } from "react-icons/ai";
+import { IoDocumentText, IoDownload, IoSend } from "react-icons/io5";
+import { MdDelete } from "react-icons/md";
 
 const ManageLease = () => {
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
@@ -139,7 +142,7 @@ const ManageLease = () => {
                 {filteredLeases.map((lease) => (
                   <tr
                     key={lease?._id}
-                    className={`border-b ${
+                    className={`border-b text-center ${
                       darkMode ? "border-gray-700" : "border-gray-200"
                     }`}
                   >
@@ -153,14 +156,14 @@ const ManageLease = () => {
                       {lease?.landlordName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      ${lease?.contractDetails.rentAmount}
+                      ₱ {lease?.contractDetails.rentAmount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.status}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        className={`px-4 py-2 text-xs font-bold rounded ${
+                        className={`px-4 py-2 text-lg font-bold rounded ${
                           darkMode
                             ? "bg-blue-600 text-white hover:bg-blue-500"
                             : "bg-blue-500 text-white hover:bg-blue-600"
@@ -170,10 +173,10 @@ const ManageLease = () => {
                           setView("EditLease");
                         }}
                       >
-                        Edit
+                        <AiFillEdit />
                       </button>
                       <button
-                        className={`ml-2 px-4 py-2 text-xs font-bold rounded ${
+                        className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
                           darkMode
                             ? "bg-green-600 text-white hover:bg-green-500"
                             : "bg-green-500 text-white hover:bg-green-600"
@@ -183,35 +186,35 @@ const ManageLease = () => {
                           setView("ViewLease");
                         }}
                       >
-                        View
+                        <IoDocumentText />
                       </button>
                       {lease?.status === "Draft" ? (
                         <button
-                          className={`ml-2 px-4 py-2 text-xs font-bold rounded ${
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
                             darkMode
                               ? "bg-red-600 text-white hover:bg-red-500"
                               : "bg-red-500 text-white hover:bg-red-600"
                           }`}
                           onClick={() => handleSend(lease._id)}
                         >
-                          Del
+                          <MdDelete />
                         </button>
                       ) : (
                         <button
-                          className={`ml-2 px-4 py-2 text-xs font-bold rounded ${
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
                             darkMode
                               ? "bg-orange-600 text-white hover:bg-orange-500"
                               : "bg-orange-500 text-white hover:bg-orange-600"
                           }`}
                           onClick={() => handleSend(lease._id)}
                         >
-                          Send
+                          <IoSend />
                         </button>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        className={`px-4 py-2 text-xs font-bold rounded ${
+                        className={`px-4 py-2 text-lg font-bold rounded ${
                           darkMode
                             ? "bg-blue-600 text-white hover:bg-blue-500"
                             : "bg-blue-500 text-white hover:bg-blue-600"
@@ -219,7 +222,7 @@ const ManageLease = () => {
                         onClick={() => handleDownload(lease._id)}
                         disabled={!lease._id}
                       >
-                        Download
+                        <IoDownload />
                       </button>
                     </td>
                   </tr>

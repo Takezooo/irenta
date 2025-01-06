@@ -271,7 +271,7 @@ export const ViewListing = () => {
                     }`}
                   >
                     <h3 className="text-lg sm:text-2xl font-semibold mb-4">
-                      ₱4,000 / head / month
+                    ₱ {selectedProperty?.price} / head / month
                     </h3>
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">

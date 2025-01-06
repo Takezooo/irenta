@@ -24,7 +24,6 @@ const ReserveListing = () => {
     const fetchData = async () => {
       try {
         const reservedListings = await fetchReservedListings();
-        console.log("Fetched Reserved Listings:", reservedListings);
         setReservations(reservedListings);
       } catch (error) {
         console.error("Error fetching reserved listings:", error);

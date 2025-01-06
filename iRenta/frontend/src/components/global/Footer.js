@@ -79,7 +79,7 @@ export const Footer = () => {
             </div>
           </div>
           <p className="text-sm text-center md:text-left">
-          Copyright © 2023 - DingDorm
+          Copyright © 2025 - DingDorm
           </p>
         </div>
       </div>

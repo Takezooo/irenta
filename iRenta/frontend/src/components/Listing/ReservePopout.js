@@ -6,8 +6,7 @@ import {
 } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import {
-  updateReservationStatus,
-  fetchReservationById,
+  updateReservationStatus
 } from "../../global/api/Reservations";
 import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext for dark mode
 
@@ -38,7 +37,6 @@ const ReservePopout = ({
   };
 
   const displayRequestDetails = requestDetails || dummyRequestDetails;
-  console.log(displayRequestDetails);
 
   useEffect(() => {
     // converts the data into a readable image
@@ -85,6 +83,21 @@ const ReservePopout = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!validIdBase64) {
+      alert("No image available for download.");
+      return;
+    }
+
+    // Create a temporary anchor element
+    const link = document.createElement("a");
+    link.href = validIdBase64;
+    link.download = "ValidID.jpg"; // Specify the filename
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // Clean up the DOM
   };
 
   return (
@@ -206,7 +219,7 @@ const ReservePopout = ({
               </div>
               <div className="text-left">
                 <button
-                  onClick={handleApprove}
+                  onClick={handleDownload}
                   className={`font-medium py-2 px-4 rounded ${
                     darkMode
                       ? "bg-blue-600 hover:bg-blue-500 text-white"

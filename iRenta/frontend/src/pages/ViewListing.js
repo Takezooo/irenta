@@ -27,7 +27,6 @@ export const ViewListing = () => {
   const navigate = useNavigate();
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
-
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {

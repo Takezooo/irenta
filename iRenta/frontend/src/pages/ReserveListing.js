@@ -37,8 +37,13 @@ const ReserveListing = () => {
   }, [user]);
 
   // Navigate to the property details page
-  const handleViewProperty = (listing) => {
-    setSelectedProperty(listing);
+  const handleViewProperty = (listing, ownerId) => {
+    const modifiedListing = {
+      ...listing,
+      userId: ownerId, // Assign ownerId as userId
+    };
+  
+    setSelectedProperty(modifiedListing); // Set the modified listing
     navigate(`/${listing._id}`);
   };
 
@@ -96,7 +101,7 @@ const ReserveListing = () => {
                         }
                         alt={listing.title || "No Title"}
                         className="w-full h-full object-cover cursor-pointer"
-                        onClick={() => handleViewProperty(listing)}
+                        onClick={() => handleViewProperty(listing, reservation.ownerId)}
                       />
                       <div
                         className={`cursor-pointer absolute top-2 right-2 rounded-full px-4 py-2 shadow-md ${

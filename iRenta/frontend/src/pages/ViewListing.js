@@ -188,24 +188,42 @@ export const ViewListing = () => {
                   darkMode ? "bg-gray-800" : "bg-gray-200"
                 }`}
               >
-                <span
-                  className={`${darkMode ? "text-gray-400" : "text-gray-500"}`}
-                >
-                  Main Image
-                </span>
+                <img
+                  src={
+                    selectedProperty?.images?.[0]?.link || "/placeholder-image.jpg"
+                  }
+                  alt={selectedProperty?.title || "Main Image"}
+                  className="h-full w-full object-cover rounded-lg"
+                />
               </div>
               {/* Thumbnail Images */}
-              <div className="grid grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-1/2">
-                {Array(4)
-                  .fill(null)
-                  .map((_, index) => (
-                    <div
-                      key={index}
-                      className={`h-24 lg:h-full rounded-md ${
-                        darkMode ? "bg-gray-700" : "bg-gray-300"
-                      }`}
-                    ></div>
-                  ))}
+              <div className="grid grid-cols-4 lg:grid-cols-2 gap-4 lg:grid-rows-2 w-full lg:w-1/2">
+                {selectedProperty?.images?.slice(1, 5).map((image, index) => (
+                  <div
+                    key={index}
+                    className={`h-24 lg:h-full rounded-md shadow-md flex items-center justify-center ${
+                      darkMode ? "bg-gray-700" : "bg-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image.link || "/placeholder-image.jpg"}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="h-full w-full object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+
+                {/* Add placeholders for missing images */}
+                {Array.from({
+                  length: Math.max(0, 4 - (selectedProperty?.images?.length || 0) + 1),
+                }).map((_, index) => (
+                  <div
+                    key={`placeholder-${index}`}
+                    className={`h-24 lg:h-full rounded-md shadow-md ${
+                      darkMode ? "bg-gray-700" : "bg-gray-300"
+                    }`}
+                  ></div>
+                ))}
               </div>
             </div>
           </div>

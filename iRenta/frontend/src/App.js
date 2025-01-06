@@ -17,6 +17,10 @@ import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
 import ReservationPage from "./pages/ReservationPage.js";
+import AboutPage from "./pages/AboutPage.js";
+import TenantDashboard from "./pages/TenantDashboard.js";
+import ViewProfile from "./pages/ViewProfile.js";
+import EditProfile from "./pages/EditProfile.js";
 
 // Contexts
 import { AuthProvider } from "./global/contexts/AuthContext.js";
@@ -60,7 +64,19 @@ const App = () => {
                   />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
+                  <Route path="/tenant-dashboard" element={<TenantDashboard />} />
+                  <Route path="/about-us" element={<AboutPage />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
+
+                  {/* Seeker Routes */}
+                  <Route
+                    path="/request-reservation"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker"]}>
+                        <ReservationPage />
+                      </PrivateRoute>
+                    }
+                  />
 
                   {/* Owner Routes */}
                   <Route
@@ -114,10 +130,18 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/reservation"
+                    path="/view-profile"
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                        <ReservationPage />
+                        <ViewProfile />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit-profile"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+                        <EditProfile />
                       </PrivateRoute>
                     }
                   />

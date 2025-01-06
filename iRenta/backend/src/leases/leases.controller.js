@@ -1,5 +1,6 @@
 import Lease from "./leases.model.js";
 import Terms from "../terms/terms.model.js";
+import Users from "../users/users.model.js";  
 import generatePdf from "../../global/utils/PdfGenerator.js";
 import Notification from "../notifications/notifications.model.js";
 import fs from "fs";
@@ -59,8 +60,7 @@ export const CreateLease = async (req, res) => {
     const leaseData = {
       ...req.body,
       tenant: tenant || undefined,
-      status: action === "saveAndSend" ? "Pending" : "Draft", // Set status based on action
-      "contractDetails.termsAndConditions": termsContent,
+      status: action === "saveAndSend" ? "Ready" : "Draft", // Set status based on action
     };
 
     const lease = await Lease.create(leaseData);
@@ -135,13 +135,14 @@ export const GetPdf = async (req, res) => {
 
     // Find the lease by ID
     const lease = await Lease.findById(id);
+    const tenant = lease.tenant ? await Users.findById(lease.tenant) : null;
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
     // Generate PDF dynamically and stream it
-    const pdfStream = await generatePdf(lease);
+    const pdfStream = await generatePdf(lease, tenant);
 
     res.setHeader(
       "Content-Disposition",

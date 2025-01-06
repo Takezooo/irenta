@@ -1,21 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import CreateLease from "./CreateLease.js";
 import EditLease from "./EditLease.js";
 import ViewLease from "./ViewLease.js";
-import { fetchLeases, downloadPdf, updateLease } from "../../../global/api/Leases.js";
+import {
+  fetchLeases,
+  downloadPdf,
+  updateLease,
+} from "../../../global/api/Leases.js";
+import { ThemeContext } from "../../../contexts/ThemeContext";
+import { AiFillEdit } from "react-icons/ai";
+import { IoDocumentText, IoDownload, IoSend } from "react-icons/io5";
+import { MdDelete } from "react-icons/md";
 
-const ManageLease = () => {
+const ManageLease = ({seekerId}) => {
+  const passedSeekerId = seekerId || "";
+  const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
   const [view, setView] = useState("LeaseHub");
   const [leases, setLeases] = useState([]);
   const [selectedLeaseId, setSelectedLeaseId] = useState(null);
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredLeases, setFilteredLeases] = useState([]);
+
   // Fetch leases from the backend
   useEffect(() => {
     const getLeases = async () => {
       try {
         const data = await fetchLeases();
         setLeases(data);
+        setFilteredLeases(data);
       } catch (err) {
         console.error("Failed to fetch leases:", err);
       }
@@ -24,6 +36,7 @@ const ManageLease = () => {
   }, []);
 
   const handleDownload = (leaseId) => {
+    console.log(filteredLeases);
     if (!leaseId) {
       console.error("Error: leaseId is undefined.");
       return;
@@ -44,7 +57,7 @@ const ManageLease = () => {
       alert("Failed to mark lease as ready to send.");
     }
   };
-  
+
   const handleFilterChange = (e) => {
     const status = e.target.value;
     setFilterStatus(status);
@@ -56,7 +69,11 @@ const ManageLease = () => {
   };
 
   return (
-    <div className="mt-16 flex-grow p-6 pb-4">
+    <div
+      className={`mt-16 flex-grow p-6 pb-4 ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
+      }`}
+    >
       {view === "LeaseHub" ? (
         <>
           <h1 className="text-2xl font-bold mb-6">Lease Hub</h1>
@@ -65,14 +82,22 @@ const ManageLease = () => {
           <div className="mb-4 flex flex-wrap gap-4">
             <button
               onClick={() => setView("CreateLease")}
-              className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded hover:bg-green-600"
+              className={`px-4 py-2 rounded text-sm font-medium ${
+                darkMode
+                  ? "bg-green-600 text-white hover:bg-green-500"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              }`}
             >
               Create Lease
             </button>
             <select
               value={filterStatus}
               onChange={handleFilterChange}
-              className="px-4 py-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
+              className={`px-4 py-2 border rounded text-sm ${
+                darkMode
+                  ? "bg-gray-800 text-white border-gray-700 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">All Statuses</option>
               <option value="Draft">Draft</option>
@@ -86,85 +111,120 @@ const ManageLease = () => {
 
           {/* Leases Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 shadow-md rounded-lg">
-              <thead className="bg-gray-100 rounded-lg">
+            <table
+              className={`min-w-full border shadow-md rounded-lg ${
+                darkMode
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
                 <tr>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Property Name
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Tenant
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Landlord
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Rent Amount
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                    File
-                  </th>
+                  {[
+                    "Property Name",
+                    "Tenant",
+                    "Landlord",
+                    "Rent Amount",
+                    "Status",
+                    "Actions",
+                    "File",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className={`px-6 py-3 text-center text-xs font-medium uppercase tracking-wider ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {filteredLeases.map((lease) => (
-                  <tr key={lease?._id} className="text-center border-b">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <tr
+                    key={lease?._id}
+                    className={`border-b text-center ${
+                      darkMode ? "border-gray-700" : "border-gray-200"
+                    }`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.property.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {lease?.tenant || lease?.tenantPlaceholder?.name || "N/A"}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {(lease?.tenant?.info?.firsname, lease?.tenant?.info?.lastName) || lease?.tenantPlaceholder?.name || "N/A"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.landlordName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      ${lease?.contractDetails.rentAmount}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      ₱ {lease?.contractDetails.rentAmount}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.status}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600"
+                        className={`px-4 py-2 text-lg font-bold rounded ${
+                          darkMode
+                            ? "bg-blue-600 text-white hover:bg-blue-500"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
                         onClick={() => {
                           setSelectedLeaseId(lease?._id);
                           setView("EditLease");
                         }}
                       >
-                        Edit
+                        <AiFillEdit />
                       </button>
                       <button
-                        className="ml-2 px-4 py-2 bg-green-500 text-white text-xs font-bold rounded hover:bg-green-600"
+                        className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
+                          darkMode
+                            ? "bg-green-600 text-white hover:bg-green-500"
+                            : "bg-green-500 text-white hover:bg-green-600"
+                        }`}
                         onClick={() => {
                           setSelectedLeaseId(lease?._id);
                           setView("ViewLease");
                         }}
                       >
-                        View
+                        <IoDocumentText />
                       </button>
-                      {lease?.status === "Draft" && (
+                      {lease?.status === "Draft" ? (
                         <button
-                          className="ml-2 px-4 py-2 bg-orange-500 text-white text-xs font-bold rounded hover:bg-orange-600"
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
+                            darkMode
+                              ? "bg-red-600 text-white hover:bg-red-500"
+                              : "bg-red-500 text-white hover:bg-red-600"
+                          }`}
                           onClick={() => handleSend(lease._id)}
                         >
-                          Send
+                          <MdDelete />
+                        </button>
+                      ) : (
+                        <button
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
+                            darkMode
+                              ? "bg-orange-600 text-white hover:bg-orange-500"
+                              : "bg-orange-500 text-white hover:bg-orange-600"
+                          }`}
+                          onClick={() => handleSend(lease._id)}
+                        >
+                          <IoSend />
                         </button>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        className="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600"
+                        className={`px-4 py-2 text-lg font-bold rounded ${
+                          darkMode
+                            ? "bg-blue-600 text-white hover:bg-blue-500"
+                            : "bg-blue-500 text-white hover:bg-blue-600"
+                        }`}
                         onClick={() => handleDownload(lease._id)}
                         disabled={!lease._id}
                       >
-                        Download
+                        <IoDownload />
                       </button>
                     </td>
                   </tr>
@@ -175,37 +235,24 @@ const ManageLease = () => {
         </>
       ) : view === "CreateLease" ? (
         <CreateLease
-          onLeaseCreated={() => {
-            const refreshLeases = async () => {
-              try {
-                const updatedLeases = await fetchLeases();
-                setLeases(updatedLeases);
-                setFilteredLeases(updatedLeases);
-                setView("LeaseHub");
-              } catch (err) {
-                console.error("Failed to refresh leases:", err);
-              }
-            };
-            refreshLeases();
+          onLeaseCreated={async () => {
+            const updatedLeases = await fetchLeases();
+            setLeases(updatedLeases);
+            setFilteredLeases(updatedLeases);
+            setView("LeaseHub");
           }}
+          seekerId={passedSeekerId}
         />
       ) : view === "ViewLease" ? (
         <ViewLease leaseId={selectedLeaseId} />
       ) : (
         <EditLease
           leaseId={selectedLeaseId}
-          onLeaseUpdated={() => {
-            const refreshLeases = async () => {
-              try {
-                const updatedLeases = await fetchLeases();
-                setLeases(updatedLeases);
-                setFilteredLeases(updatedLeases);
-                setView("LeaseHub");
-              } catch (err) {
-                console.error("Failed to refresh leases:", err);
-              }
-            };
-            refreshLeases();
+          onLeaseUpdated={async () => {
+            const updatedLeases = await fetchLeases();
+            setLeases(updatedLeases);
+            setFilteredLeases(updatedLeases);
+            setView("LeaseHub");
           }}
         />
       )}

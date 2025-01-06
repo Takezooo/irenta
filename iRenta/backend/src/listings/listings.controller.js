@@ -210,33 +210,26 @@ export const FetchReservedListings = async (req, res) => {
     const userId = req.user.id;
     const userType = req.user.userType;
 
-    let reservations;
+    const seekerSelectFields =
+    "info.firstName info.lastName info.email info.phoneNumber";
 
-    if (userType === "Seeker") {
-      // Fetch reservations for the seeker
-      reservations = await Reservation.find({ seekerId: userId })
-        .populate({
-          path: "listingId",
-          select: "title images price description",
-        })
-        .populate({
-          path: "seekerId",
-          select: "firstName lastName",
-        })
-        .exec();
-    } else if (userType === "Owner") {
-      // Fetch reservations for the owner
-      reservations = await Reservation.find({ ownerId: userId })
-        .populate({
-          path: "listingId",
-          select: "title images price description",
-        })
-        .populate({
-          path: "seekerId",
-          select: "info.firstName info.lastName",
-        })
-        .exec();
-    }
+    // Determine the filter based on user type
+    const filter = userType === "Seeker" ? { seekerId: userId } : { ownerId: userId };
+
+    // Fetch reservations
+    const reservations = await Reservation.find(filter)
+      .populate({
+        path: "listingId",
+      })
+      .populate({
+        path: "seekerId",
+        select: seekerSelectFields, // Use reusable variable
+      })
+      .exec();
+
+      if (!reservations || reservations.length === 0) {
+        return res.status(404).json({ message: "No reservations found." });
+      }
 
     res.status(200).json(reservations);
   } catch (error) {

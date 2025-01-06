@@ -3,7 +3,7 @@ import { fetchLeaseById, updateLease } from "../../../global/api/Leases.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js";
 
-const EditLease = ({ leaseId, onLeaseUpdated }) => {
+const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
   const [formData, setFormData] = useState(null);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [error, setError] = useState("");
@@ -13,8 +13,8 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
     const getLease = async () => {
       try {
         const fetchedLease = await fetchLeaseById(leaseId);
-        if (fetchedLease.status !== "Draft") {
-          setError("Only leases with status 'Draft' can be edited.");
+        if (fetchedLease.status !== "Draft" && fetchedLease.status !== "Ready") {
+          setError("Only leases with status 'Draft' or 'Ready' can be edited.");
         } else {
           setFormData(fetchedLease);
         }
@@ -71,7 +71,7 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.status === "Pending") {
+      if (formData.status === "Draft" || formData.status === "Ready") {
         const updatedLease = await updateLease(leaseId, formData);
         alert("Lease updated successfully!");
         console.log("Updated lease:", updatedLease);
@@ -244,7 +244,7 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
           </div>
 
           {/* Contract Details Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
                 className={`block text-sm font-medium ${
@@ -286,7 +286,11 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label 
+              className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+                >
                 Rent Amount
               </label>
               <input
@@ -294,22 +298,76 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
                 name="contractDetails.rentAmount"
                 value={formData.contractDetails.rentAmount || ""}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}              
+                />
+            </div>
+            <div>
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Deposit Amount
+              </label>
+              <input
+                type="number"
+                name="contractDetails.depositAmount"
+                value={formData.contractDetails.depositAmount}
+                onChange={handleChange}
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
               />
+            </div>
+            <div>
+              <label   className={`block text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Payment Frequency
+              </label>
+              <select
+                name="contractDetails.paymentFrequency"
+                value={formData.contractDetails.paymentFrequency}
+                onChange={handleChange}
+                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              >
+                <option value="">Select Frequency Terms</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
             </div>
           </div>
 
           {/* Terms Templates Section */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label 
+            className={`block text-sm font-medium ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}
+            >
               Terms and Conditions Template
             </label>
             <select
               name="contractDetails.termsAndConditions"
               value={formData.contractDetails.termsAndConditions || ""}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm px-4 py-2"
-            >
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}              
+              >            
               <option value="">Select a template</option>
               {termsTemplates.map((template) => (
                 <option key={template._id} value={template.content}>
@@ -317,6 +375,28 @@ const EditLease = ({ leaseId, onLeaseUpdated }) => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Additional Rules & Regulations */}
+          <div>
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Rules and Regulations
+            </label>
+            <textarea
+              name="contractDetails.rulesAndRegulations"
+              value={formData.contractDetails.rulesAndRegulations}
+              onChange={handleChange}
+              rows="4"
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+              }`}
+            />
           </div>
 
           <button

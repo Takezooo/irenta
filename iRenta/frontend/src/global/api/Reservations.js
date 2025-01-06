@@ -3,18 +3,22 @@ import { GetToken } from "../utils/Token";
 
 const API_BASE_URL = "http://localhost:5000/api/reservations";
 
-export const createReservation = async (listingId, ownerId) => {
+export const createReservation = async (formData) => {
   const authToken = GetToken();
   try {
     await axios.post(
-      `${API_BASE_URL}/`,
-      { listingId, ownerId },
+      `${API_BASE_URL}/create`,
+      formData,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }
     );
   } catch (error) {
-    console.error("Error creating reservation:", error);
+    console.error(
+      "Error creating reservation:",
+      error.response?.data || error.message
+    );
+    throw error;
   }
 };
 
@@ -45,5 +49,22 @@ export const moveToRenterList = async (seekerId) => {
     );
   } catch (error) {
     console.error("Error moving seeker to renter list:", error);
+  }
+};
+
+export const fetchReservationById = async (reservationId) => {
+  const authToken = GetToken();
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${reservationId}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    return response.data; // Returns the reservation object
+  } catch (error) {
+    console.error("Error fetching reservation:", error.response?.data || error.message);
+    throw error;
   }
 };

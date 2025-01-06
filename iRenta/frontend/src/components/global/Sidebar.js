@@ -246,7 +246,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
             <span className="text-xs">Manage Terms</span>
           </button>
           <button
-            onClick={() => setActiveContent("content5")}
+            onClick={() => setActiveContent("content6")}
             className={`flex flex-col items-center text-blue-500 dark:text-blue-400 ${
               isActive("content6") ? "text-blue-900 dark:text-blue-500" : ""
             }`}
@@ -268,7 +268,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
         {activeContent === "content3" && <ManageTenants />}
         {activeContent === "content4" && <OcularVisitCalendar />}
         {activeContent === "content5" && <TermsManagement />}
-        {activeContent === "content6" && <ManageLease />}
+        {activeContent === "content6" && <ManageLease seekerId={location?.state?.seekerId}/>}
       </div>
     </div>
   );

@@ -25,6 +25,9 @@ const reservationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Contract",
   },
+  moveInDate: { type: Date, required: true },
+  shortMessage: { type: String, required: false },
+  uploadedValidId: { data: Buffer, contentType: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -7,7 +7,7 @@ const MainDashboard = () => {
   return (
     <div
       className={`pt-20 pb-4 flex flex-col gap-2 ${
-        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
       }`}
     >
       <div className="flex gap-2">

@@ -28,6 +28,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const { logout, user } = useContext(AuthContext);
   const [notifOpen, setNotifOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",
@@ -44,6 +45,19 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
   const toggleDarkMode = () => {
     setDarkMode((prev) => !prev);
+  };
+
+  const handleLogoutClick = () => {
+    setShowConfirmation(true); // Show confirmation modal
+  };
+
+  const handleConfirmLogout = () => {
+    setShowConfirmation(false); // Close the modal
+    logout(); // Call the logout function
+  };
+
+  const handleCancelLogout = () => {
+    setShowConfirmation(false); // Close the modal
   };
 
   useEffect(() => {
@@ -245,7 +259,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md">
                   {user ? (
                     <ul className="py-2">
-                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                      <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 cursor-default">
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
@@ -261,24 +275,15 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li
-                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
-                        onClick={toggleDarkMode} // Move the onClick here
-                      >
-                        <span className="px-4 text-sm font-medium dark:text-gray-100">
-                          {darkMode ? "Dark Mode" : "Light Mode"}
-                        </span>
-                        <div
-                          className={`w-12 h-6 flex items-center ${
-                            darkMode ? "bg-gray-800" : "bg-gray-300"
-                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                      <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <button
+                          className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
+                          onClick={() => navigate("/view-profile")}
                         >
-                          <div
-                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
-                              darkMode ? "translate-x-6" : "translate-x-0"
-                            } transition-transform duration-300`}
-                          ></div>
-                        </div>
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
+                            Your Profile
+                          </h3>
+                        </button>
                       </li>
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
@@ -302,10 +307,29 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </button>
                         </li>
                       )}
+                      <li
+                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
+                        onClick={toggleDarkMode} // Move the onClick here
+                      >
+                        <span className="px-4 text-sm font-medium dark:text-gray-100">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>
+                      </li>
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button
-                          onClick={logout}
+                          onClick={handleLogoutClick}
                           className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
                         >
                           <FaPowerOff className="h-5 w-5" />
@@ -314,6 +338,32 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </h3>
                         </button>
                       </li>
+                      {/* Confirmation Modal */}
+                      {showConfirmation && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                          <div
+                            className={`w-full max-w-sm p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md`}
+                          >
+                            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                              Are you sure you want to log out?
+                            </h2>
+                            <div className="flex justify-end space-x-4">
+                              <button
+                                onClick={handleCancelLogout}
+                                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleConfirmLogout}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                              >
+                                Log out
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </ul>
                   ) : (
                     <ul className="py-3">
@@ -549,7 +599,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       {/* Logout Button */}
                       <li className="flex self-end w-full justify-center">
                         <button
-                          onClick={logout}
+                          onClick={handleLogoutClick}
                           className="w-full flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                         >
                           <FaPowerOff className="h-5 w-5" />
@@ -558,6 +608,32 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </h3>
                         </button>
                       </li>
+                      {/* Confirmation Modal */}
+                      {showConfirmation && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                          <div
+                            className={`w-full max-w-sm p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md`}
+                          >
+                            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+                              Are you sure you want to log out?
+                            </h2>
+                            <div className="flex justify-end space-x-4">
+                              <button
+                                onClick={handleCancelLogout}
+                                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleConfirmLogout}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                              >
+                                Log out
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </ul>
                   ) : (
                     // Logged-out Dropdown

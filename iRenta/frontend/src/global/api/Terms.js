@@ -14,6 +14,19 @@ export const fetchTermsTemplates = async () => {
   }
 };
 
+export const fetchTermsById = async (id) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${id}`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching terms by ID:", error);
+    throw error;
+  }
+};
+
 // Create a new terms template
 export const createTermsTemplate = async (data) => {
   const authToken = GetToken();
@@ -37,6 +50,19 @@ export const updateTermsTemplate = async (id, updatedData) => {
     return response.data;
   } catch (error) {
     console.error("Error updating terms template:", error);
+    throw error;
+  }
+};
+
+export const attachTermsToListing = async (payload) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/attach-terms`, payload, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to attach terms to listing:", error);
     throw error;
   }
 };

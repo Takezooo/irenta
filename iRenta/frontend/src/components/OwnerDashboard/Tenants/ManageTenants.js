@@ -43,7 +43,7 @@ const ManageTenant = () => {
   return (
     <div
       className={`mt-16 flex-grow p-6 pb-4 ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
       }`}
     >
       <h1 className="text-2xl font-bold mb-6">Manage Tenants</h1>

@@ -36,6 +36,7 @@ const LandingPage = () => {
   }, []);
 
   const handleBrowseListing = () => navigate("/browse-listing");
+  const handleAboutUs = () => navigate("/about-us");
 
   const handleViewProperty = (listing) => {
     setSelectedProperty(listing);
@@ -350,7 +351,9 @@ const LandingPage = () => {
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <button className="mt-4 inline-block text-black underline">
+            <button 
+            className="mt-4 inline-block text-black underline"
+            onClick={handleAboutUs}>
               See more
             </button>
           </div>

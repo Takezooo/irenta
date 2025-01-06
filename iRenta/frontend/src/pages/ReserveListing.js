@@ -24,7 +24,6 @@ const ReserveListing = () => {
     const fetchData = async () => {
       try {
         const reservedListings = await fetchReservedListings();
-        console.log("Fetched Reserved Listings:", reservedListings);
         setReservations(reservedListings);
       } catch (error) {
         console.error("Error fetching reserved listings:", error);
@@ -37,8 +36,13 @@ const ReserveListing = () => {
   }, [user]);
 
   // Navigate to the property details page
-  const handleViewProperty = (listing) => {
-    setSelectedProperty(listing);
+  const handleViewProperty = (listing, ownerId) => {
+    const modifiedListing = {
+      ...listing,
+      userId: ownerId, // Assign ownerId as userId
+    };
+  
+    setSelectedProperty(modifiedListing); // Set the modified listing
     navigate(`/${listing._id}`);
   };
 
@@ -46,11 +50,13 @@ const ReserveListing = () => {
     setActiveProperty(listing);
     setRequestDetails({
       id: reservation._id,
+      seekerId: reservation.seekerId || "Unknown",
       requesterName: `${seeker?.info?.firstName || "Unknown"} ${
         seeker?.info?.lastName || ""
       }`,
       dateTime: reservation?.createdAt || "Date not available",
       status: reservation?.status || "Unknown status",
+      uploadedValidId: reservation.uploadedValidId || "No Uploaded Valid Id",
     });
     setShowPopout(true);
   };
@@ -94,7 +100,7 @@ const ReserveListing = () => {
                         }
                         alt={listing.title || "No Title"}
                         className="w-full h-full object-cover cursor-pointer"
-                        onClick={() => handleViewProperty(listing)}
+                        onClick={() => handleViewProperty(listing, reservation.ownerId)}
                       />
                       <div
                         className={`cursor-pointer absolute top-2 right-2 rounded-full px-4 py-2 shadow-md ${

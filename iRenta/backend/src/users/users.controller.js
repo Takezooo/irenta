@@ -105,63 +105,81 @@ const UpdateUser = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user ID." });
+    }
+
     const { body, file } = req;
+
+    // Ensure the `user` field exists and is parsable
+    if (!body.user) {
+      return res.status(400).json({ message: "User data is required." });
+    }
+
     const user = JSON.parse(body.user);
 
     let userProfile = {};
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid Id!" });
-    }
-
-    // upload file part
+    // Handle file upload if a file is provided
     if (file) {
       const { id: fileId, name: fileName } = await driveService.UploadFiles(
         file,
         process.env.PROFILE_FOLDER_ID
       );
 
-      Object.assign(userProfile, {
+      userProfile = {
         id: fileId,
         name: fileName,
         link: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
-      });
+      };
 
-      await driveService.DeleteFiles(user.info.profile.id);
+      // Delete the old profile picture if it exists
+      if (user.info.profile?.id) {
+        await driveService.DeleteFiles(user.info.profile.id);
+      }
     }
 
-    const result = await Users.findByIdAndUpdate(
-      user._id,
-      {
-        $set: {
-          credentials: {
-            username: user.credentials.username,
-            password: await BCrypt.hash(user.credentials.password),
-            email: user.credentials.email,
-          },
-          info: {
-            firstName: user.info.firstName,
-            middleName: user.info.middleName,
-            lastName: user.info.lastName,
-            birthDate: user.birthDate,
-            gender: user.gender,
-            phoneNumber: user.info.phoneNumber,
-            profile: userProfile.hasOwnProperty("id")
-              ? userProfile
-              : user.info.profile,
-            userType: user.info.userType,
-            address: user.info.address,
-          },
-        },
-      },
-      { new: true }
-    );
+    // Retrieve the existing user from the database to ensure the password is preserved
+    const existingUser = await Users.findById(id);
 
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Construct the update object and preserve the current password
+    const updateData = {
+      credentials: {
+        username: user.credentials.username,
+        email: user.credentials.email,
+        password: existingUser.credentials.password, // Preserve the current password
+      },
+      info: {
+        firstName: user.info.firstName,
+        middleName: user.info.middleName,
+        lastName: user.info.lastName,
+        birthDate: user.info.birthDate,
+        gender: user.info.gender,
+        phoneNumber: user.info.phoneNumber,
+        userType: user.info.userType,
+        address: user.info.address,
+        profile: userProfile.id ? userProfile : user.info.profile, // Use the new profile if updated
+      },
+    };
+
+    // Update the user in the database
+    const updatedUser = await Users.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(400).json({ message: error.message || "Failed to update user." });
   }
 };
+
 
 // function for deleting user
 const DeleteUser = async (req, res) => {

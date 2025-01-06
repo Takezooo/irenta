@@ -28,7 +28,7 @@ router.get("/reserved", authenticate, FetchReservedListings);
 router.get('/:id', GetListingById);
 
 // Route to update a listing (only for owners)
-router.put('/:id', authenticate, UpdateListing);
+router.put('/:id', authenticate, upload.array("files", 10), UpdateListing);
 
 // Route to delete a listing (only for owners)
 router.delete('/:id', authenticate, DeleteListing);

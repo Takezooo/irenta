@@ -96,3 +96,20 @@ export const moveToRenterList = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getReservationById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const reservation = await Reservation.findById(id);
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found." });
+    }
+
+    res.status(200).json(reservation);
+  } catch (error) {
+    console.error("Error fetching reservation:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

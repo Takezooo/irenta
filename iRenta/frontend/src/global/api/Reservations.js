@@ -51,3 +51,20 @@ export const moveToRenterList = async (seekerId) => {
     console.error("Error moving seeker to renter list:", error);
   }
 };
+
+export const fetchReservationById = async (reservationId) => {
+  const authToken = GetToken();
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${reservationId}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    return response.data; // Returns the reservation object
+  } catch (error) {
+    console.error("Error fetching reservation:", error.response?.data || error.message);
+    throw error;
+  }
+};

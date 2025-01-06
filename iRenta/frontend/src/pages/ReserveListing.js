@@ -46,11 +46,13 @@ const ReserveListing = () => {
     setActiveProperty(listing);
     setRequestDetails({
       id: reservation._id,
+      seekerId: reservation.seekerId || "Unknown",
       requesterName: `${seeker?.info?.firstName || "Unknown"} ${
         seeker?.info?.lastName || ""
       }`,
       dateTime: reservation?.createdAt || "Date not available",
       status: reservation?.status || "Unknown status",
+      uploadedValidId: reservation.uploadedValidId || "No Uploaded Valid Id",
     });
     setShowPopout(true);
   };

@@ -76,7 +76,7 @@ const ReservePopout = ({
       navigate("/owner-dashboard", {
         state: {
           contentActive: "content6",
-          anotherState: displayRequestDetails.seekerId,
+          seekerId: displayRequestDetails.seekerId,
         },
       });
     } catch (error) {

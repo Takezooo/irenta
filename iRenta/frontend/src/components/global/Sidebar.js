@@ -268,7 +268,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
         {activeContent === "content3" && <ManageTenants />}
         {activeContent === "content4" && <OcularVisitCalendar />}
         {activeContent === "content5" && <TermsManagement />}
-        {activeContent === "content6" && <ManageLease />}
+        {activeContent === "content6" && <ManageLease seekerId={location?.state?.seekerId}/>}
       </div>
     </div>
   );

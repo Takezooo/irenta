@@ -3,7 +3,7 @@ import { fetchLeaseById, updateLease } from "../../../global/api/Leases.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js";
 
-const EditLease = ({ leaseId, onLeaseUpdated }) => {
+const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
   const [formData, setFormData] = useState(null);
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [error, setError] = useState("");

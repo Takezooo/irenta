@@ -6,7 +6,8 @@ import { AuthContext } from "../../../global/contexts/AuthContext.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js"; // Import ThemeContext for dark mode
 import { GetToken } from "../../../global/utils/Token.js";
 
-const CreateLease = () => {
+const CreateLease = ({seekerId}) => {
+  const passedSeekerId = seekerId || "";
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const storedToken = GetToken();
@@ -30,7 +31,7 @@ const CreateLease = () => {
         zip: "",
       },
     },
-    tenant: "",
+    tenant: passedSeekerId._id || "",
     tenantPlaceholder: {
       name: "",
       email: "",
@@ -428,7 +429,7 @@ const CreateLease = () => {
                   name="tenant"
                   value={formData.tenant}
                   onChange={handleChange}
-                  placeholder="Enter Tenant ID"
+                  placeholder={passedSeekerId._id}
                   className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"

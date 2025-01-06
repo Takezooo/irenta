@@ -12,7 +12,8 @@ import { AiFillEdit } from "react-icons/ai";
 import { IoDocumentText, IoDownload, IoSend } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 
-const ManageLease = () => {
+const ManageLease = ({seekerId}) => {
+  const passedSeekerId = seekerId || "";
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
   const [view, setView] = useState("LeaseHub");
   const [leases, setLeases] = useState([]);
@@ -35,6 +36,7 @@ const ManageLease = () => {
   }, []);
 
   const handleDownload = (leaseId) => {
+    console.log(filteredLeases);
     if (!leaseId) {
       console.error("Error: leaseId is undefined.");
       return;
@@ -150,7 +152,7 @@ const ManageLease = () => {
                       {lease?.property.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {lease?.tenant || lease?.tenantPlaceholder?.name || "N/A"}
+                      {(lease?.tenant?.info?.firsname, lease?.tenant?.info?.lastName) || lease?.tenantPlaceholder?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.landlordName}
@@ -239,6 +241,7 @@ const ManageLease = () => {
             setFilteredLeases(updatedLeases);
             setView("LeaseHub");
           }}
+          seekerId={passedSeekerId}
         />
       ) : view === "ViewLease" ? (
         <ViewLease leaseId={selectedLeaseId} />

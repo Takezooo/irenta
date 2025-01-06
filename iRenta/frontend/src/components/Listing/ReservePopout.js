@@ -5,9 +5,7 @@ import {
   AiFillCloseCircle,
 } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import {
-  updateReservationStatus
-} from "../../global/api/Reservations";
+import { updateReservationStatus } from "../../global/api/Reservations";
 import { ThemeContext } from "../../contexts/ThemeContext"; // Import ThemeContext for dark mode
 
 const ReservePopout = ({
@@ -40,15 +38,19 @@ const ReservePopout = ({
 
   useEffect(() => {
     // converts the data into a readable image
-    const byteArray = new Uint8Array(
-      displayRequestDetails.uploadedValidId.data.data
-    );
-    const base64String = btoa(
-      byteArray.reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
-    setValidIdBase64(
-      `data:${displayRequestDetails.uploadedValidId.contentType};base64,${base64String}`
-    );
+    if (displayRequestDetails.uploadedValidId === "No Uploaded Valid Id") {
+      return;
+    } else {
+      const byteArray = new Uint8Array(
+        displayRequestDetails.uploadedValidId.data.data
+      );
+      const base64String = btoa(
+        byteArray.reduce((data, byte) => data + String.fromCharCode(byte), "")
+      );
+      setValidIdBase64(
+        `data:${displayRequestDetails.uploadedValidId.contentType};base64,${base64String}`
+      );
+    }
   }, [displayRequestDetails.uploadedValidId]);
 
   const handleDecline = async () => {
@@ -98,6 +100,14 @@ const ReservePopout = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link); // Clean up the DOM
+  };
+
+  const isValidIdExisting = () => {
+    if (displayRequestDetails.uploadedValidId === "No Uploaded Valid Id") {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   return (
@@ -208,7 +218,7 @@ const ReservePopout = ({
               {displayProperty.price} / night
             </p>
           </div>
-          {isOwner && (
+          {(isOwner && isValidIdExisting()) && (
             <div className="flex mt-4 border-t pt-4 justify-evenly items-center">
               <div>
                 <img

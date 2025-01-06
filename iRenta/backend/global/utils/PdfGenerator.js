@@ -11,7 +11,7 @@ const generatePdf = async (leaseData, tenant) => {
   {
     tenant === null
       ? doc.text(`Tenant: ${leaseData.tenantPlaceholder.name}`)
-      : doc.text(`Tenant: ${tenant.firstName} ${tenant.lastName}`);
+      : doc.text(`Tenant: ${tenant.info.firstName} ${tenant.info.lastName}`);
   }
   doc.text(`Start Date: ${leaseData.contractDetails.startDate}`);
   doc.text(`End Date: ${leaseData.contractDetails.endDate}`);

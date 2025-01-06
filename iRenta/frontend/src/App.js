@@ -8,7 +8,7 @@ import LandingPage from "./pages/LandingPage.js";
 import Login from "./pages/Login.js";
 import Register from "./pages/Register.js";
 import OwnerDashboard from "./pages/OwnerDashboard.js";
-import NotAuthorized from "./pages/Unauthorized/NotAuthorized.js";
+import NotAuthorized from "./pages/unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";

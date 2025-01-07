@@ -168,6 +168,8 @@ export const SendLeaseToSeeker = async (req, res) => {
       return res.status(404).json({ message: "Lease not found." });
     }
 
+    // Mark lease as sent to the tenant
+    lease.status = "Sent";
     await lease.save();
     console.log("Tenant ID:", lease.tenant);
     // Notify Tenant

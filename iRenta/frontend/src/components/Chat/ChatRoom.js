@@ -32,6 +32,12 @@ const ChatRoom = ({ chatId, userId, darkMode }) => {
         console.log("Socket connected. Joining room...");
         newSocket.emit("joinRoom", { chatId });
       });
+
+      // Listen for new messages
+      newSocket.on("receiveMessage", (newMessage) => {
+        console.log("Received message:", newMessage);
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
     }
 
     setSocket(newSocket);
@@ -40,12 +46,6 @@ const ChatRoom = ({ chatId, userId, darkMode }) => {
     newSocket.on("chatHistory", (chatMessages) => {
       console.log("Chat history received:", chatMessages);
       setMessages(chatMessages); // Load the chat history into state
-    });
-
-    // Listen for new messages
-    newSocket.on("receiveMessage", (newMessage) => {
-      console.log("Received message:", newMessage);
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
     return () => newSocket.disconnect();

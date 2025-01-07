@@ -23,7 +23,8 @@ import {
 import { AiFillHeart, AiFillHome } from "react-icons/ai";
 
 const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
-  const { darkMode, setDarkMode } = useContext(ThemeContext);  const [notifications, setNotifications] = useState([]);
+  const { darkMode, setDarkMode } = useContext(ThemeContext);
+  const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { logout, user } = useContext(AuthContext);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -114,6 +115,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     }
     if (notification.type === "ReservationRequest") {
       navigate("/reservations");
+    }
+    if (notification.type === "LeaseSent" && notification.leaseId) {
+      navigate("/view-contract", { state: { leaseId: notification.leaseId } });
     }
   };
 
@@ -209,21 +213,25 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               </h5>
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md z-50">
-                  <ul className="py-2">
+                  {/* <ul className="py-2">
                     <li className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                       <Link
                         to="/view-contract"
                         className="block w-full text-left"
                       >
-                        View Contract
+                        View Lease
                       </Link>
                     </li>
-                  </ul>
+                  </ul> */}
                   {notifications.map((notification) => (
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
-                      className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600 cursor-pointer bg-gray-100 dark:bg-gray-800"
+                      className={`px-4 py-2 text-sm cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-gray-600 ${
+                        notification.type === "LeaseSent"
+                          ? "block w-full text-left text-green-600 dark:text-green-400 font-semibold"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
                     >
                       {notification.message}
                     </div>
@@ -396,7 +404,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
           </div>
         </div>
 
-
         {/* Mobile Topbar Navigation */}
         <div className="lg:hidden grid grid-rows-2 shadow z-50">
           <div className="flex items-center justify-between w-full px-4 bg-white dark:bg-gray-800 shadow-md">
@@ -481,7 +488,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             <div className="w-full group mx-auto" ref={notifRef}>
               <button
                 className={`h-full w-full py-1 ${
-                  notifOpen ? "bg-blue-100 dark:bg-blue-800 text-blue-500" : "text-gray-500 dark:text-gray-300"
+                  notifOpen
+                    ? "bg-blue-100 dark:bg-blue-800 text-blue-500"
+                    : "text-gray-500 dark:text-gray-300"
                 } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleNotifToggle}
               >
@@ -495,7 +504,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               </h5>
               {notifOpen && (
                 <div className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden">
-                  <ul className="py-2">
+                  {/* <ul className="py-2">
                     <li className="flex gap-4 items-center text-left m-4 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                       <Link
                         to="/view-contract"
@@ -504,12 +513,16 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         View Contract
                       </Link>
                     </li>
-                  </ul>
+                  </ul> */}
                   {notifications.map((notification) => (
                     <div
                       key={notification._id}
                       onClick={() => handleNotificationClick(notification)}
-                      className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600 cursor-pointer bg-gray-100 dark:bg-gray-800"
+                      className={`px-4 py-2 text-sm cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-gray-600 ${
+                        notification.type === "LeaseSent"
+                          ? "block w-full text-left text-green-600 dark:text-green-400 font-semibold"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
                     >
                       {notification.message}
                     </div>
@@ -522,7 +535,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             <div className="group w-full mx-auto" ref={profileRef}>
               <button
                 className={`h-full w-full py-1 ${
-                  dropdownOpen ? "bg-blue-100 dark:bg-blue-800 text-blue-500" : "text-gray-500 dark:text-gray-300"
+                  dropdownOpen
+                    ? "bg-blue-100 dark:bg-blue-800 text-blue-500"
+                    : "text-gray-500 dark:text-gray-300"
                 } hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-blue-600 flex justify-center items-center`}
                 onClick={handleProfileToggle}
               >
@@ -565,9 +580,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
-                      <li
-                        className="flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
-                      >
+                      <li className="flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                         <div
                           className={`w-12 h-6 flex items-center ${
                             darkMode ? "bg-gray-800" : "bg-gray-300"
@@ -666,7 +679,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </div>
           </div>
         </div>
-
       </div>
     </nav>
   );

@@ -143,12 +143,85 @@ export const CreateListing = async (req, res) => {
 export const UpdateListing = async (req, res) => {
   try {
     const listingId = req.params.id; // Get the listing ID from the route
-    const { title, description, price } = req.body;
+    const { body, files } = req;
 
-    // Find and update the listing
+    // Check if the logged-in user is an "owner"
+    if (req.user.userType !== "Owner") {
+      return res.status(403).json({ message: "Only owners can update listings." });
+    }
+
+    // Destructure necessary fields from the request body
+    const {
+      title,
+      description,
+      price,
+      type,
+      bedroomNumber,
+      bathroomNumber,
+      visitAvailability,
+      propertySize,
+      address,
+      amenities,
+    } = JSON.parse(body.data);
+
+    // Check if the address object is present and has required fields
+    if (!address || !address.houseNumber || !address.street || !address.city) {
+      return res.status(400).json({
+        message: "Address is incomplete. Ensure houseNumber, street, and city are provided.",
+      });
+    }
+
+    // Validate visitAvailability
+    if (visitAvailability) {
+      const { startTime, endTime } = visitAvailability;
+
+      // Ensure both times are provided
+      if (!startTime || !endTime) {
+        return res.status(400).json({
+          message: "Visit availability requires both startTime and endTime.",
+        });
+      }
+
+      // Ensure startTime is earlier than endTime
+      if (moment(startTime, "HH:mm").isSameOrAfter(moment(endTime, "HH:mm"))) {
+        return res.status(400).json({ message: "Start time must be earlier than end time." });
+      }
+    }
+
+    // Handle image uploads (if any new images are uploaded)
+    let updatedImages = [];
+
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const { id: fileId, name: fileName } = await driveService.UploadFiles(
+          file,
+          process.env.PROPERTY_FOLDER_ID
+        );
+
+        updatedImages.push({
+          id: fileId,
+          name: fileName,
+          link: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
+        });
+      }
+    }
+
+    // Find the listing to update
     const updatedListing = await Listing.findOneAndUpdate(
       { _id: listingId, userId: req.user.id }, // Ensure the user owns the listing
-      { title, description, price }, // Fields to update
+      {
+        title,
+        description,
+        price,
+        type,
+        bedroomNumber,
+        bathroomNumber,
+        propertySize,
+        address,
+        visitAvailability,
+        amenities,
+        images: updatedImages.length > 0 ? updatedImages : undefined, // Only update images if new ones are provided
+      },
       { new: true, runValidators: true } // Return the updated document and validate updates
     );
 
@@ -164,6 +237,7 @@ export const UpdateListing = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const DeleteListing = async (req, res) => {
   try {

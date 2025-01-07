@@ -53,7 +53,7 @@ const leaseSchema = new mongoose.Schema(
       enum: [
         "Draft",
         "Ready",
-        "Pending",
+        "Sent",
         "Active",
         "Completed",
         "Terminated",
@@ -65,7 +65,7 @@ const leaseSchema = new mongoose.Schema(
     pdfPath: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    isSentToSeeker: { type: Boolean, default: false },
+    // isSentToSeeker: { type: Boolean, default: false },
     isSignedBySeeker: { type: Boolean, default: false },
     isSignedByLandlord: { type: Boolean, default: false },
     uploadedAgreementPath: { type: String },

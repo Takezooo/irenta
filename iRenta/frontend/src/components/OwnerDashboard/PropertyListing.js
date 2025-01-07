@@ -5,6 +5,7 @@ import { fetchOwnerListings, deleteList } from "../../global/api/Listings.js";
 import { fetchUserData } from "../../global/api/Users.js";
 import { AuthContext } from "../../global/contexts/AuthContext.js";
 import { ThemeContext } from "../../contexts/ThemeContext.js";
+import { useProperty } from "../../global/contexts/PropertyContext";
 
 export const PropertyListing = () => {
   const [listings, setListings] = useState([]);
@@ -19,6 +20,7 @@ export const PropertyListing = () => {
       profile: { link: "" },
     },
   });
+  const { setSelectedProperty } = useProperty();
 
   const { darkMode } = useContext(ThemeContext); // Access dark mode context
   const navigate = useNavigate();
@@ -78,6 +80,11 @@ export const PropertyListing = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleEditListing = (listing) => {
+    setSelectedProperty(listing);
+    navigate(`/edit-listing/${listing._id}`);
   };
 
   return (
@@ -322,7 +329,7 @@ export const PropertyListing = () => {
                         ? "bg-gray-700 text-white hover:bg-gray-600"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     }`}
-                    onClick={() => navigate("/edit-list")}
+                    onClick={() => handleEditListing(listing)}
                   >
                     Edit
                   </button>

@@ -57,8 +57,8 @@ const ManageLease = ({ seekerId }) => {
     }
 
     try {
+      await updateLease(leaseId, { tenant: targetSeekerId }); // Update tenant
       await sendLeaseToSeeker(leaseId); // Call sendLeaseToSeeker API to send the lease
-      await updateLease(leaseId, { status: "Sent" });
       alert("Lease sent to Seeker!");
 
       const updatedLeases = await fetchLeases();

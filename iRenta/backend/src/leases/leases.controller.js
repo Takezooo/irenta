@@ -171,10 +171,10 @@ export const SendLeaseToSeeker = async (req, res) => {
     // Mark lease as sent to the tenant
     lease.isSentToSeeker = true;
     await lease.save();
-
+    console.log("Tenant ID:", lease.tenant);
     // Notify Tenant
     const notification = new Notification({
-      userId: lease.tenant, // Tenant's user ID
+      userId: lease.tenant._id, // Tenant's user ID
       type: "LeaseSent",
       message: "A new lease agreement has been sent to you for review.",
     });

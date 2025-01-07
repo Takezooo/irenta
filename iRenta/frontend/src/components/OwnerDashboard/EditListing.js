@@ -43,7 +43,6 @@ const EditListing = () => {
   console.log(lat, lng)
   // Fetch the data for the specific listing
   useEffect(() => {
-    
     const fetchListing = async () => {
       try {
         
@@ -89,6 +88,8 @@ const EditListing = () => {
 
     fetchListing();
   }, [id, storedToken, navigate]);
+
+  console.log(selectedImages);
 
   // Handlers
   const handleFileChange = (event) => {
@@ -337,12 +338,13 @@ const EditListing = () => {
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
               )}
+              
               <div>
                 {/* Preview Section */}
                 {selectedImages.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {selectedImages.map((image, index) => {
-                      // Check if the image is a valid File object or a URL
+                      // Check if the image is a File or an object with a "link" property
                       if (image instanceof File) {
                         // For File object, create a URL from the file
                         return (
@@ -360,12 +362,12 @@ const EditListing = () => {
                             </button>
                           </div>
                         );
-                      } else if (typeof image === "string") {
-                        // If it's a string (i.e., a URL), directly use the URL in the src attribute
+                      } else if (image.link) {
+                        // If the image object has a "link" property, use it for the src
                         return (
                           <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
                             <img
-                              src={image} // Image URL from the database
+                              src={image.link} // Use the "link" property for fetched images
                               alt={`Preview ${index}`}
                               className="w-full h-full object-cover"
                             />
@@ -378,8 +380,7 @@ const EditListing = () => {
                           </div>
                         );
                       }
-                      // Return null if neither is true
-                      return null;
+                      return null; // Handle invalid data
                     })}
                   </div>
                 )}

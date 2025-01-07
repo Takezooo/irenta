@@ -1,29 +1,37 @@
 import React, { useState, useEffect, useContext } from "react";
-import { fetchLeaseById, downloadPdf } from "../../../global/api/Leases.js"; // Import API functions
-import { ThemeContext } from "../../../contexts/ThemeContext.js";
+import { useLocation } from "react-router-dom";
+import { fetchLeaseById } from "../../../global/api/Leases";
+import { ThemeContext } from "../../../contexts/ThemeContext";
+import { downloadPdf } from "../../../global/api/Leases";
 
-const ViewLease = ({ leaseId }) => {
+const ViewLease = () => {
+  const location = useLocation();
+  const { leaseId } = location.state || {}; // Get leaseId from state
   const [leaseDetails, setLeaseDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { darkMode } = useContext(ThemeContext); // Access dark mode state
+  const { darkMode } = useContext(ThemeContext);
 
   useEffect(() => {
-    const getLease = async () => {
+    const getLeaseDetails = async () => {
       try {
         setLoading(true);
-        const fetchedLease = await fetchLeaseById(leaseId);
-        setLeaseDetails(fetchedLease);
+        const lease = await fetchLeaseById(leaseId); // Fetch lease by ID
+        setLeaseDetails(lease);
       } catch (err) {
-        console.error("Failed to fetch lease:", err);
         setError("Failed to fetch lease details.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
-    getLease();
+    if (leaseId) {
+      getLeaseDetails();
+    }
   }, [leaseId]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   const handleDownloadPdf = () => {
     if (leaseId) {

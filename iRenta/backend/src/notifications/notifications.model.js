@@ -10,6 +10,7 @@ const notificationSchema = new mongoose.Schema({
   message: { type: String, required: true },
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
   viewed: { type: Boolean, default: false },
+  leaseId: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
 });
 

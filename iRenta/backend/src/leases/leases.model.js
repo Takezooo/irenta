@@ -53,7 +53,7 @@ const leaseSchema = new mongoose.Schema(
       enum: [
         "Draft",
         "Ready",
-        "Pending",
+        "Sent",
         "Active",
         "Completed",
         "Terminated",

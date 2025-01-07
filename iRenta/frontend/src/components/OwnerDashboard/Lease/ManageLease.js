@@ -6,13 +6,14 @@ import {
   fetchLeases,
   downloadPdf,
   updateLease,
+  sendLeaseToSeeker,
 } from "../../../global/api/Leases.js";
 import { ThemeContext } from "../../../contexts/ThemeContext";
 import { AiFillEdit } from "react-icons/ai";
 import { IoDocumentText, IoDownload, IoSend } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 
-const ManageLease = ({seekerId}) => {
+const ManageLease = ({ seekerId }) => {
   const passedSeekerId = seekerId || "";
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
   const [view, setView] = useState("LeaseHub");
@@ -20,6 +21,8 @@ const ManageLease = ({seekerId}) => {
   const [selectedLeaseId, setSelectedLeaseId] = useState(null);
   const [filterStatus, setFilterStatus] = useState("");
   const [filteredLeases, setFilteredLeases] = useState([]);
+  const [showTenantModal, setShowTenantModal] = useState(false); // Modal visibility
+  const [tenantId, setTenantId] = useState(""); // Tenant ID from modal
 
   // Fetch leases from the backend
   useEffect(() => {
@@ -46,10 +49,20 @@ const ManageLease = ({seekerId}) => {
   };
 
   const handleSend = async (leaseId) => {
+    const targetSeekerId = passedSeekerId || tenantId;
+
+    if (!targetSeekerId) {
+      setShowTenantModal(true);
+      return;
+    }
+
     try {
-      await updateLease(leaseId, { status: "Ready" });
-      alert("Lease marked as ready to send!");
+      await sendLeaseToSeeker(leaseId); // Call sendLeaseToSeeker API to send the lease
+      await updateLease(leaseId, { status: "Sent" });
+      alert("Lease sent to Seeker!");
+
       const updatedLeases = await fetchLeases();
+
       setLeases(updatedLeases);
       setFilteredLeases(updatedLeases);
     } catch (err) {
@@ -68,12 +81,62 @@ const ManageLease = ({seekerId}) => {
     }
   };
 
+  const handleModalSubmit = () => {
+    setShowTenantModal(false);
+  };
+
   return (
     <div
       className={`mt-16 flex-grow p-6 pb-4 ${
         darkMode ? "bg-gray-900 text-white" : "bg-gray-200 text-black"
       }`}
     >
+      {/* Tenant Modal */}
+      {showTenantModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className={`p-6 rounded-lg shadow-md ${
+              darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+            }`}
+          >
+            <h2 className="text-xl font-bold mb-4">Enter Tenant ID</h2>
+            <input
+              type="text"
+              placeholder="Tenant ID"
+              value={tenantId}
+              onChange={(e) => setTenantId(e.target.value)}
+              className={`w-full px-4 py-2 rounded mb-4 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-gray-200 border-gray-300"
+              }`}
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowTenantModal(false)}
+                className={`px-4 py-2 rounded mr-2 ${
+                  darkMode
+                    ? "bg-gray-600 hover:bg-gray-500 text-white"
+                    : "bg-gray-300 hover:bg-gray-400 text-black"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleModalSubmit}
+                className={`px-4 py-2 rounded ${
+                  darkMode
+                    ? "bg-blue-600 hover:bg-blue-500 text-white"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {view === "LeaseHub" ? (
         <>
           <h1 className="text-2xl font-bold mb-6">Lease Hub</h1>
@@ -152,7 +215,10 @@ const ManageLease = ({seekerId}) => {
                       {lease?.property.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {(lease?.tenant?.info?.firsname, lease?.tenant?.info?.lastName) || lease?.tenantPlaceholder?.name || "N/A"}
+                      {(lease?.tenant?.info?.firsname,
+                      lease?.tenant?.info?.lastName) ||
+                        lease?.tenantPlaceholder?.name ||
+                        "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {lease?.landlordName}

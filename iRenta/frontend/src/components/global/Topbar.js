@@ -21,6 +21,7 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { AiFillHeart, AiFillHome } from "react-icons/ai";
+import socket, { subscribeToNotifications } from "../../global/utils/Socket.js";
 
 const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const { darkMode, setDarkMode } = useContext(ThemeContext);
@@ -81,18 +82,36 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   }, [user, storedToken]);
 
   useEffect(() => {
+    if (user?.id) {
+      console.log(`Subscribing to notifications for user ${user.id}`);
+      subscribeToNotifications(user.id); // Subscribe to user's room
+  
+      socket.on("newNotification", (notification) => {
+        console.log("Received notification:", notification); // Debug log
+        setNotifications((prev) => [notification, ...prev]);
+        setUnreadCount((prev) => prev + 1); // Increment unread count
+      });
+  
+      return () => {
+        socket.off("newNotification"); // Cleanup listener
+      };
+    }
+  }, [user?.id]);
+  
+
+  useEffect(() => {
     const getNotifications = async () => {
       try {
         const data = await fetchNotifications();
         setNotifications(data);
-        setUnreadCount(data.filter((n) => !n.viewed).length);
+        setUnreadCount(data.filter((n) => !n.viewed).length); // Calculate unread count
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
       }
     };
     getNotifications();
   }, []);
-
+  
   const handleNotificationClick = async (notification) => {
     if (!notification.viewed) {
       await markNotificationAsViewed(notification._id);

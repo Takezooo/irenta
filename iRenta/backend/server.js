@@ -55,6 +55,8 @@ app.get("/", (req, res) => {
 
 // Initialize Socket.IO
 const io = socketIO(server);
+// Attach the Socket.IO instance to the app for global access
+app.set("socketio", io);
 
 mongoose.connection.once("open", () => {
     console.log("Database connected.");

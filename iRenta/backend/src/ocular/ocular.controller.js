@@ -134,29 +134,29 @@ export const UpdateOcularRemarks = async (req, res) => {
     ocular.remarks = action;
     await ocular.save();
 
-    // Notify the seeker
-    const newNotification = new Notification({
-      userId: ocular.userId,
-      type: "VisitResponse",
-      message: `Your visit request for property ${
-        ocular.propertyId
-      } was ${action.toLowerCase()}.`,
-      propertyId: ocular.propertyId,
-      viewed: false,
-    });
-    await newNotification.save();
+    // // Notify the seeker
+    // const newNotification = new Notification({
+    //   userId: ocular.userId,
+    //   type: "VisitResponse",
+    //   message: `Your visit request for property ${
+    //     ocular.name
+    //   } was ${action.toLowerCase()}.`,
+    //   propertyId: ocular.propertyId,
+    //   viewed: false,
+    // });
+    // await newNotification.save();
 
-    // Emit a real-time notification via Socket.IO
-    const io = req.app.get("socketio");
-    if (!io) {
-      console.error("Socket.IO instance not found.");
-      return res
-        .status(500)
-        .json({ message: "Server error: Socket.IO not initialized." });
-    }
+    // // Emit a real-time notification via Socket.IO
+    // const io = req.app.get("socketio");
+    // if (!io) {
+    //   console.error("Socket.IO instance not found.");
+    //   return res
+    //     .status(500)
+    //     .json({ message: "Server error: Socket.IO not initialized." });
+    // }
 
-    io.to(ocular.userId.toString()).emit("newNotification", newNotification);
-    console.log(`Notification emitted to room: ${ocular.userId}`);
+    // io.to(ocular.userId.toString()).emit("newNotification", newNotification);
+    // console.log(`Notification emitted to room: ${ocular.userId}`);
 
     res
       .status(200)

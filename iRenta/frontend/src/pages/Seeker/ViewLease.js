@@ -131,8 +131,10 @@ const ViewLease = () => {
     try {
       // Update lease with agreement and signature
       const formData = new FormData();
+      formData.append("status", "Signed");
+      formData.append("isSignedBySeeker", true);
       formData.append("isAgreed", true);
-      formData.append("signature", signatureFile);
+      formData.append("uploadedSignature", signatureFile);
 
       await updateLease(leaseId, formData);
       alert("Lease updated and sent back to the owner.");

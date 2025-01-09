@@ -354,7 +354,7 @@ const ManageLease = ({ seekerId }) => {
                             : "bg-green-500 text-white hover:bg-green-600"
                         }`}
                         onClick={() => {
-                          setSelectedLeaseId(lease);
+                          setSelectedLeaseId(lease?._id);
                           setView("ViewLease");
                         }}
                       >

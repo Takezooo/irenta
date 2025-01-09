@@ -29,7 +29,7 @@ const ViewLease = ({ leaseId }) => {
 
   useEffect(() => {
     // converts the data into a readable image
-    if (leaseDetails?.uploadedSignature === "No Uploaded Valid Id") {
+    if (leaseDetails?.uploadedSignature === "No Uploaded Signature") {
       return;
     } else {
       const byteArray = new Uint8Array(

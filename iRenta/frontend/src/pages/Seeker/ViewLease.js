@@ -13,6 +13,7 @@ const ViewLease = () => {
   const location = useLocation();
   const { leaseId } = location.state || {}; // Get leaseId from state
   const [leaseDetails, setLeaseDetails] = useState(null);
+  const [signatureBase64, setSignatureBase64] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAgreed, setIsAgreed] = useState(false);
@@ -38,6 +39,23 @@ const ViewLease = () => {
       getLeaseDetails();
     }
   }, [leaseId]);
+
+  useEffect(() => {
+    // converts the data into a readable image
+    if (leaseDetails?.uploadedOwnerSignature === "No Uploaded Signature") {
+      return;
+    } else {
+      const byteArray = new Uint8Array(
+        leaseDetails?.uploadedOwnerSignature?.data.data
+      );
+      const base64String = btoa(
+        byteArray.reduce((data, byte) => data + String.fromCharCode(byte), "")
+      );
+      setSignatureBase64(
+        `data:${leaseDetails?.uploadedOwnerSignature?.contentType};base64,${base64String}`
+      );
+    }
+  }, [leaseDetails]);
 
   // if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -326,6 +344,36 @@ const ViewLease = () => {
             >
               {leaseDetails?.contractDetails?.rulesAndRegulations || "N/A"}
             </p>
+          </div>
+
+          {/* Placeholder for Owner's Signature */}
+          <div className="mt-6">
+            <h2
+              className={`text-xl font-semibold ${
+                darkMode ? "text-gray-300" : "text-gray-800"
+              }`}
+            >
+              Owner's Signature
+            </h2>
+            <div className="flex justify-center mt-4">
+              {leaseDetails?.uploadedOwnerSignature ? (
+                <img
+                  src={signatureBase64}
+                  alt="Owner's Signature"
+                  className="w-48 h-32 object-contain border border-gray-300"
+                />
+              ) : (
+                <div
+                  className={`w-48 h-32 flex items-center justify-center border ${
+                    darkMode
+                      ? "border-gray-600 bg-gray-700 text-gray-300"
+                      : "border-gray-300 bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  No Signature Provided
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}

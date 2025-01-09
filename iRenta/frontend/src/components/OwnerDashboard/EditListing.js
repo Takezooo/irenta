@@ -17,6 +17,9 @@ const EditListing = () => {
   const [fileName] = useState("No file chosen");
   // State for form fields
   const [selectedImages, setSelectedImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [removedImages, setRemovedImages] = useState([]);
+  // const [combinedImages, setCombinedImages] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -77,7 +80,7 @@ const EditListing = () => {
             startTime: "",
             endTime: "",
           });
-          setSelectedImages(listing.images || []);
+          setExistingImages(listing.images || []);
         }
       } catch (error) {
         console.error("Error fetching listing:", error);
@@ -90,21 +93,23 @@ const EditListing = () => {
   }, [id, storedToken, navigate]);
 
   console.log(selectedImages);
-
+  console.log(existingImages)
   // Handlers
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
 
-    const invalidFiles = files.filter(
-      (file) => !allowedTypes.includes(file.type)
-    );
+    // Filter out invalid files
+    const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
     const newFiles = files.filter(
       (file) =>
         allowedTypes.includes(file.type) &&
-        file.type.startsWith("image/") &&
-        !selectedImages.includes(file)
+        !selectedImages.some(
+          (image) =>
+            image instanceof File && image.name === file.name // Avoid duplicate files
+        )
     );
+
     // Check for invalid file types
     if (invalidFiles.length > 0) {
       setErrorMessage(
@@ -112,12 +117,12 @@ const EditListing = () => {
           .map((file) => file.name)
           .join(", ")}`
       );
-      event.target.value = ""; // Reset the input field
+      //event.target.value = ""; // Reset the input field
       return;
     }
 
     // Check for file count limit
-    if (selectedImages.length + newFiles.length > 10) {
+    if (existingImages.length + newFiles.length > 10) {
       setErrorMessage("You can only upload up to 10 images.");
       return;
     }
@@ -129,6 +134,16 @@ const EditListing = () => {
 
   const handleRemoveImage = (index) => {
     setSelectedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveExistingImages = (index) => {
+    const removedImage = existingImages[index]; // Get the image that is about to be removed
+    
+    // Remove the image from the existingImages array
+    setExistingImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    
+    // Add the removed image to the removedImages array
+    setRemovedImages((prevRemovedImages) => [...prevRemovedImages, removedImage]);
   };
 
   const handleAmenityChange = (e) => {
@@ -206,14 +221,17 @@ const EditListing = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Validate required fields
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
       return;
     }
-
+  
     try {
       const formData = new FormData();
+  
+      // Append non-file data as a JSON string
       formData.append(
         "data",
         JSON.stringify({
@@ -227,22 +245,24 @@ const EditListing = () => {
           address,
           visitAvailability,
           amenities: selectedAmenities,
+          removedImages: removedImages,
         })
       );
-
-      selectedImages.forEach((file) => {
-        if (file instanceof File) {
-          formData.append("files", file);
-        }
+  
+      const newImageFiles = selectedImages.filter((image) => image instanceof File); // Newly added files
+      // Append new image files to the FormData
+      newImageFiles.forEach((file) => {
+        formData.append("files", file); // Use "newImages" key for new files
       });
-
+  
+      // Make the API request
       const response = await axios.put(`${API_LINK}/listings/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${storedToken}`,
           "Content-Type": "multipart/form-data",
         },
       });
-
+  
       if (response.status === 200) {
         alert("Listing updated successfully!");
         navigate("/owner-dashboard");
@@ -252,6 +272,7 @@ const EditListing = () => {
       alert("An error occurred while updating the listing.");
     }
   };
+  
 
   if (lat === 0 || lng === 0) {
     return <div>Loading map...</div>; // Show loading or default content until lat/lng is valid
@@ -284,7 +305,7 @@ const EditListing = () => {
             >
               <AiOutlineClose className="w-6 h-6" />
             </button>
-            <h2 className="text-lg font-bold">Add a Listing</h2>
+            <h2 className="text-lg font-bold">Edit Listing</h2>
           </div>
 
           <div className="flex-grow overflow-y-auto p-6 space-y-6">
@@ -301,7 +322,7 @@ const EditListing = () => {
                   darkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Photos • {selectedImages.length} / 10 • You can add up to 10
+                Photos • {existingImages.length + selectedImages.length} / 10 • You can add up to 10
                 photos.
               </p>
               <div className="flex items-center">
@@ -330,57 +351,56 @@ const EditListing = () => {
                       : "bg-gray-100 text-gray-600 border border-gray-300"
                   }`}
                 >
-                  {selectedImages.length > 0
-                    ? `${selectedImages.length} file(s) selected`
+                  {existingImages.length + selectedImages.length > 0
+                    ? `${existingImages.length + selectedImages.length} file(s) selected`
                     : "No file chosen"}
                 </span>
               </div>
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
               )}
-              
+
               <div>
                 {/* Preview Section */}
+                {existingImages.length > 0 && (
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    {existingImages.map((image, index) => {
+                      return (
+                        <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
+                          <img
+                            src={image.link} // Use the "link" property for fetched images
+                            alt={`Preview ${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
+                            onClick={() => handleRemoveExistingImages(index)}
+                          >
+                            <IoClose className="w-6 h-6" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
                 {selectedImages.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {selectedImages.map((image, index) => {
-                      // Check if the image is a File or an object with a "link" property
-                      if (image instanceof File) {
-                        // For File object, create a URL from the file
-                        return (
-                          <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
-                            <img
-                              src={URL.createObjectURL(image)} // Create object URL for the image
-                              alt={`Preview ${index}`}
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <IoClose className="w-6 h-6" />
-                            </button>
-                          </div>
-                        );
-                      } else if (image.link) {
-                        // If the image object has a "link" property, use it for the src
-                        return (
-                          <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
-                            <img
-                              src={image.link} // Use the "link" property for fetched images
-                              alt={`Preview ${index}`}
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
-                              onClick={() => handleRemoveImage(index)}
-                            >
-                              <IoClose className="w-6 h-6" />
-                            </button>
-                          </div>
-                        );
-                      }
-                      return null; // Handle invalid data
+                      return (
+                        <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
+                          <img
+                            src={URL.createObjectURL(image)} // Create object URL for the image
+                            alt={`Preview ${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full"
+                            onClick={() => handleRemoveImage(index)}
+                          >
+                            <IoClose className="w-6 h-6" />
+                          </button>
+                        </div>
+                      );
                     })}
                   </div>
                 )}

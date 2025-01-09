@@ -144,7 +144,7 @@ export const UpdateListing = async (req, res) => {
   try {
     const listingId = req.params.id; // Get the listing ID from the route
     const { body, files } = req;
-
+    const ID = req.user.userId;
     // Check if the logged-in user is an "owner"
     if (req.user.userType !== "Owner") {
       return res.status(403).json({ message: "Only owners can update listings." });
@@ -162,6 +162,7 @@ export const UpdateListing = async (req, res) => {
       propertySize,
       address,
       amenities,
+      removedImages, // Receive removed images
     } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
@@ -188,8 +189,20 @@ export const UpdateListing = async (req, res) => {
       }
     }
 
+    // Find the existing listing
+    const listing = await Listing.findOne({
+      _id: listingId,
+      userId: req.user.id, // Ensure the user owns the listing
+    });
+
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found or you're not authorized to update it.",
+      });
+    }
+
     // Handle image uploads (if any new images are uploaded)
-    let updatedImages = [];
+    let newImages = [];
 
     if (files && files.length > 0) {
       for (const file of files) {
@@ -198,7 +211,7 @@ export const UpdateListing = async (req, res) => {
           process.env.PROPERTY_FOLDER_ID
         );
 
-        updatedImages.push({
+        newImages.push({
           id: fileId,
           name: fileName,
           link: `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`,
@@ -206,7 +219,10 @@ export const UpdateListing = async (req, res) => {
       }
     }
 
-    // Find the listing to update
+    // Combine existing images with new images
+    const updatedImages = [...listing.images, ...newImages];
+
+    // Update the listing with new data and images
     const updatedListing = await Listing.findOneAndUpdate(
       { _id: listingId, userId: req.user.id }, // Ensure the user owns the listing
       {
@@ -220,20 +236,39 @@ export const UpdateListing = async (req, res) => {
         address,
         visitAvailability,
         amenities,
-        images: updatedImages.length > 0 ? updatedImages : undefined, // Only update images if new ones are provided
+        images: updatedImages, // Combine existing and new images
       },
       { new: true, runValidators: true } // Return the updated document and validate updates
-    );
 
-    // Check if the listing was found and updated
-    if (!updatedListing) {
-      return res.status(404).json({
-        message: "Listing not found or you're not authorized to update it.",
+    );
+    
+    // Handle image deletions (if any images are to be removed)
+    if (removedImages && removedImages.length > 0) {
+      // Delete the removed images from storage (Google Drive)
+      const deletePromises = removedImages.map((image) => {
+        if (image.id) {
+          return driveService.DeleteFiles(image.id).catch((err) => {
+            console.error(`Failed to delete file with id ${image.id}:`, err);
+          });
+        }
+        return Promise.resolve();
       });
+    
+      // Wait for all images to be deleted from storage
+      await Promise.all(deletePromises);
+    
+      // Check for any inconsistencies between the id fields
+      const removedImageIds = removedImages.map((image) => image._id || image._id);  // Adjust based on logging
+
+      await Listing.updateOne(
+        { _id: listingId }, // Filter to match the document
+        { $pull: { images: { _id: { $in: removedImageIds } } } } // Remove all objects matching the _ids
+      );
     }
 
     res.status(200).json(updatedListing); // Return the updated listing
   } catch (err) {
+    console.error("Error updating listing:", err);
     res.status(500).json({ message: err.message });
   }
 };

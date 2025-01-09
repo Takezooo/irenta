@@ -136,7 +136,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
       navigate("/reservations");
     }
     if (notification.type === "LeaseSent" && notification.leaseId) {
-      navigate("/view-contract", { state: { leaseId: notification.leaseId } });
+      navigate("/view-lease", { state: { leaseId: notification.leaseId } });
     }
   };
 

@@ -1,12 +1,24 @@
 import React, { useState, useEffect, useContext } from "react";
-import { ThemeContext } from "../../../contexts/ThemeContext";
-import { fetchLeaseById, downloadPdf } from "../../../global/api/Leases";
+import SignaturePad from "react-signature-canvas";
+import { useLocation } from "react-router-dom";
+import { AuthContext } from "../../global/contexts/AuthContext";
+import { ThemeContext } from "../../contexts/ThemeContext";
+import { fetchLeaseById, updateLease, downloadPdf } from "../../global/api/Leases";
 
-const ViewLease = ({ leaseId }) => {
+const ViewLease = () => {
+  const location = useLocation();
+  const { leaseId } = location.state || {}; // Get leaseId from state
   const [leaseDetails, setLeaseDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const signaturePadRef = React.useRef();
   const { darkMode } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
+  const userType = user.userType || "";
+  console.log(leaseId);
 
   useEffect(() => {
     const getLeaseDetails = async () => {
@@ -26,11 +38,71 @@ const ViewLease = ({ leaseId }) => {
     }
   }, [leaseId]);
 
+  // if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   const handleDownloadPdf = () => {
     if (leaseId) {
       downloadPdf(leaseId);
     } else {
       console.error("Lease ID is not available.");
+    }
+  };
+
+  const handleAttachSignature = (event) => {
+    const file = event.target.files[0];
+    if (!file || !file.type.includes("png")) {
+      alert("Only PNG files with a transparent background are allowed.");
+      return;
+    }
+    setSignatureFile(file);
+  };
+
+  const handleOpenSignaturePad = () => {
+    setShowSignaturePad(true);
+  };
+
+  const handleCancelSignature = () => {
+    setShowSignaturePad(false);
+  };
+
+  const handleDoneSignature = () => {
+    if (signaturePadRef.current) {
+      const signatureUrl = signaturePadRef.current.toDataURL("image/png");
+      fetch(signatureUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "digital-signature.png", {
+            type: "image/png",
+          });
+          setSignatureFile(file);
+          setShowSignaturePad(false);
+        });
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!isAgreed) {
+      alert("Please agree to the terms and conditions.");
+      return;
+    }
+    if (!signatureFile) {
+      alert("Please attach a signature or draw a digital signature.");
+      return;
+    }
+
+    try {
+      // Update lease with agreement and signature
+      const formData = new FormData();
+      formData.append("isAgreed", true);
+      formData.append("signature", signatureFile);
+
+      await updateLease(leaseId, formData);
+      alert("Lease updated and sent back to the owner.");
+      setSignatureFile(null); // Clear temporary file
+    } catch (error) {
+      console.error("Error submitting lease:", error);
+      alert("Failed to submit lease. Please try again.");
     }
   };
 
@@ -219,16 +291,88 @@ const ViewLease = ({ leaseId }) => {
 
           {/* Actions */}
           <div className="flex flex-col w-full justify-center items-center gap-2">
-            <button
-              className={`my-5 w-fit px-4 py-2 rounded-md ${
-                darkMode
-                  ? "bg-blue-600 text-white hover:bg-blue-500"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
-              onClick={handleDownloadPdf}
-            >
-              Download as PDF
-            </button>
+            {userType === "Seeker" && (
+              <>
+                <div className="text-center space-y-4">
+                  <label className="block">
+                    <input
+                      type="checkbox"
+                      checked={isAgreed}
+                      onChange={(e) => setIsAgreed(e.target.checked)}
+                    />
+                    <span className="ml-2">
+                      I Agree to the Terms and Conditions
+                    </span>
+                  </label>
+
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/png"
+                      onChange={handleAttachSignature}
+                    />
+                    <button
+                      className={
+                        "my-5 w-fit px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-500"
+                      }
+                      onClick={handleOpenSignaturePad}
+                    >
+                      Digital Signature
+                    </button>
+                  </div>
+
+                  <div className="flex justify-center gap-5 mt-4">
+                    {userType !== "Owner" && (
+                      <button
+                        className={
+                          "my-5 w-fit px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500"
+                        }
+                        onClick={handleSubmit}
+                      >
+                        Submit
+                      </button>
+                    )}
+
+                    <button
+                      className={`my-5 w-fit px-4 py-2 rounded-md ${
+                        darkMode
+                          ? "bg-blue-600 text-white hover:bg-blue-500"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                      onClick={handleDownloadPdf}
+                    >
+                      Download as PDF
+                    </button>
+                  </div>
+                </div>
+                {/* Digital Signature Pop-Up */}
+                {showSignaturePad && (
+                  <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 ">
+                    <div className="bg-white p-4 rounded shadow-lg">
+                      <SignaturePad ref={signaturePadRef} />
+                      <div className="flex justify-center gap-3 mt-4">
+                        <button
+                          className={
+                            "my-5 w-fit px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-500"
+                          }
+                          onClick={handleCancelSignature}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className={
+                            "my-5 w-fit px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500"
+                          }
+                          onClick={handleDoneSignature}
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

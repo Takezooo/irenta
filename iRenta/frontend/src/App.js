@@ -12,7 +12,7 @@ import NotAuthorized from "./pages/Unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
-import ViewContract from "./components/OwnerDashboard/Lease/ViewLease.js";
+import ViewLease from "./components/OwnerDashboard/Lease/ViewLease.js";
 import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
@@ -106,10 +106,10 @@ const App = () => {
 
                   {/* Seeker and Owner Routes */}
                   <Route
-                    path="/view-contract"
+                    path="/view-lease"
                     element={
                       <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                        <ViewContract />
+                        <ViewLease />
                       </PrivateRoute>
                     }
                   />

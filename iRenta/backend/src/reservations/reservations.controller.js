@@ -45,6 +45,17 @@ export const createReservation = async (req, res) => {
     });
     await notification.save();
 
+    // Emit a real-time notification via Socket.IO
+    const io = req.app.get("socketio");
+    if (!io) {
+      console.error("Socket.IO instance not found.");
+      return res
+        .status(500)
+        .json({ message: "Server error: Socket.IO not initialized." });
+    }
+    io.to(ownerId.toString()).emit("newNotification", notification);
+    console.log(`Notification emitted to room: ${ownerId}`);
+
     res
       .status(201)
       .json({ message: "Reservation created successfully.", reservation });
@@ -66,7 +77,6 @@ export const updateReservationStatus = async (req, res) => {
 
     reservation.status = status;
     await reservation.save();
-
     // Notify Seeker
     const notification = new Notification({
       userId: reservation.seekerId,
@@ -74,6 +84,19 @@ export const updateReservationStatus = async (req, res) => {
       message: `Your reservation request has been ${status.toLowerCase()}.`,
     });
     await notification.save();
+    // Emit a real-time notification via Socket.IO
+    const io = req.app.get("socketio");
+    if (!io) {
+      console.error("Socket.IO instance not found.");
+      return res
+        .status(500)
+        .json({ message: "Server error: Socket.IO not initialized." });
+    }
+
+    io.to(reservation.seekerId.toString()).emit(
+      "newNotification",
+      notification
+    );
 
     res.status(200).json({ message: "Reservation status updated." });
   } catch (error) {

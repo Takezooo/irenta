@@ -12,7 +12,7 @@ import NotAuthorized from "./pages/Unauthorized/NotAuthorized.js";
 import ViewListing from "./pages/ViewListing.js";
 import AddListing from "./components/OwnerDashboard/AddListing.js";
 import BrowseListing from "./pages/BrowseListing.js";
-import ViewLease from "./components/OwnerDashboard/Lease/ViewLease.js";
+import ViewLease from "./pages/Seeker/ViewLease.js";
 import EditListing from "./components/OwnerDashboard/EditListing.js";
 import LikedListing from "./pages/LikedListing.js";
 import ReserveListing from "./pages/ReserveListing.js";
@@ -64,7 +64,10 @@ const App = () => {
                   />
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/browse-listing" element={<BrowseListing />} />
-                  <Route path="/tenant-dashboard" element={<TenantDashboard />} />
+                  <Route
+                    path="/tenant-dashboard"
+                    element={<TenantDashboard />}
+                  />
                   <Route path="/about-us" element={<AboutPage />} />
                   <Route path="/:propertyId" element={<ViewListing />} />
 
@@ -74,6 +77,14 @@ const App = () => {
                     element={
                       <PrivateRoute allowedRoles={["Seeker"]}>
                         <ReservationPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/view-lease"
+                    element={
+                      <PrivateRoute allowedRoles={["Seeker"]}>
+                        <ViewLease />
                       </PrivateRoute>
                     }
                   />
@@ -105,14 +116,6 @@ const App = () => {
                   />
 
                   {/* Seeker and Owner Routes */}
-                  <Route
-                    path="/view-lease"
-                    element={
-                      <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-                        <ViewLease />
-                      </PrivateRoute>
-                    }
-                  />
                   <Route
                     path="/liked-listing"
                     element={

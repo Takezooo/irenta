@@ -1,13 +1,26 @@
 import React, { useState, useEffect, useContext } from "react";
-import { ThemeContext } from "../../../contexts/ThemeContext";
-import { fetchLeaseById, downloadPdf } from "../../../global/api/Leases";
+import SignaturePad from "react-signature-canvas";
+import { useLocation } from "react-router-dom";
+import { ThemeContext } from "../../contexts/ThemeContext";
+import {
+  fetchLeaseById,
+  updateLease,
+  downloadPdf,
+} from "../../global/api/Leases";
+import imageCompression from "browser-image-compression";
 
-const ViewLease = ({ leaseId }) => {
+const ViewLease = () => {
+  const location = useLocation();
+  const { leaseId } = location.state || {}; // Get leaseId from state
   const [leaseDetails, setLeaseDetails] = useState(null);
+  const [signatureBase64, setSignatureBase64] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const signaturePadRef = React.useRef();
   const { darkMode } = useContext(ThemeContext);
-  const [signatureBase64, setSignatureBase64] = useState("");
 
   useEffect(() => {
     const getLeaseDetails = async () => {
@@ -29,26 +42,124 @@ const ViewLease = ({ leaseId }) => {
 
   useEffect(() => {
     // converts the data into a readable image
-    if (leaseDetails?.uploadedSignature === "No Uploaded Signature") {
+    if (leaseDetails?.uploadedOwnerSignature === "No Uploaded Signature") {
       return;
     } else {
       const byteArray = new Uint8Array(
-        leaseDetails?.uploadedSignature?.data.data
+        leaseDetails?.uploadedOwnerSignature?.data.data
       );
       const base64String = btoa(
         byteArray.reduce((data, byte) => data + String.fromCharCode(byte), "")
       );
       setSignatureBase64(
-        `data:${leaseDetails?.uploadedSignature?.contentType};base64,${base64String}`
+        `data:${leaseDetails?.uploadedOwnerSignature?.contentType};base64,${base64String}`
       );
     }
   }, [leaseDetails]);
+
+  // if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   const handleDownloadPdf = () => {
     if (leaseId) {
       downloadPdf(leaseId);
     } else {
       console.error("Lease ID is not available.");
+    }
+  };
+
+  const handleAttachSignature = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !file.type.includes("png")) {
+      alert("Only PNG files with a transparent background are allowed.");
+      return;
+    }
+    const options = {
+      maxSizeMB: 0.5, // Compress to 1MB
+      maxWidthOrHeight: 1024, // Resize dimensions
+      useWebWorker: true,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      setSignatureFile(compressedFile);
+      alert("File compressed successfully!");
+    } catch (error) {
+      console.error("Error compressing file:", error);
+      alert("Failed to compress the file.");
+    }
+  };
+
+  const handleOpenSignaturePad = () => {
+    setShowSignaturePad(true);
+  };
+
+  const handleCancelSignature = () => {
+    setShowSignaturePad(false);
+  };
+
+  const handleDoneSignature = async () => {
+    if (signaturePadRef.current) {
+      const signatureUrl = signaturePadRef.current.toDataURL("image/png");
+
+      try {
+        // Fetch the signature as a blob
+        const res = await fetch(signatureUrl);
+        const blob = await res.blob();
+
+        // Create a file object from the blob
+        const file = new File([blob], "digital-signature.png", {
+          type: "image/png",
+        });
+
+        // Compression options
+        const options = {
+          maxSizeMB: 0.5, // Target size in MB
+          maxWidthOrHeight: 1024, // Maximum dimensions
+          useWebWorker: true, // Use web worker for better performance
+        };
+
+        // Compress the file
+        const compressedFile = await imageCompression(file, options);
+
+        // Save the compressed file to state
+        setSignatureFile(compressedFile);
+
+        // Hide the signature pad
+        setShowSignaturePad(false);
+
+        alert("File compressed and saved successfully!");
+      } catch (error) {
+        console.error("Error handling the signature:", error);
+        alert("Failed to process the signature. Please try again.");
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!isAgreed) {
+      alert("Please agree to the terms and conditions.");
+      return;
+    }
+    if (!signatureFile) {
+      alert("Please attach a signature or draw a digital signature.");
+      return;
+    }
+
+    try {
+      // Update lease with agreement and signature
+      const formData = new FormData();
+      formData.append("status", "Signed");
+      formData.append("isSignedBySeeker", true);
+      formData.append("isAgreed", true);
+      formData.append("uploadedSignature", signatureFile);
+
+      await updateLease(leaseId, formData);
+      alert("Lease updated and sent back to the owner.");
+      setSignatureFile(null); // Clear temporary file
+    } catch (error) {
+      console.error("Error submitting lease:", error);
+      alert("Failed to submit lease. Please try again.");
     }
   };
 
@@ -235,20 +346,20 @@ const ViewLease = ({ leaseId }) => {
             </p>
           </div>
 
-          {/* Placeholder for Seeker's Signature */}
+          {/* Placeholder for Owner's Signature */}
           <div className="mt-6">
             <h2
               className={`text-xl font-semibold ${
                 darkMode ? "text-gray-300" : "text-gray-800"
               }`}
             >
-              Tenant's Signature
+              Owner's Signature
             </h2>
             <div className="flex justify-center mt-4">
-              {leaseDetails?.uploadedSignature ? (
+              {leaseDetails?.uploadedOwnerSignature ? (
                 <img
                   src={signatureBase64}
-                  alt="Tenant's Signature"
+                  alt="Owner's Signature"
                   className="w-48 h-32 object-contain border border-gray-300"
                 />
               ) : (
@@ -267,16 +378,82 @@ const ViewLease = ({ leaseId }) => {
 
           {/* Actions */}
           <div className="flex flex-col w-full justify-center items-center gap-2">
-            <button
-              className={`my-5 w-fit px-4 py-2 rounded-md ${
-                darkMode
-                  ? "bg-blue-600 text-white hover:bg-blue-500"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
-              onClick={handleDownloadPdf}
-            >
-              Download as PDF
-            </button>
+            <div className="text-center space-y-4">
+              <label className="block">
+                <input
+                  type="checkbox"
+                  checked={isAgreed}
+                  onChange={(e) => setIsAgreed(e.target.checked)}
+                />
+                <span className="ml-2">
+                  I Agree to the Terms and Conditions
+                </span>
+              </label>
+
+              <div>
+                <input
+                  type="file"
+                  accept="image/png"
+                  onChange={handleAttachSignature}
+                />
+                <button
+                  className={
+                    "my-5 w-fit px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-500"
+                  }
+                  onClick={handleOpenSignaturePad}
+                >
+                  Digital Signature
+                </button>
+              </div>
+
+              <div className="flex justify-center gap-5 mt-4">
+                <button
+                  className={
+                    "my-5 w-fit px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500"
+                  }
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+
+                <button
+                  className={`my-5 w-fit px-4 py-2 rounded-md ${
+                    darkMode
+                      ? "bg-blue-600 text-white hover:bg-blue-500"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
+                  onClick={handleDownloadPdf}
+                >
+                  Download as PDF
+                </button>
+              </div>
+            </div>
+            {/* Digital Signature Pop-Up */}
+            {showSignaturePad && (
+              <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 ">
+                <div className="bg-white p-4 rounded shadow-lg">
+                  <SignaturePad ref={signaturePadRef} />
+                  <div className="flex justify-center gap-3 mt-4">
+                    <button
+                      className={
+                        "my-5 w-fit px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-500"
+                      }
+                      onClick={handleCancelSignature}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className={
+                        "my-5 w-fit px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-500"
+                      }
+                      onClick={handleDoneSignature}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

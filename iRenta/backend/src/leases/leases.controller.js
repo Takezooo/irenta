@@ -1,6 +1,6 @@
 import Lease from "./leases.model.js";
 import Terms from "../terms/terms.model.js";
-import Users from "../users/users.model.js";  
+import Users from "../users/users.model.js";
 import generatePdf from "../../global/utils/PdfGenerator.js";
 import Notification from "../notifications/notifications.model.js";
 import fs from "fs";
@@ -35,7 +35,9 @@ export const CreateLease = async (req, res) => {
         !property?.address?.city ||
         !property?.address?.zip
       ) {
-        return res.status(400).json({ message: "Property details are incomplete" });
+        return res
+          .status(400)
+          .json({ message: "Property details are incomplete" });
       }
       if (
         !contractDetails?.startDate ||
@@ -43,7 +45,9 @@ export const CreateLease = async (req, res) => {
         !contractDetails?.rentAmount ||
         !contractDetails?.depositAmount
       ) {
-        return res.status(400).json({ message: "Lease details are incomplete" });
+        return res
+          .status(400)
+          .json({ message: "Lease details are incomplete" });
       }
     }
 
@@ -71,8 +75,6 @@ export const CreateLease = async (req, res) => {
     res.status(500).json({ message: "Failed to create lease" });
   }
 };
-
-
 
 // Fetch all leases created by the landlord
 export const GetCreatedLeases = async (req, res) => {
@@ -180,6 +182,21 @@ export const SendLeaseToSeeker = async (req, res) => {
       message: "A new lease agreement has been sent to you for review.",
     });
     await notification.save();
+
+    // Emit a real-time notification via Socket.IO
+    const io = req.app.get("socketio");
+    if (!io) {
+      console.error("Socket.IO instance not found.");
+      return res
+        .status(500)
+        .json({ message: "Server error: Socket.IO not initialized." });
+    }
+
+    io.to(lease.tenant._id.toString()).emit(
+      "newNotification",
+      notification
+    );
+    console.log(`Notification emitted to room: ${lease.tenant._id}`);
 
     res.status(200).json({ message: "Lease sent to Tenant.", lease });
   } catch (error) {

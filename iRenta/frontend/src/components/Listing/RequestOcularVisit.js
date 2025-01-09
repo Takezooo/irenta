@@ -58,11 +58,7 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
 
   const handleTimeChange = (e) => {
     const time = e.target.value;
-    if (isTimeWithinAvailability(time)) {
-      setSelectedTime(time);
-    } else {
-      alert("Selected time is outside the available hours.");
-    }
+    setSelectedTime(time);
   };
 
   const handleSubmit = async () => {
@@ -73,6 +69,11 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
 
     if (!selectedTime) {
       alert("Please select a time.");
+      return;
+    }
+
+    if (!isTimeWithinAvailability(selectedTime)) {
+      alert("Selected time is outside the available hours.");
       return;
     }
 
@@ -115,7 +116,11 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
           onChange={setSelectedDate}
           tileDisabled={isDateDisabled}
           value={selectedDate}
-          className={darkMode ? "text-black react-calendar react-calendar-dark" : "react-calendar"}
+          className={
+            darkMode
+              ? "text-black react-calendar react-calendar-dark"
+              : "react-calendar"
+          }
         />
         <div className="mt-4">
           <label

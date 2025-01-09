@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { GetToken } from '../utils/Token';
+import socket from '../utils/Socket';
 
 export const NotificationContext = createContext();
 
@@ -34,6 +35,19 @@ export const NotificationProvider = ({ children }) => {
       console.error('Error marking notification as viewed:', error);
     }
   };
+
+  useEffect(() => {
+    socket.on("newNotification", (notification) => {
+      console.log("New Notification Received:", notification); // Debug log
+      setNotifications((prev) => [notification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+    });
+  
+    return () => {
+      socket.off("newNotification"); // Cleanup listener
+    };
+  }, []);
+  
 
   useEffect(() => {
     fetchNotifications();

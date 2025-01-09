@@ -25,6 +25,16 @@ const socketIO = (server) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.user);
 
+    // Notification subscription
+    socket.on("subscribeToNotifications", (userId) => {
+      if (!userId) {
+        console.error("Invalid userId for subscription.");
+        return;
+      }
+      socket.join(userId);
+      console.log(`User subscribed to notifications room: ${userId}`);
+    });
+
     // **Join a Room**
     socket.on("joinRoom", async ({ chatId }) => {
       try {

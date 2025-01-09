@@ -41,7 +41,7 @@ const ReservationPage = () => {
     if (!file) return;
 
     const options = {
-      maxSizeMB: 1, // Compress to 1MB
+      maxSizeMB: 0.5, // Compress to 1MB
       maxWidthOrHeight: 1024, // Resize dimensions
       useWebWorker: true,
     };

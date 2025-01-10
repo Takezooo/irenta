@@ -50,7 +50,7 @@ const ManageTenant = () => {
 
       {/* Waitlist Section */}
       <div className="mb-8">
-        <Waitlist reservations={tenants} />
+        <Waitlist />
       </div>
 
       {/* Tenants Table */}

@@ -5,6 +5,7 @@ import { ThemeContext } from "../../contexts/ThemeContext";
 import { AuthContext } from "../../global/contexts/AuthContext";
 import { GetToken } from "../../global/utils/Token";
 import { fetchUserData } from "../../global/api/Users";
+import { registerToWaitlist } from "../../global/api/Tenants";
 import { sendNotification } from "../../global/api/Notifications";
 import {
   fetchLeaseById,
@@ -25,12 +26,12 @@ const ViewLease = () => {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const signaturePadRef = React.useRef();
   const { darkMode } = useContext(ThemeContext);
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",
       lastName: "",
-    }
+    },
   });
 
   const storedToken = GetToken();
@@ -183,7 +184,20 @@ const ViewLease = () => {
       formData.append("uploadedSignature", signatureFile);
 
       await updateLease(leaseId, formData);
-      // Send notification to seeker
+
+      const tenantData = {
+        seekerId: user.id,
+        propertyId: leaseDetails.property.propertyId,
+        leaseId,
+        landlordId: leaseDetails.landlord, // Use landlord ID from lease details
+      };
+  
+      console.log("Payload to be sent to registerTenant:", tenantData);
+  
+      // Register user as waitlisted and update tenantBadge
+      await registerToWaitlist(tenantData);
+
+      // Send notification to owner
       await sendNotification(leaseDetails.landlord, {
         type: "SignedContract",
         leaseId: leaseId,
@@ -191,6 +205,7 @@ const ViewLease = () => {
       });
 
       alert("Lease updated and sent back to the owner.");
+
       setSignatureFile(null); // Clear temporary file
     } catch (error) {
       console.error("Error submitting lease:", error);

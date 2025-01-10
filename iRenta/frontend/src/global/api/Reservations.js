@@ -37,21 +37,6 @@ export const updateReservationStatus = async (reservationId, status) => {
   }
 };
 
-export const moveToRenterList = async (seekerId) => {
-  const authToken = GetToken();
-  try {
-    await axios.post(
-      `${API_BASE_URL}/move-to-renter`,
-      { seekerId },
-      {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }
-    );
-  } catch (error) {
-    console.error("Error moving seeker to renter list:", error);
-  }
-};
-
 export const fetchReservationById = async (reservationId) => {
   const authToken = GetToken();
 

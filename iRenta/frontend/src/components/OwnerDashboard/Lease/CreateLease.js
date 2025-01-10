@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import { createLease } from "../../../global/api/Leases.js";
 import { fetchUserData } from "../../../global/api/Users.js";
+import { fetchOwnerListings } from "../../../global/api/Listings.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
 import { AuthContext } from "../../../global/contexts/AuthContext.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js"; // Import ThemeContext for dark mode
 import { GetToken } from "../../../global/utils/Token.js";
 
-const CreateLease = ({seekerId}) => {
+const CreateLease = ({ seekerId }) => {
   const passedSeekerId = seekerId || "";
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const storedToken = GetToken();
+  const [listings, setListings] = useState([]);
   const [usePlaceholderTenant, setUsePlaceholderTenant] = useState(false);
   const [preloadedTerms, setPreloadedTerms] = useState([]);
   const [userProfile, setUserProfile] = useState({
@@ -21,8 +23,23 @@ const CreateLease = ({seekerId}) => {
     },
   });
 
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await fetchOwnerListings();
+        setListings(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
   const [formData, setFormData] = useState({
     property: {
+      propertyId: "",
       name: "",
       address: {
         houseNumber: "",
@@ -50,7 +67,6 @@ const CreateLease = ({seekerId}) => {
       rulesAndRegulations: "",
     },
   });
-
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -123,6 +139,27 @@ const CreateLease = ({seekerId}) => {
     }
 
     return true;
+  };
+
+  const handleListingSelect = (e) => {
+    const selectedListing = listings.find(
+      (listing) => listing._id === e.target.value
+    );
+    if (selectedListing) {
+      setFormData((prev) => ({
+        ...prev,
+        property: {
+          propertyId: selectedListing._id,
+          name: selectedListing.title,
+          address: {
+            houseNumber: selectedListing.address.houseNumber,
+            street: selectedListing.address.street,
+            city: selectedListing.address.city,
+            zip: selectedListing.address.zip,
+          },
+        },
+      }));
+    }
   };
 
   const handleSubmit = async (action, event) => {
@@ -233,108 +270,32 @@ const CreateLease = ({seekerId}) => {
           onSubmit={(e) => handleSubmit("saveAndSend", e)}
           className="space-y-6"
         >
-          {/* Property Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Property Name
-              </label>
-              <input
-                type="text"
-                name="property.name"
-                value={formData.property.name}
-                onChange={handleChange}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
-            </div>
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                House Number
-              </label>
-              <input
-                type="text"
-                name="property.address.houseNumber"
-                value={formData.property.address.houseNumber}
-                onChange={handleChange}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
-            </div>
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Street
-              </label>
-              <input
-                type="text"
-                name="property.address.street"
-                value={formData.property.address.street}
-                onChange={handleChange}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
-            </div>
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                City
-              </label>
-              <input
-                type="text"
-                name="property.address.city"
-                value={formData.property.address.city}
-                onChange={handleChange}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
-            </div>
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                ZIP
-              </label>
-              <input
-                type="text"
-                name="property.address.zip"
-                value={formData.property.address.zip}
-                onChange={handleChange}
-                className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
-            </div>
+{/* Property Selection */}
+<div>
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Select Property
+            </label>
+            <select
+              name="propertyId"
+              value={formData.property.propertyId}
+              onChange={handleListingSelect}
+              className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                  : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+              }`}
+            >
+              <option value="">Select a property</option>
+              {listings.map((listing) => (
+                <option key={listing._id} value={listing._id}>
+                  {listing.title} - {listing.address.city}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Tenant Details */}
@@ -365,10 +326,11 @@ const CreateLease = ({seekerId}) => {
             {usePlaceholderTenant ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label   className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
+                  <label
+                    className={`block text-sm font-medium ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
                     Placeholder Name
                   </label>
                   <input
@@ -376,18 +338,19 @@ const CreateLease = ({seekerId}) => {
                     name="tenantPlaceholder.name"
                     value={formData.tenantPlaceholder.name}
                     onChange={handleChange}
-                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
+                    className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                        : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                    }`}
+                  />
                 </div>
                 <div>
-                  <label   className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
+                  <label
+                    className={`block text-sm font-medium ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
                     Placeholder Email
                   </label>
                   <input
@@ -395,18 +358,19 @@ const CreateLease = ({seekerId}) => {
                     name="tenantPlaceholder.email"
                     value={formData.tenantPlaceholder.email}
                     onChange={handleChange}
-                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
+                    className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                        : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                    }`}
+                  />
                 </div>
                 <div>
-                  <label   className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
+                  <label
+                    className={`block text-sm font-medium ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
                     Placeholder Phone
                   </label>
                   <input
@@ -414,12 +378,12 @@ const CreateLease = ({seekerId}) => {
                     name="tenantPlaceholder.phoneNumber"
                     value={formData.tenantPlaceholder.phoneNumber}
                     onChange={handleChange}
-                      className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-                    : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-                }`}
-              />
+                    className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
+                        : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
+                    }`}
+                  />
                 </div>
               </div>
             ) : (
@@ -443,7 +407,8 @@ const CreateLease = ({seekerId}) => {
           {/* Lease Details */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label   className={`block text-sm font-medium ${
+              <label
+                className={`block text-sm font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
@@ -482,7 +447,8 @@ const CreateLease = ({seekerId}) => {
               />
             </div>
             <div>
-              <label   className={`block text-sm font-medium ${
+              <label
+                className={`block text-sm font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
@@ -501,7 +467,8 @@ const CreateLease = ({seekerId}) => {
               />
             </div>
             <div>
-              <label   className={`block text-sm font-medium ${
+              <label
+                className={`block text-sm font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >
@@ -520,7 +487,8 @@ const CreateLease = ({seekerId}) => {
               />
             </div>
             <div>
-              <label   className={`block text-sm font-medium ${
+              <label
+                className={`block text-sm font-medium ${
                   darkMode ? "text-gray-300" : "text-gray-700"
                 }`}
               >

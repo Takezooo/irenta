@@ -30,6 +30,7 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
         autocompleteRef.current,
         {
           fields: ["formatted_address", "geometry"],
+          componentRestrictions: { country: "PH" }, 
         }
       );
 

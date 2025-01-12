@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
 
+const PHILIPPINES_BOUNDS = {
+  north: 21.120031, // Northernmost point
+  south: 4.589991,  // Southernmost point
+  west: 116.87,     // Westernmost point
+  east: 126.606,    // Easternmost point
+};
+
 const LIBRARIES = ["places"]; // Static array for libraries
 
 export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3 }) => {
@@ -124,6 +131,10 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
       zoom={15}
       mapContainerStyle={{ width: "100%", height: "100%" }}
       options={{
+        restriction: {
+          latLngBounds: PHILIPPINES_BOUNDS, // Restrict to Philippines bounds
+          strictBounds: true, // Prevent dragging outside
+        },
         streetViewControl: false,
         mapTypeControl: false,
         styles: [

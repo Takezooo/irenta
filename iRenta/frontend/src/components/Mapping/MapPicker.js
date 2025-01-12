@@ -3,6 +3,13 @@ import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
 import { ThemeContext } from "../../contexts/ThemeContext";
 const LIBRARIES = ["places"]; // Static array for libraries
 
+const PHILIPPINES_BOUNDS = {
+  north: 21.120031, // Northernmost point
+  south: 4.589991,  // Southernmost point
+  west: 116.87,     // Westernmost point
+  east: 126.606,    // Easternmost point
+};
+
 const MapPicker = ({ center, zoom, onLocationChange }) => {
   const { darkMode } = useContext(ThemeContext);
   const { isLoaded, loadError } = useLoadScript({
@@ -123,6 +130,10 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
           zoom={15}
           mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
           options={{
+            restriction: {
+              latLngBounds: PHILIPPINES_BOUNDS, // Restrict to Philippines bounds
+              strictBounds: true, // Prevent dragging outside
+            },
             streetViewControl: false,
             mapTypeControl: false,
             styles: [

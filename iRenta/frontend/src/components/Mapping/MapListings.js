@@ -131,12 +131,14 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
       zoom={15}
       mapContainerStyle={{ width: "100%", height: "100%" }}
       options={{
+        gestureHandling: "greedy",
+        fullscreenControl: false, // Disable fullscreen control
+        streetViewControl: false,
+        mapTypeControl: false,
         restriction: {
           latLngBounds: PHILIPPINES_BOUNDS, // Restrict to Philippines bounds
           strictBounds: true, // Prevent dragging outside
         },
-        streetViewControl: false,
-        mapTypeControl: false,
         styles: [
           {
             featureType: "poi",

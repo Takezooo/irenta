@@ -212,7 +212,7 @@ const BrowseListing = () => {
             </div>
           </div>
 
-          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen ">
+          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-100% ">
             <MapListings
               isLoaded={isLoaded}
               mapCenter={mapCenter}

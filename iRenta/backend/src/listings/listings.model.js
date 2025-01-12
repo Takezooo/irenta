@@ -23,8 +23,8 @@ const listingSchema = new mongoose.Schema({
     street: { type: String, required: true },
     city: { type: String, required: true },
     zip: { type: String },
-    lng: { type: String },
-    lat: { type: String },
+    lng: { type: Number },
+    lat: { type: Number },
   },
   visitAvailability: {
     startTime: { type: String }, // e.g., "09:00"

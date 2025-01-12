@@ -11,15 +11,17 @@ import { GetToken } from "../global/utils/Token";
 import { AuthContext } from "../global/contexts/AuthContext";
 import { ThemeContext } from "../contexts/ThemeContext";
 import { useProperty } from "../global/contexts/PropertyContext";
+import { useMapLogic, MapListings } from "../components/Mapping/MapListings";
 
 const BrowseListing = () => {
   const [listings, setListings] = useState([]);
   const [likedListings, setLikedListings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
+  const [radius, setRadius] = useState(3); // Add radius state
   const { setSelectedProperty } = useProperty();
   const { user } = useContext(AuthContext);
-  const { darkMode } = useContext(ThemeContext); // Access dark mode context
+  const { darkMode } = useContext(ThemeContext);
   const authToken = GetToken();
   const navigate = useNavigate();
 
@@ -41,6 +43,16 @@ const BrowseListing = () => {
     fetchData();
     fetchCurrentUserData();
   }, [authToken, user]);
+
+  const { isLoaded, nearbyListings, mapCenter } = useMapLogic({
+    fetchListings,
+    initialCenter: { lat: 14.454, lng: 120.937 },
+    RADIUS: radius, // Pass the dynamic radius
+  });
+
+  const handleRadiusChange = (event) => {
+    setRadius(Number(event.target.value)); // Update the radius dynamically
+  };
 
   const handleLikeToggle = async (listingId) => {
     if (!user) {
@@ -83,10 +95,8 @@ const BrowseListing = () => {
     >
       <Topbar />
 
-      {/* Main Content */}
       {!isMapFullScreen && (
         <div className="flex-grow flex pt-[70px] h-screen">
-          {/* Listings Section */}
           <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
             <button
               onClick={handleBackClick}
@@ -98,8 +108,32 @@ const BrowseListing = () => {
             >
               <FaChevronLeft className="text-lg" />
             </button>
+
+            {/* Dropdown for Radius Selection */}
+            <div className="mb-4">
+              <label htmlFor="radius" className="block mb-2 font-medium">
+                Select Radius (km)
+              </label>
+              <select
+                id="radius"
+                value={radius}
+                onChange={handleRadiusChange}
+                className={`px-4 py-2 border rounded ${
+                  darkMode
+                    ? "bg-gray-800 text-white border-gray-700"
+                    : "bg-white text-black border-gray-300"
+                }`}
+              >
+                <option value={1}>1 km</option>
+                <option value={3}>3 km</option>
+                <option value={5}>5 km</option>
+                <option value={10}>10 km</option>
+                <option value={20}>20 km</option>
+              </select>
+            </div>
+
             <div className="flex flex-wrap gap-4">
-              {currentListings.map((listing) => (
+              {nearbyListings.map((listing) => (
                 <div
                   key={listing._id}
                   className={`flex flex-col rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all ${
@@ -108,7 +142,6 @@ const BrowseListing = () => {
                       : "bg-white border-gray-300"
                   }`}
                 >
-                  {/* Image Section */}
                   <div className="relative flex-shrink-0 h-2/3">
                     <img
                       src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
@@ -132,7 +165,6 @@ const BrowseListing = () => {
                     </button>
                   </div>
 
-                  {/* Details Section */}
                   <div
                     className="p-4 flex-grow flex flex-col justify-between"
                     onClick={() => handleViewProperty(listing)}
@@ -159,7 +191,6 @@ const BrowseListing = () => {
               ))}
             </div>
 
-            {/* Pagination */}
             <div className="flex justify-center mt-4">
               {Array.from({ length: totalPages }, (_, index) => (
                 <button
@@ -181,63 +212,17 @@ const BrowseListing = () => {
             </div>
           </div>
 
-          {/* Map Section */}
-          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen">
-            <iframe
-              className="w-full h-full border-none"
-              src="https://maps.google.com/maps?q=Bacoor&t=&z=13&ie=UTF8&iwloc=&output=embed"
-              allowFullScreen
-              title="Map"
-            ></iframe>
+          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen ">
+            <MapListings
+              isLoaded={isLoaded}
+              mapCenter={mapCenter}
+              nearbyListings={nearbyListings}
+              handleViewProperty={handleViewProperty}
+            />
           </div>
         </div>
       )}
 
-      {/* Show Map Button for Phone */}
-      {!isMapFullScreen && (
-        <div className="lg:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-sm">
-          <button
-            onClick={openMapFullScreen}
-            className={`w-full px-4 py-3 rounded-full shadow-lg transition ${
-              darkMode
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            See Map
-          </button>
-        </div>
-      )}
-
-      {/* Full Screen Map for Phone */}
-      {isMapFullScreen && (
-        <div
-          className={`fixed inset-0 z-40 ${
-            darkMode ? "bg-gray-900" : "bg-gray-200"
-          }`}
-        >
-          <iframe
-            className="absolute inset-0 w-full h-full border-none"
-            src="https://maps.google.com/maps?q=Bacoor&t=&z=13&ie=UTF8&iwloc=&output=embed"
-            allowFullScreen
-            title="Full Screen Map"
-          ></iframe>
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm">
-            <button
-              onClick={closeMapFullScreen}
-              className={`w-full px-4 py-3 rounded-full shadow-lg transition ${
-                darkMode
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
-            >
-              See Listings
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
       <Footer />
     </div>
   );

@@ -131,13 +131,14 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
       zoom={15}
       mapContainerStyle={{ width: "100%", height: "100%" }}
       options={{
+        mapId: "7faff3f15533dffa",
         gestureHandling: "greedy",
-        fullscreenControl: false, // Disable fullscreen control
+        fullscreenControl: false,
         streetViewControl: false,
         mapTypeControl: false,
         restriction: {
-          latLngBounds: PHILIPPINES_BOUNDS, // Restrict to Philippines bounds
-          strictBounds: true, // Prevent dragging outside
+          latLngBounds: PHILIPPINES_BOUNDS,
+          strictBounds: true,
         },
         styles: [
           {
@@ -165,7 +166,15 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
             lng: listing.address.lng,
           }}
           title={listing.title}
-          onClick={() => handleViewProperty(listing)}
+          // icon={{
+          //   url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="30">
+          //           <rect x="0" y="0" rx="15" ry="15" width="80" height="30" fill="white" stroke="blue" stroke-width="1"/>
+          //           <text x="50%" y="50%" text-anchor="middle" dy="6" fill="black" font-size="14" font-weight="bold">$${listing.price}</text>
+          //         </svg>`,
+          //   scaledSize: new window.google.maps.Size(80, 30), // Adjust the size of the pill
+          //   anchor: new window.google.maps.Point(40, 15), // Set anchor to the center of the pill
+          // }}
+          onClick={() => handleViewProperty(listing)} // Add functionality for when marker is clicked
         />
       ))}
     </GoogleMap>

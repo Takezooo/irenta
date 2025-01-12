@@ -487,6 +487,8 @@ export const ViewListing = () => {
                 zoom={17}
                 mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
                 options={{
+                  mapId: "7faff3f15533dffa", 
+                  fullscreenControl: false,
                   streetViewControl: false,
                   mapTypeControl: false,
                   gestureHandling: "none", 

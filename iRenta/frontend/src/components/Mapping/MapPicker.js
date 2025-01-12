@@ -128,9 +128,11 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
       >
         <GoogleMap
           center={selectedLocation}
+          onClick={handleMapClick}
           zoom={15}
           mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
           options={{
+            mapId: "7faff3f15533dffa", 
             gestureHandling: "greedy",
             fullscreenControl: false, // Disable fullscreen control
             streetViewControl: false,

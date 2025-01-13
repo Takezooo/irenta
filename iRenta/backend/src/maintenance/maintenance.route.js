@@ -1,4 +1,5 @@
 import express from "express";
+import RequireAuth from "../../global/middlewares/RequireAuth.js";
 import {
   createMaintenanceRequest,
   getTenantMaintenanceRequests,
@@ -8,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.post("/", createMaintenanceRequest); // Create a new maintenance request
+router.post("/", RequireAuth, createMaintenanceRequest); // Create a new maintenance request
 router.get("/tenant/:tenantId", getTenantMaintenanceRequests); // Get maintenance requests for a tenant
 router.get("/landlord/:landlordId", getLandlordMaintenanceRequests); // Get maintenance requests for a landlord
 router.patch("/:id", updateMaintenanceStatus); // Update the status of a maintenance request

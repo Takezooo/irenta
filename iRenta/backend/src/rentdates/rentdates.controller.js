@@ -19,16 +19,18 @@ const getNextPeriodDate = (date, frequency) => {
 };
 
 const isPartialPeriod = (currentDate, endDate, frequency) => {
-  const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  const daysInPeriod = Math.ceil((endDate - currentDate) / (1000 * 60 * 60 * 24)) + 1;
   
   switch(frequency.toLowerCase()) {
     case 'monthly':
-      return currentDate.getDate() !== 1 || endDate.getDate() !== monthEnd.getDate();
+      // Get days in the current month
+      const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+      // It's partial if the days in period is less than days in month
+      return daysInPeriod < daysInMonth;
     case 'quarterly':
-      return (endDate - currentDate) / (1000 * 60 * 60 * 24) !== 91;
+      return daysInPeriod < 90; // Standard quarter length
     case 'yearly':
-      return (endDate - currentDate) / (1000 * 60 * 60 * 24) !== 365;
+      return daysInPeriod < 365;
     default:
       return false;
   }
@@ -38,14 +40,14 @@ const calculatePartialPeriodRent = (startDate, endDate, amount, frequency) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
   
-  // Get total days in the month
-  const totalDaysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+  // Get days in the month
+  const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
   
   // Calculate actual days in the period
   const actualDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
   
   // Calculate daily rate
-  const dailyRate = amount / totalDaysInMonth;
+  const dailyRate = amount / daysInMonth;
   
   // Calculate prorated amount
   const proratedAmount = Math.round(dailyRate * actualDays * 100) / 100;
@@ -64,7 +66,6 @@ export const generateRentDates = async (req, res) => {
       throw new Error('Missing required fields for generating rent dates');
     }
 
-    // Delete any existing rent dates for this lease
     await RentDate.deleteMany({ leaseId });
 
     const rentDates = [];
@@ -79,35 +80,35 @@ export const generateRentDates = async (req, res) => {
         periodEndDate = new Date(endDate);
       }
 
+      const isPartial = isPartialPeriod(currentDate, periodEndDate, paymentFrequency);
+      let finalAmount = rentAmount;
+      let numberOfDays = Math.ceil((periodEndDate - currentDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      if (isPartial) {
+        const partial = calculatePartialPeriodRent(
+          currentDate,
+          periodEndDate,
+          rentAmount,
+          paymentFrequency
+        );
+        finalAmount = partial.amount;
+        numberOfDays = partial.days;
+      }
+
       const rentDateData = {
         leaseId,
         rentDate: new Date(currentDate),
         dueDate: new Date(currentDate),
         endDate: periodEndDate,
-        baseAmount: rentAmount,
-        isPartialMonth: isPartialPeriod(currentDate, periodEndDate, paymentFrequency),
-        numberOfDays: Math.ceil((periodEndDate - currentDate) / (1000 * 60 * 60 * 24)) + 1
+        baseAmount: finalAmount,
+        isPartialMonth: isPartial,
+        numberOfDays
       };
-
-      // Check if this is a partial period
-      if (
-        currentDate.getMonth() !== periodEndDate.getMonth() ||
-        currentDate.getFullYear() !== periodEndDate.getFullYear()
-      ) {
-        const partial = calculatePartialPeriodRent(
-          currentDate, 
-          periodEndDate, 
-          rentAmount, 
-          paymentFrequency
-        );
-        rentDateData.isPartialMonth = true;
-        rentDateData.numberOfDays = partial.days;
-        rentDateData.baseAmount = partial.amount;
-      }
 
       rentDates.push(rentDateData);
 
       if (periodEndDate >= endDate) break;
+      
       currentDate = new Date(periodEndDate);
       currentDate.setDate(currentDate.getDate() + 1);
     }

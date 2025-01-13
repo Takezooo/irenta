@@ -5,7 +5,7 @@ import { fetchPayments, createPayment } from "../../global/api/Payments";
 import { fetchRentDatesByLease } from "../../global/api/RentDates";
 import { getCurrentTenant } from "../../global/api/Tenants";
 
-const RentPayments = ({ leaseId }) => {
+const RentPayments = () => {
   const { darkMode } = useContext(ThemeContext);
   const { user } = useContext(AuthContext);
   const [payments, setPayments] = useState([]);

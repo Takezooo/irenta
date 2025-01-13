@@ -48,72 +48,75 @@ const calculatePartialPeriodRent = (startDate, endDate, amount, frequency) => {
 
 export const generateRentDates = async (req, res) => {
   try {
-    const { leaseId, moveInDate, moveOutDate, isFixed, rentAmount, paymentFrequency } = req.body;
+    const { leaseId, moveInDate, moveOutDate, rentAmount, paymentFrequency } = req.body;
 
-    // Validate payment frequency
-    const validFrequencies = ['monthly', 'quarterly', 'yearly'];
-    if (!validFrequencies.includes(paymentFrequency.toLowerCase())) {
-      return res.status(400).json({ 
-        message: 'Invalid payment frequency. Must be monthly, quarterly, or yearly'
-      });
+    if (!leaseId || !moveInDate || !moveOutDate || !rentAmount || !paymentFrequency) {
+      throw new Error('Missing required fields for generating rent dates');
     }
+
+    // Delete any existing rent dates for this lease
+    await RentDate.deleteMany({ leaseId });
 
     const rentDates = [];
     let currentDate = new Date(moveInDate);
-    const endDate = isFixed ? new Date(moveOutDate) : null;
-    
-    while (!endDate || currentDate <= endDate) {
+    const endDate = new Date(moveOutDate);
+
+    while (currentDate <= endDate) {
       let periodEndDate = getNextPeriodDate(currentDate, paymentFrequency);
       periodEndDate = new Date(periodEndDate.setDate(periodEndDate.getDate() - 1));
       
-      // Check if this is the last period and if it's partial
-      const isLastPeriod = endDate && periodEndDate > endDate;
-      if (isLastPeriod) {
-        periodEndDate = endDate;
+      if (periodEndDate > endDate) {
+        periodEndDate = new Date(endDate);
       }
 
-      let rentDateData = {
+      const rentDateData = {
         leaseId,
         rentDate: new Date(currentDate),
         dueDate: new Date(currentDate),
         endDate: periodEndDate,
         baseAmount: rentAmount,
-        paymentFrequency,
+        isPartialMonth: false,
       };
 
-      // Calculate partial period if applicable
-      if (isLastPeriod) {
+      // Check if this is a partial period
+      if (
+        currentDate.getMonth() !== periodEndDate.getMonth() ||
+        currentDate.getFullYear() !== periodEndDate.getFullYear()
+      ) {
         const partial = calculatePartialPeriodRent(
           currentDate, 
           periodEndDate, 
           rentAmount, 
           paymentFrequency
         );
-        rentDateData = {
-          ...rentDateData,
-          isPartialMonth: true,
-          numberOfDays: partial.days,
-        };
-      } else {
-        rentDateData = {
-          ...rentDateData,
-          isPartialMonth: false,
-        };
+        rentDateData.isPartialMonth = true;
+        rentDateData.numberOfDays = partial.days;
+        rentDateData.baseAmount = partial.amount;
       }
 
       rentDates.push(rentDateData);
 
-      if (isLastPeriod) break;
-      
-      currentDate = getNextPeriodDate(currentDate, paymentFrequency);
+      if (periodEndDate >= endDate) break;
+      currentDate = new Date(periodEndDate);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     const savedRentDates = await RentDate.insertMany(rentDates);
-    res.status(201).json(savedRentDates);
+    
+    if (res.status && res.json) {
+      res.status(201).json(savedRentDates);
+    }
+    return savedRentDates;
+
   } catch (error) {
-    res.status(400).json({ message: `Error generating rent dates: ${error.message}` });
+    console.error("Error generating rent dates:", error);
+    if (res.status && res.json) {
+      res.status(400).json({ message: error.message });
+    }
+    throw error;
   }
 };
+
 
 export const getRentDatesByLease = async (req, res) => {
   try {

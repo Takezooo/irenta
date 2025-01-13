@@ -45,10 +45,10 @@ const CreateLease = ({ seekerId }) => {
       name: "",
       address: { houseNumber: "", street: "", city: "", zip: "" },
     },
-    tenant: "",
+    tenant: passedSeekerId?._id || "",
     tenantPlaceholder: { name: "", email: "", phoneNumber: "" },
-    landlord: "",
-    landlordName: "",
+    landlord:  user?.id || "",
+    landlordName:  `${user?.info?.firstName || ''} ${user?.info?.lastName || ''}`,
     contractDetails: {
       startDate: "",
       endDate: "",

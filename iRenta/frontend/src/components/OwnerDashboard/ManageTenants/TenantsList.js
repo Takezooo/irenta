@@ -22,21 +22,21 @@ const TenantsList = () => {
         // Fetch tenants
         const tenantsData = await fetchTenantList();
         setTenants(tenantsData);
-
+  
         // Fetch properties
-        const propertyData = await Promise.all(
-          tenantsData.map((tenant) => fetchSpecificList(tenant.propertyId))
-        );
-        setProperties([...new Set(propertyData.map((prop) => prop.title))]);
-
+        const propertyTitles = [
+          ...new Set(tenantsData.map((tenant) => tenant.propertyId.title)),
+        ];
+        setProperties(propertyTitles);
+        console.log(properties);
         // Fetch rent dates
         const rentDatesData = {};
         for (const tenant of tenantsData) {
-          const dates = await fetchRentDatesByLease(tenant.leaseId);
+          const dates = await fetchRentDatesByLease(tenant.leaseId._id); // Ensure leaseId is a string
           rentDatesData[tenant.leaseId] = dates;
         }
         setRentDates(rentDatesData);
-
+  
         // Fetch payments
         const paymentsData = await fetchPayments();
         setPayments(paymentsData);
@@ -44,7 +44,7 @@ const TenantsList = () => {
         console.error("Error loading tenant data:", error);
       }
     };
-
+  
     loadData();
   }, []);
 

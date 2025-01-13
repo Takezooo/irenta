@@ -1,6 +1,7 @@
 import Tenant from "./tenants.model.js";
 import Lease from "../leases/leases.model.js";
 import User from "../users/users.model.js";
+import { generateRentDates } from "../rentdates/rentdates.controller.js"; // Add this import
 
 // POST /api/tenants/register
 export const registerToWaitlist = async (req, res) => {
@@ -80,29 +81,102 @@ export const moveToTenant = async (req, res) => {
   const { tenantId } = req.body;
 
   try {
-    // Update Tenant schema
-    const tenant = await Tenant.findByIdAndUpdate(
-      tenantId,
-      {
-        isWaitListed: false,
-        active: true,
-        movedInDate: new Date(),
-      },
+    // First fetch the tenant with populated lease details
+    const tenant = await Tenant.findById(tenantId).populate({
+      path: 'leaseId',
+      select: 'contractDetails'
+    });
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found." });
+    }
+
+    // Fetch complete lease details
+    const lease = await Lease.findById(tenant.leaseId._id);
+    if (!lease) {
+      return res.status(404).json({ message: "Lease not found." });
+    }
+
+    // Update tenant status
+    tenant.isWaitListed = false;
+    tenant.active = true;
+    tenant.movedInDate = new Date();
+    await tenant.save();
+
+    // Generate rent dates
+    try {
+      await generateRentDates({
+        body: {
+          leaseId: lease._id,
+          moveInDate: tenant.movedInDate,
+          moveOutDate: lease.contractDetails.endDate,
+          isFixed: lease.leaseType === 'Fixed',
+          rentAmount: lease.contractDetails.rentAmount,
+          paymentFrequency: lease.contractDetails.paymentFrequency
+        }
+      }, {
+        status: () => ({ json: () => {} }),
+        json: () => {}
+      });
+    } catch (rentError) {
+      console.error("Error generating rent dates:", rentError);
+      // Continue execution but log the error
+    }
+
+    // Update User schema (tenantBadge)
+    const updatedUser = await User.findByIdAndUpdate(
+      tenant.seekerId,
+      { tenantBadge: true },
       { new: true }
     );
 
-    if (!tenant) return res.status(404).json({ message: "Tenant not found." });
+    if (!updatedUser) {
+      throw new Error('Failed to update user tenant badge');
+    }
 
-    // Update User schema (tenantBadge)
-    await User.findByIdAndUpdate(tenant.seekerId, { tenantBadge: true });
+    // Update Lease status
+    lease.status = "Active";
+    await lease.save();
 
-    // Update Lease schema (status to Active)
-    await Lease.findByIdAndUpdate(tenant.leaseId, { status: "Active" });
+    res.status(200).json({ 
+      message: "Moved to tenant successfully.",
+      tenant,
+      user: updatedUser,
+      lease
+    });
 
-    res.status(200).json({ message: "Moved to tenant successfully.", tenant });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to move to tenant.", error: error.message });
+    console.error("Move to tenant error:", error);
+    res.status(500).json({ 
+      message: "Failed to move to tenant.", 
+      error: error.message 
+    });
+  }
+};
+
+export const getCurrentTenant = async (req, res) => {
+  try {
+    const seekerId = req.user.id;
+    const tenant = await Tenant.findOne({ 
+      seekerId,
+      active: true,
+      isWaitListed: false 
+    })
+    .populate({
+      path: 'leaseId',
+      select: 'contractDetails'
+    })
+    .populate('propertyId');
+
+    if (!tenant) {
+      return res.status(404).json({ message: "No active tenant record found" });
+    }
+
+    res.status(200).json(tenant);
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Failed to fetch tenant details", 
+      error: error.message 
+    });
   }
 };

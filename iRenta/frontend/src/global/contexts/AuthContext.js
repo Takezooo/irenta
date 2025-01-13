@@ -5,97 +5,88 @@ import {
   RemoveToken,
   GetRefreshToken,
   RemoveRefreshToken,
-} from "../utils/Token.js"; // Import utilities
+} from "../utils/Token.js";
 import { refreshAccessToken } from "../api/Auth.js";
-import { fetchUserData } from "../api/Users.js"; // Import the user data fetching function
+import { fetchUserData } from "../api/Users.js";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Store user info, including role
-  const [token, setToken] = useState(null); // Store token in memory
-  const [loading, setLoading] = useState(true); // Add loading state
-  // Load token and user on app initialization
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = GetToken();
-      const storedRefreshToken = GetRefreshToken();
+      try {
+        const storedToken = GetToken();
+        const storedRefreshToken = GetRefreshToken();
 
-      if (storedToken) {
-        try {
-          const storedUser = JSON.parse(atob(storedToken.split(".")[1]));
-          // Check token expiration
-          const isExpired = storedUser.exp * 1000 < Date.now();
-          if (isExpired) {
-            if (storedRefreshToken) {
-              try {
-                setLoading(true);
-                const newToken = await refreshAccessToken(); // Refresh token
+        // If no tokens exist at all, set loading false and return early
+        if (!storedToken && !storedRefreshToken) {
+          setLoading(false);
+          return;
+        }
+
+        if (storedToken) {
+          try {
+            const storedUser = JSON.parse(atob(storedToken.split(".")[1]));
+            const isExpired = storedUser.exp * 1000 < Date.now();
+
+            if (isExpired) {
+              if (storedRefreshToken) {
+                const newToken = await refreshAccessToken();
                 const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
-                const fullUserData = await fetchUserData(
-                  refreshedUser.id,
-                  newToken
-                );
+                const fullUserData = await fetchUserData(refreshedUser.id, newToken);
                 setUser({
                   ...refreshedUser,
                   ...fullUserData,
                 });
                 setToken(newToken);
-              } catch (err) {
-                console.error("Token refresh failed:", err);
+              } else {
                 logout();
-              } finally {
-                setLoading(false); // Set loading to false when done
               }
             } else {
-              logout();
+              const fullUserData = await fetchUserData(storedUser.id, storedToken);
+              setUser({
+                ...storedUser,
+                ...fullUserData,
+              });
+              setToken(storedToken);
             }
-          } else {
-            setLoading(true);
-            const fullUserData = await fetchUserData(
-              storedUser.id,
-              storedToken
-            );
+          } catch (err) {
+            console.error("Invalid token format:", err);
+            logout();
+          }
+        } else if (storedRefreshToken) {
+          try {
+            const newToken = await refreshAccessToken();
+            const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
+            const fullUserData = await fetchUserData(refreshedUser.id, newToken);
             setUser({
-              ...storedUser,
+              ...refreshedUser,
               ...fullUserData,
             });
-            setToken(storedToken);
+            setToken(newToken);
+          } catch (err) {
+            console.error("Token refresh failed:", err);
+            logout();
           }
-        } catch (err) {
-          console.error("Invalid token format:", err);
-          logout(); // Clear tokens if parsing fails
-        } finally {
-          setLoading(false); // Set loading to false when done
         }
-      } else if (storedRefreshToken) {
-        try {
-          setLoading(true);
-          const newToken = await refreshAccessToken();
-          const refreshedUser = JSON.parse(atob(newToken.split(".")[1]));
-          const fullUserData = await fetchUserData(refreshedUser.id, newToken);
-          setUser({
-            ...refreshedUser,
-            ...fullUserData,
-          });
-          setUser(refreshedUser);
-          setToken(newToken);
-        } catch (err) {
-          console.error("Token refresh failed:", err);
-          logout();
-        } finally {
-          setLoading(false); // Set loading to false when done
-        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        logout();
+      } finally {
+        setLoading(false); // Always set loading to false when done
       }
     };
 
     initializeAuth();
   }, []);
 
-  // Login: Save token and user
   const login = async (userData, authToken) => {
     try {
-      // Fetch full user data including tenantBadge
+      setLoading(true);
       const fullUserData = await fetchUserData(userData.id, authToken);
       setUser({
         ...userData,
@@ -106,15 +97,17 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Error fetching full user data:", err);
       logout();
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout: Clear token and user
   const logout = () => {
     setUser(null);
     setToken(null);
-    RemoveToken(); // Remove token using `token.js`
+    RemoveToken();
     RemoveRefreshToken();
+    setLoading(false);
   };
 
   return (

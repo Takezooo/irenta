@@ -1,6 +1,7 @@
 import express from "express";
 import {
   registerToWaitlist,
+  getCurrentTenant,
   getWaitlist,
   getTenantlist,
   moveToTenant,
@@ -11,7 +12,7 @@ const router = express.Router();
 
 // Register a seeker to the waitlist
 router.post("/register", RequireAuth, registerToWaitlist);
-
+router.get('/current', getCurrentTenant);
 // Fetch all waitlisted seekers of the owner
 router.get("/waitlist", RequireAuth, getWaitlist);
 

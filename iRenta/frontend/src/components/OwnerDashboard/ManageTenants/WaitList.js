@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { fetchWaitlist, moveToTenant } from "../../../global/api/Tenants";
 import { fetchSpecificList } from "../../../global/api/Listings";
 import { ThemeContext } from "../../../contexts/ThemeContext";
+import { toast } from "react-toastify";
 
 export const Waitlist = () => {
   const [waitlist, setWaitlist] = useState([]);
@@ -52,12 +53,22 @@ export const Waitlist = () => {
 
   const handleMoveToTenant = async (tenantId) => {
     try {
-      await moveToTenant(tenantId);
-      setWaitlist((prev) => prev.filter((item) => item._id !== tenantId));
-      alert("Moved to tenant successfully!");
+      //setIsLoading(true); // Add loading state
+      const response = await moveToTenant(tenantId);
+      
+      if (response.tenant && response.lease) {
+        setWaitlist((prev) => prev.filter((item) => item._id !== tenantId));
+        toast.success("Successfully moved to tenant and generated rent dates!");
+      } else {
+        throw new Error('Incomplete response from server');
+      }
     } catch (error) {
       console.error("Error moving to tenant:", error);
+      toast.error(error.message || "Failed to move to tenant");
     }
+    //  finally {
+    //   setIsLoading(false); // Clear loading state
+    // }
   };
 
   if (!waitlist.length) {

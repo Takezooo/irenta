@@ -11,6 +11,16 @@ export const registerToWaitlist = async (data) => {
   return response.data;
 };
 
+export const getCurrentTenant = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/current`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current tenant:", error);
+    throw error;
+  }
+};
+
 export const fetchWaitlist = async () => {
   const authToken = GetToken();
   const response = await axios.get(`${API_BASE_URL}/waitlist`, {

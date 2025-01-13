@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Register a seeker to the waitlist
 router.post("/register", RequireAuth, registerToWaitlist);
-router.get('/current', getCurrentTenant);
+router.get('/current', RequireAuth, getCurrentTenant);
 // Fetch all waitlisted seekers of the owner
 router.get("/waitlist", RequireAuth, getWaitlist);
 

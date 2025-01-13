@@ -5,19 +5,34 @@ import { fetchRentDatesByLease } from '../../../global/api/RentDates';
 import { fetchPayments } from '../../../global/api/Payments';
 
 const RentTracker = () => {
+  // Add loading state
   const { darkMode } = useContext(ThemeContext);
   const [tenants, setTenants] = useState([]);
   const [rentDates, setRentDates] = useState({});
   const [payments, setPayments] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState('all');
   const [properties, setProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       try {
         // Fetch tenants
         const tenantsData = await fetchTenantList();
         setTenants(tenantsData);
+
+        // Fetch rent dates in parallel
+        const rentDatesPromises = tenantsData.map(tenant => 
+          fetchRentDatesByLease(tenant.leaseId._id)
+        );
+        const rentDatesResults = await Promise.all(rentDatesPromises);
+        
+        const rentDatesMap = {};
+        tenantsData.forEach((tenant, index) => {
+          rentDatesMap[tenant.leaseId._id] = rentDatesResults[index];
+        });
+        setRentDates(rentDatesMap);
 
         // Extract unique properties
         const uniqueProperties = [...new Set(tenantsData.map(tenant => 
@@ -25,24 +40,27 @@ const RentTracker = () => {
         ))];
         setProperties(uniqueProperties);
 
-        // Fetch rent dates for each tenant
-        const rentDatesData = {};
-        for (const tenant of tenantsData) {
-          const dates = await fetchRentDatesByLease(tenant.leaseId);
-          rentDatesData[tenant.leaseId] = dates;
-        }
-        setRentDates(rentDatesData);
-
         // Fetch payments
         const paymentsData = await fetchPayments();
         setPayments(paymentsData);
       } catch (error) {
         console.error('Error loading rent tracker data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadData();
+    // Set up periodic refresh
+    const refreshInterval = setInterval(loadData, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(refreshInterval);
   }, []);
+
+  // Add loading indicator
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   // Filter tenants based on selected property
   const filteredTenants = selectedProperty === 'all'

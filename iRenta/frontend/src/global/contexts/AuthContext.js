@@ -107,6 +107,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     RemoveToken();
     RemoveRefreshToken();
+    localStorage.clear();
     setLoading(false);
   };
 

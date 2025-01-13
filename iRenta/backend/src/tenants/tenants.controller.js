@@ -1,6 +1,7 @@
 import Tenant from "./tenants.model.js";
 import Lease from "../leases/leases.model.js";
 import User from "../users/users.model.js";
+import RentDate from "../rentdates/rentdates.model.js"
 import { generateRentDates } from "../rentdates/rentdates.controller.js"; // Add this import
 
 // POST /api/tenants/register
@@ -156,7 +157,15 @@ export const moveToTenant = async (req, res) => {
 
 export const getCurrentTenant = async (req, res) => {
   try {
-    const seekerId = req.user.id;
+    
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        message: "Unauthorized - User not authenticated" 
+      });
+    }
+
+    const seekerId = req.user.id
+
     const tenant = await Tenant.findOne({ 
       seekerId,
       active: true,
@@ -164,16 +173,27 @@ export const getCurrentTenant = async (req, res) => {
     })
     .populate({
       path: 'leaseId',
-      select: 'contractDetails'
+      select: 'contractDetails status'
     })
-    .populate('propertyId');
+    .populate('propertyId')
+    .lean(); // Use lean() for better performance
 
     if (!tenant) {
       return res.status(404).json({ message: "No active tenant record found" });
     }
 
-    res.status(200).json(tenant);
+    // Fetch rent dates
+    const rentDates = await RentDate.find({ leaseId: tenant.leaseId })
+      .populate('payment')
+      .sort('rentDate')
+      .lean();
+
+    res.status(200).json({
+      ...tenant,
+      rentDates
+    });
   } catch (error) {
+    console.error('Error fetching tenant details:', error);
     res.status(500).json({ 
       message: "Failed to fetch tenant details", 
       error: error.message 

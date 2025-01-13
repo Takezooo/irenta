@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../global/contexts/AuthContext";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { fetchPayments, createPayment } from "../../global/api/Payments";
 import { fetchRentDatesByLease } from "../../global/api/RentDates";
@@ -6,6 +7,7 @@ import { getCurrentTenant } from "../../global/api/Tenants";
 
 const RentPayments = ({ leaseId }) => {
   const { darkMode } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
   const [payments, setPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -29,11 +31,13 @@ const RentPayments = ({ leaseId }) => {
       const tenant = await getCurrentTenant();
       setTenantDetails(tenant);
 
-      // Then fetch rent dates using the lease ID from tenant
-      if (tenant?.leaseId?._id) {
-        const dates = await fetchRentDatesByLease(tenant.leaseId._id);
-        setRentDates(dates);
+      if (tenant?.rentDates) {
+        setRentDates(tenant.rentDates);
       }
+
+      // Fetch payments
+      const paymentsData = await fetchPayments();
+      setPayments(paymentsData);
     } catch (error) {
       console.error("Error loading tenant and rent dates:", error);
     } finally {
@@ -91,7 +95,7 @@ const RentPayments = ({ leaseId }) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const tenantId = "current-tenant-id"; // Get from auth context
+        const tenantId = user._id; // Get from auth context
         await createPayment({
           ...formData,
           tenantId,

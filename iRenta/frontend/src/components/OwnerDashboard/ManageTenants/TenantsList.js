@@ -10,7 +10,11 @@ import { fetchSpecificList } from "../../../global/api/Listings";
 const TenantsList = () => {
   const { darkMode } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("current");
-  const [tenants, setTenants] = useState([]);
+  const [tenants, setTenants] = useState(() => {
+    const saved = localStorage.getItem('tenants');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
   const [rentDates, setRentDates] = useState({});
   const [payments, setPayments] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState("all");
@@ -47,6 +51,10 @@ const TenantsList = () => {
   
     loadData();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('tenants', JSON.stringify(tenants));
+  }, [tenants]);
 
   const filteredTenants =
     selectedProperty === "all"

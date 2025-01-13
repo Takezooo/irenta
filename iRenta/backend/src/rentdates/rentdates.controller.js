@@ -18,31 +18,41 @@ const getNextPeriodDate = (date, frequency) => {
   return newDate;
 };
 
+const isPartialPeriod = (currentDate, endDate, frequency) => {
+  const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  
+  switch(frequency.toLowerCase()) {
+    case 'monthly':
+      return currentDate.getDate() !== 1 || endDate.getDate() !== monthEnd.getDate();
+    case 'quarterly':
+      return (endDate - currentDate) / (1000 * 60 * 60 * 24) !== 91;
+    case 'yearly':
+      return (endDate - currentDate) / (1000 * 60 * 60 * 24) !== 365;
+    default:
+      return false;
+  }
+};
+
 const calculatePartialPeriodRent = (startDate, endDate, amount, frequency) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
   
-  let totalDays;
-  switch (frequency.toLowerCase()) {
-    case 'monthly':
-      totalDays = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
-      break;
-    case 'quarterly':
-      totalDays = 91;
-      break;
-    case 'yearly':
-      totalDays = (start.getFullYear() % 4 === 0) ? 366 : 365;
-      break;
-    default:
-      throw new Error('Invalid payment frequency');
-  }
+  // Get total days in the month
+  const totalDaysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
   
-  const actualDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24) + 1;
-  const dailyRate = amount / totalDays;
+  // Calculate actual days in the period
+  const actualDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // Calculate daily rate
+  const dailyRate = amount / totalDaysInMonth;
+  
+  // Calculate prorated amount
+  const proratedAmount = Math.round(dailyRate * actualDays * 100) / 100;
   
   return {
-    days: Math.floor(actualDays),
-    amount: Math.round(dailyRate * actualDays * 100) / 100
+    days: actualDays,
+    amount: proratedAmount
   };
 };
 
@@ -75,7 +85,8 @@ export const generateRentDates = async (req, res) => {
         dueDate: new Date(currentDate),
         endDate: periodEndDate,
         baseAmount: rentAmount,
-        isPartialMonth: false,
+        isPartialMonth: isPartialPeriod(currentDate, periodEndDate, paymentFrequency),
+        numberOfDays: Math.ceil((periodEndDate - currentDate) / (1000 * 60 * 60 * 24)) + 1
       };
 
       // Check if this is a partial period

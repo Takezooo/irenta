@@ -104,22 +104,6 @@ export const updateReservationStatus = async (req, res) => {
   }
 };
 
-export const moveToRenterList = async (req, res) => {
-  const { seekerId } = req.body;
-  try {
-    const user = await User.findById(seekerId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-    user.renterBadge = true;
-    await user.save();
-
-    res.status(200).json({ message: "Seeker moved to renter list." });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 export const getReservationById = async (req, res) => {
   const { id } = req.params;
 

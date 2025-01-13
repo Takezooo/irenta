@@ -19,6 +19,11 @@ const leaseSchema = new mongoose.Schema(
     },
     landlordName: { type: String, required: true },
     property: {
+      propertyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Listing",
+        required: true,
+      },
       name: { type: String, required: true },
       address: {
         houseNumber: { type: String, required: true },
@@ -48,26 +53,37 @@ const leaseSchema = new mongoose.Schema(
       },
       rulesAndRegulations: { type: String, required: false },
     },
+    moveInDate: { type: Date, required: false }, // Optional field
+    moveOutDate: { type: Date, required: false }, // Optional field
+    leaseType: {
+      type: String,
+      enum: ["Month-to-Month", "Fixed-Term"],
+      required: false, // Optional, default behavior can be managed in app logic
+    },
     status: {
       type: String,
       enum: [
         "Draft",
         "Ready",
         "Sent",
+        "Signed",
+        "Declined",
         "Active",
         "Completed",
         "Terminated",
         "Renewed",
-        "Modified",
+        "Modified", // if sent na tapos binago pa,
       ],
       default: "Draft",
     },
     pdfPath: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    // isSentToSeeker: { type: Boolean, default: false },
-    isSignedBySeeker: { type: Boolean, default: false },
     isSignedByLandlord: { type: Boolean, default: false },
+    uploadedOwnerSignature: { data: Buffer, contentType: String },
+    isAgreed: { type: Boolean, default: false },
+    isSignedBySeeker: { type: Boolean, default: false },
+    uploadedSignature: { data: Buffer, contentType: String },
     uploadedAgreementPath: { type: String },
   },
   { timestamps: true }

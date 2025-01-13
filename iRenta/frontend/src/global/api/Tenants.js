@@ -19,6 +19,14 @@ export const fetchWaitlist = async () => {
   return response.data;
 };
 
+export const fetchTenantList = async () => {
+    const authToken = GetToken();
+    const response = await axios.get(`${API_BASE_URL}/tenantlist`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    return response.data;
+  };
+
 export const moveToTenant = async (tenantId) => {
   const authToken = GetToken();
   const response = await axios.put(

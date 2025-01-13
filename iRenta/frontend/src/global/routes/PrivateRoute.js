@@ -3,9 +3,14 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext.js";
 import { refreshAccessToken } from "../api/Auth.js";
 import { GetRefreshToken } from "../utils/Token.js";
+import LoadingScreen from "../../components/global/Loading.js";
 
-const PrivateRoute = ({ children, allowedRoles }) => {
-  const { user, token, login, logout } = useContext(AuthContext);
+const PrivateRoute = ({
+  children,
+  allowedRoles,
+  requireTenantBadge = false,
+}) => {
+  const { user, token, login, logout, loading  } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +18,7 @@ const PrivateRoute = ({ children, allowedRoles }) => {
       console.log("Validating token...");
       const refreshToken = GetRefreshToken();
       console.log("Retrieved Refresh Token:", refreshToken);
-  
+
       if (!token && refreshToken) {
         try {
           const newToken = await refreshAccessToken();
@@ -26,12 +31,20 @@ const PrivateRoute = ({ children, allowedRoles }) => {
       }
       setIsLoading(false);
     };
-  
+
     validateToken();
   }, [token, login, logout]);
 
-  if (isLoading) {
-    return <div>Loading...</div>; // Show loading indicator while validating
+  // Debug logs
+  console.log("Auth Status:", {
+    userType: user?.userType,
+    tenantBadge: user?.tenantBadge,
+    requireTenantBadge,
+  });
+
+  // Add loading screen
+  if (isLoading && loading) {
+    return <LoadingScreen />;
   }
 
   if (!user) {
@@ -40,6 +53,10 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 
   if (!allowedRoles.includes(user.userType)) {
     console.log("Redirecting to not-authorized: User role mismatch");
+    return <Navigate to="/not-authorized" />;
+  }
+  if (requireTenantBadge && !user.tenantBadge) {
+    console.log("Redirecting to not-authorized: Tenant badge required");
     return <Navigate to="/not-authorized" />;
   }
 

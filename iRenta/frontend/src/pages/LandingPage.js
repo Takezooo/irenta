@@ -26,7 +26,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-
+console.log(user);
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchListings();

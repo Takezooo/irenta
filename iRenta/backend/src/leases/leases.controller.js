@@ -1,15 +1,24 @@
 import Lease from "./leases.model.js";
 import Terms from "../terms/terms.model.js";
 import Users from "../users/users.model.js";
+import Tenant from '../tenants/tenants.model.js';
 import generatePdf from "../../global/utils/PdfGenerator.js";
 import Notification from "../notifications/notifications.model.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+export const uploadMiddleware = upload.fields([
+  { name: "uploadedSignature", maxCount: 1 }, // Seeker's signature
+  { name: "uploadedOwnerSignature", maxCount: 1 }, // Owner's signature
+]);
 // Create a new lease
 export const CreateLease = async (req, res) => {
   try {
@@ -83,7 +92,6 @@ export const GetCreatedLeases = async (req, res) => {
     const leases = await Lease.find({ landlord: ownerId })
       .populate("tenant") // Populate tenant details if needed
       .populate("landlord"); // Populate landlord details if needed
-
     res.status(200).json(leases);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -114,6 +122,27 @@ export const UpdateLease = async (req, res) => {
     const { id } = req.params; // Get the lease ID from the URL
     const updatedData = req.body; // Get the updated data from the request body
 
+    // Handle Seeker's signature
+    if (req.files?.uploadedSignature?.length > 0) {
+      updatedData.uploadedSignature = {
+        data: req.files.uploadedSignature[0].buffer,
+        contentType: req.files.uploadedSignature[0].mimetype,
+      };
+    }
+
+    // Handle Owner's signature
+    if (req.files?.uploadedOwnerSignature?.length > 0) {
+      updatedData.uploadedOwnerSignature = {
+        data: req.files.uploadedOwnerSignature[0].buffer,
+        contentType: req.files.uploadedOwnerSignature[0].mimetype,
+      };
+    }
+
+    // Handle other fields from the form
+    if (req.body.isAgreed) {
+      updatedData.isAgreed = req.body.isAgreed === "true"; // Convert to boolean
+    }
+
     const lease = await Lease.findByIdAndUpdate(id, updatedData, {
       new: true, // Return the updated lease
       runValidators: true, // Validate the update against the schema
@@ -121,6 +150,38 @@ export const UpdateLease = async (req, res) => {
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
+    }
+
+    // Check if both parties have signed and today is move-in date
+    if (
+      lease.isSignedByLandlord &&
+      lease.isSignedBySeeker &&
+      lease.moveInDate
+    ) {
+      const today = new Date();
+      const moveInDate = new Date(lease.moveInDate);
+
+      // Compare dates (ignoring time)
+      if (today.toDateString() === moveInDate.toDateString()) {
+        // Create tenant record
+        const tenantData = {
+          seekerId: lease.tenant,
+          propertyId: lease.property.propertyId,
+          leaseId: lease._id,
+          landlordId: lease.landlord,
+          movedInDate: lease.moveInDate,
+          active: true,
+          isWaitListed: false
+        };
+
+        // Import and create Tenant record
+        const Tenant = mongoose.model("Tenant");
+        await Tenant.create(tenantData);
+
+        // Update lease status to Active
+        lease.status = "Active";
+        await lease.save();
+      }
     }
 
     res.status(200).json(lease);
@@ -192,10 +253,7 @@ export const SendLeaseToSeeker = async (req, res) => {
         .json({ message: "Server error: Socket.IO not initialized." });
     }
 
-    io.to(lease.tenant._id.toString()).emit(
-      "newNotification",
-      notification
-    );
+    io.to(lease.tenant._id.toString()).emit("newNotification", notification);
     console.log(`Notification emitted to room: ${lease.tenant._id}`);
 
     res.status(200).json({ message: "Lease sent to Tenant.", lease });

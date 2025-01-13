@@ -62,9 +62,18 @@ export const Waitlist = () => {
 
   if (!waitlist.length) {
     return (
-      <p className={`${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-        No Seekers signed the lease agreement.
-      </p>
+      <div>
+        <h2
+          className={`text-xl font-bold mb-4 ${
+            darkMode ? "text-white" : "text-black"
+          }`}
+        >
+          Waitlist
+        </h2>
+        <p className={`${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+          No Seekers signed the lease agreement.
+        </p>
+      </div>
     );
   }
 
@@ -87,47 +96,37 @@ export const Waitlist = () => {
             return (
               <div
                 key={item?._id}
-                className={`mb-4 p-4 border rounded shadow-md ${
+                className={`mb-4 p-4 border rounded shadow-md flex items-center justify-between ${
                   darkMode
                     ? "bg-gray-800 border-gray-700"
                     : "bg-gray-50 border-gray-200"
                 }`}
               >
-                <p
-                  className={`mb-2 ${
+                <div
+                  className={`flex gap-4 items-center ${
                     darkMode ? "text-gray-300" : "text-gray-800"
                   }`}
                 >
-                  <strong>Seeker:</strong>{" "}
-                  {item?.seekerId?.info?.firstName || "Unknown Seeker"}{" "}
-                  {item?.seekerId?.info?.lastName || ""}
-                </p>
-                <p
-                  className={`mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-800"
-                  }`}
-                >
-                  <strong>Property:</strong>
-                  {matchingListing?.title || "Unknown Property"}
-                </p>
-                <p
-                  className={`mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-800"
-                  }`}
-                >
-                  <strong>Address:</strong> {address.houseNumber || ""}{" "}
-                  {address.street || ""}, {address.city || ""},{" "}
-                  {address.zip || ""}
-                </p>
-                <p
-                  className={`mb-2 ${
-                    darkMode ? "text-gray-300" : "text-gray-800"
-                  }`}
-                >
-                  <strong>Waitlisted Date:</strong>{" "}
-                  {new Date(item?.waitListedDate).toLocaleDateString() ||
-                    "Unknown Date"}
-                </p>
+                  <span>
+                    <strong>Seeker:</strong>{" "}
+                    {item?.seekerId?.info?.firstName || "Unknown"}{" "}
+                    {item?.seekerId?.info?.lastName || ""}
+                  </span>
+                  <span>
+                    <strong>Property:</strong>{" "}
+                    {matchingListing?.title || "Unknown"}
+                  </span>
+                  <span>
+                    <strong>Address:</strong> {address.houseNumber || ""}{" "}
+                    {address.street || ""}, {address.city || ""},{" "}
+                    {address.zip || ""}
+                  </span>
+                  <span>
+                    <strong>Date:</strong>{" "}
+                    {new Date(item?.waitListedDate).toLocaleDateString() ||
+                      "Unknown"}
+                  </span>
+                </div>
                 <button
                   onClick={() => handleMoveToTenant(item._id)}
                   className={`px-4 py-2 rounded text-white ${

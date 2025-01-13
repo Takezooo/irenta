@@ -31,13 +31,13 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [userProfile, setUserProfile] = useState({
-    info: {
-      firstName: "",
-      lastName: "",
-      profile: { link: "" },
-    },
-  });
+  // const [userProfile, setUserProfile] = useState({
+  //   info: {
+  //     firstName: "",
+  //     lastName: "",
+  //     profile: { link: "" },
+  //   },
+  // });
 
   const storedToken = GetToken();
   const notifRef = useRef(null);
@@ -66,38 +66,37 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     console.log("Dark mode:", darkMode);
   }, [darkMode]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (user?.id) {
-        try {
-          const user_data = await fetchUserData(user.id, storedToken);
-          setUserProfile(user_data);
-        } catch (err) {
-          console.error("Failed to fetch user data:", err);
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     if (user?.id) {
+  //       try {
+  //         const user_data = await fetchUserData(user.id, storedToken);
+  //         setUserProfile(user_data);
+  //       } catch (err) {
+  //         console.error("Failed to fetch user data:", err);
+  //       }
+  //     }
+  //   };
 
-    fetchUser();
-  }, [user, storedToken]);
+  //   fetchUser();
+  // }, [user, storedToken]);
 
   useEffect(() => {
     if (user?.id) {
       console.log(`Subscribing to notifications for user ${user.id}`);
       subscribeToNotifications(user.id); // Subscribe to user's room
-  
+
       socket.on("newNotification", (notification) => {
         console.log("Received notification:", notification); // Debug log
         setNotifications((prev) => [notification, ...prev]);
         setUnreadCount((prev) => prev + 1); // Increment unread count
       });
-  
+
       return () => {
         socket.off("newNotification"); // Cleanup listener
       };
     }
   }, [user?.id]);
-  
 
   useEffect(() => {
     const getNotifications = async () => {
@@ -111,7 +110,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     };
     getNotifications();
   }, []);
-  
+
   const handleNotificationClick = async (notification) => {
     if (!notification.viewed) {
       await markNotificationAsViewed(notification._id);
@@ -268,7 +267,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   {user ? (
                     <img
                       src={
-                        userProfile?.info?.profile.link ||
+                        user?.info?.profile.link ||
                         "https://via.placeholder.com/150"
                       }
                       alt="Profile"
@@ -290,7 +289,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
-                              userProfile?.info?.profile.link ||
+                              user?.info?.profile.link ||
                               "https://via.placeholder.com/150"
                             }
                             alt="Profile"
@@ -298,7 +297,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                          {userProfile?.info?.firstName}
+                          {user?.info?.firstName}
                         </h3>
                       </li>
                       <hr className="my-2"></hr>
@@ -312,6 +311,18 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           </h3>
                         </button>
                       </li>
+                      {user?.tenantBadge === true && (
+                        <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
+                          <button
+                            className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
+                            onClick={()=> navigate("/tenant-dashboard")}
+                          >
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
+                              Tenant Dashboard
+                            </h3>
+                          </button>
+                        </li>
+                      )}
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
                           className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
@@ -564,7 +575,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   {user ? (
                     <img
                       src={
-                        userProfile?.info?.profile.link ||
+                        user?.info?.profile.link ||
                         "https://via.placeholder.com/150"
                       }
                       alt="Profile"
@@ -587,7 +598,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                           <img
                             src={
-                              userProfile?.info?.profile.link ||
+                              user?.info?.profile.link ||
                               "https://via.placeholder.com/150"
                             }
                             alt="Profile"
@@ -595,7 +606,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                          {userProfile?.info?.firstName}
+                          {user?.info?.firstName}
                         </h3>
                       </li>
                       <hr className="my-2"></hr>

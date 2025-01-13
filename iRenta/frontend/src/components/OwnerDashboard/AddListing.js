@@ -123,6 +123,15 @@ const AddListing = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    if (
+      address.houseNumber === "Please Input Manually" ||
+      address.street === "Please Input Manually" ||
+      address.city === "Please Input Manually"
+    ) {
+      alert("Please fill out all address fields manually.");
+      return;
+    }
+
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
       return;

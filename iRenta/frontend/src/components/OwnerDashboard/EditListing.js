@@ -221,6 +221,15 @@ const EditListing = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    if (
+      address.houseNumber === "Please Input Manually" ||
+      address.street === "Please Input Manually" ||
+      address.city === "Please Input Manually"
+    ) {
+      alert("Please fill out all address fields manually.");
+      return;
+    }
   
     // Validate required fields
     if (!title || !address.houseNumber || !address.street || !address.city) {

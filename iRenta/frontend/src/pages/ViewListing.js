@@ -13,6 +13,10 @@ import { getOrCreateChat } from "../global/api/Chats";
 import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
 import { createReservation } from "../global/api/Reservations";
+import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+
+const LIBRARIES = ["places"]; // Static array for libraries
+
 
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
@@ -27,6 +31,12 @@ export const ViewListing = () => {
   const navigate = useNavigate();
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
+    libraries: LIBRARIES, // Pass static array
+  });
+
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {
@@ -151,6 +161,8 @@ export const ViewListing = () => {
   const closePopup = () => {
     setShowOcularPopup(false);
   };
+
+  if (!isLoaded) return <div>Loading map...</div>;
 
   return (
     <div
@@ -466,12 +478,42 @@ export const ViewListing = () => {
           >
             <h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
             <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
-              <iframe
-                className="w-full h-full border-none"
-                src={`https://maps.google.com/maps?q=${location}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                allowFullScreen
-                title="Pinned Location Map"
-              ></iframe>
+            {selectedProperty?.address?.lng && selectedProperty?.address?.lat && (
+              <GoogleMap
+                center={{
+                  lat: selectedProperty.address.lat, 
+                  lng: selectedProperty.address.lng
+                }}
+                zoom={17}
+                mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
+                options={{
+                  mapId: "7faff3f15533dffa", 
+                  fullscreenControl: false,
+                  streetViewControl: false,
+                  mapTypeControl: false,
+                  gestureHandling: "none", 
+                  zoomControl: false,
+                  styles: [
+                    {
+                      featureType: "poi",
+                      stylers: [{ visibility: "off" }],
+                    },
+                    {
+                      featureType: "road",
+                      elementType: "labels.icon",
+                      stylers: [{ visibility: "off" }],
+                    },
+                    {
+                      featureType: "transit",
+                      elementType: "labels.icon",
+                      stylers: [{ visibility: "off" }],
+                    },
+                  ],
+                }}
+              >
+                {selectedProperty.address && <MarkerF position={selectedProperty.address} />}
+              </GoogleMap>
+            )}
             </div>
           </div>
 

@@ -1,4 +1,5 @@
-import Maintenance from './maintenance.model.js';
+import Maintenance from "./maintenance.model.js";
+import Tenant from "../tenants/tenants.model.js";
 
 export const createMaintenanceRequest = async (req, res) => {
   try {
@@ -18,6 +19,9 @@ export const createMaintenanceRequest = async (req, res) => {
       description,
     });
 
+    // const populatedRequest = await Maintenance.findById(newRequest._id)
+    // .populate('tenantId');
+
     res.status(201).json(newRequest);
   } catch (err) {
     console.error("Error creating maintenance request:", err);
@@ -30,8 +34,8 @@ export const getTenantMaintenanceRequests = async (req, res) => {
     const { tenantId } = req.params;
     const requests = await Maintenance.find({ tenantId })
       .sort({ createdAt: -1 })
-      .populate('tenantId');
-    
+      .populate("tenantId");
+
     res.status(200).json(requests);
   } catch (error) {
     console.error("Error fetching maintenance requests:", error);
@@ -42,14 +46,33 @@ export const getTenantMaintenanceRequests = async (req, res) => {
 export const getLandlordMaintenanceRequests = async (req, res) => {
   try {
     const { landlordId } = req.params;
-    const requests = await Maintenance.find({ landlordId })
+
+    // Get tenants for this landlord
+    const tenants = await Tenant.find({ landlordId })
+      .populate('seekerId', 'info.firstName info.lastName')
+      .populate('propertyId', 'title');
+      const userIds = tenants.map(tenant => tenant.seekerId._id);
+
+      const requests = await Maintenance.find({
+        tenantId: { $in: userIds }
+      })
       .sort({ createdAt: -1 })
-      .populate('tenantId');
-    
-    res.status(200).json(requests);
+      .populate('tenantId', 'info.firstName info.lastName');
+  
+      // Combine the data
+      const enrichedRequests = requests.map(request => {
+        const tenant = tenants.find(t => t.seekerId._id.toString() === request.tenantId._id.toString());
+        return {
+          ...request.toObject(),
+          tenantId: tenant?.seekerId,
+          propertyId: tenant?.propertyId
+        };
+      });
+
+    res.status(200).json(enrichedRequests);
   } catch (error) {
     console.error("Error fetching maintenance requests:", error);
-    res.status(500).json({ message: "Error fetching maintenance requests" });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -60,9 +83,9 @@ export const updateMaintenanceStatus = async (req, res) => {
 
     const updatedMaintenance = await Maintenance.findByIdAndUpdate(
       id,
-      { 
+      {
         status,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       { new: true }
     );

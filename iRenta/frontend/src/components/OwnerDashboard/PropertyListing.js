@@ -44,7 +44,6 @@ export const PropertyListing = () => {
       try {
         const data = await fetchOwnerListings();
         setListings(data);
-        console.log(data);
       } catch (err) {
         console.error("Failed to fetch listings:", err);
         setError("Failed to fetch listings");

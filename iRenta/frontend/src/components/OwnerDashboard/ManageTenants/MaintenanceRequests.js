@@ -1,33 +1,67 @@
-// frontend/src/components/OwnerDashboard/ManageTenants/MaintenanceRequests.js
 import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../../global/contexts/AuthContext';
 import { ThemeContext } from "../../../contexts/ThemeContext";
 import { fetchLandlordMaintenanceRequests, updateMaintenanceStatus } from '../../../global/api/Maintenance';
 
 const MaintenanceRequests = () => {
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
   const [requests, setRequests] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState('all');
   const [properties, setProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch maintenance requests
   useEffect(() => {
     const loadRequests = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        const data = await fetchLandlordMaintenanceRequests();
+        const data = await fetchLandlordMaintenanceRequests(user?._id);
+        if (!data) {
+          throw new Error('No maintenance requests data received');
+        }
+        
         setRequests(data);
         
         // Extract unique properties from requests
-        const uniqueProperties = [...new Set(data.map(request => 
-          request.propertyId.title
-        ))];
+        const uniqueProperties = [...new Set(data
+          .filter(request => request.propertyId && request.propertyId.title)
+          .map(request => request.propertyId.title)
+        )];
         setProperties(uniqueProperties);
       } catch (error) {
         console.error('Error loading maintenance requests:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadRequests();
+    
+    // Set up periodic refresh
+    const refreshInterval = setInterval(loadRequests, 30000);
+    return () => clearInterval(refreshInterval);
   }, []);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`pt-20 pb-4 p-6 ${darkMode ? 'text-white' : 'text-black'}`}>
+        <div className="text-center">Loading maintenance requests...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`pt-20 pb-4 p-6 ${darkMode ? 'text-white' : 'text-black'}`}>
+        <div className="text-red-500 text-center">Error: {error}</div>
+      </div>
+    );
+  }
 
   // Handle status update
   const handleStatusUpdate = async (requestId, newStatus) => {
@@ -106,7 +140,7 @@ const MaintenanceRequests = () => {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-bold">
-                  {request.tenantId.seekerId.info.firstName} {request.tenantId.seekerId.info.lastName}
+                  {request.tenantId.info.firstName} {request.tenantId.info.lastName}
                 </h3>
                 <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
                   {request.propertyId.title}

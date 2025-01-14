@@ -25,6 +25,7 @@ const TenantsList = () => {
       try {
         // Fetch tenants
         const tenantsData = await fetchTenantList();
+        console.log(tenantsData);
         setTenants(tenantsData);
   
         // Fetch properties
@@ -32,7 +33,6 @@ const TenantsList = () => {
           ...new Set(tenantsData.map((tenant) => tenant.propertyId.title)),
         ];
         setProperties(propertyTitles);
-        console.log(properties);
         // Fetch rent dates
         const rentDatesData = {};
         for (const tenant of tenantsData) {

@@ -18,31 +18,42 @@ const RentTracker = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Fetch tenants
+        // Fetch tenants with populated lease details
         const tenantsData = await fetchTenantList();
+        if (!tenantsData || !Array.isArray(tenantsData)) {
+          throw new Error('Invalid tenants data received');
+        }
         setTenants(tenantsData);
 
-        // Fetch rent dates in parallel
-        const rentDatesPromises = tenantsData.map(tenant => 
-          fetchRentDatesByLease(tenant.leaseId._id)
-        );
-        const rentDatesResults = await Promise.all(rentDatesPromises);
-        
-        const rentDatesMap = {};
-        tenantsData.forEach((tenant, index) => {
-          rentDatesMap[tenant.leaseId._id] = rentDatesResults[index];
-        });
-        setRentDates(rentDatesMap);
+        // Only fetch rent dates for tenants with valid lease IDs
+        const rentDatesPromises = tenantsData
+          .filter(tenant => tenant.leaseId && tenant.leaseId._id)
+          .map(tenant => fetchRentDatesByLease(tenant.leaseId._id));
+
+        if (rentDatesPromises.length > 0) {
+          const rentDatesResults = await Promise.all(rentDatesPromises);
+          
+          const rentDatesMap = {};
+          tenantsData.forEach((tenant, index) => {
+            if (tenant.leaseId && tenant.leaseId._id) {
+              rentDatesMap[tenant.leaseId._id] = rentDatesResults[index];
+            }
+          });
+          setRentDates(rentDatesMap);
+        }
 
         // Extract unique properties
-        const uniqueProperties = [...new Set(tenantsData.map(tenant => 
-          tenant.propertyId.title
-        ))];
+        const uniqueProperties = [...new Set(tenantsData
+          .filter(tenant => tenant.propertyId && tenant.propertyId.title)
+          .map(tenant => tenant.propertyId.title)
+        )];
         setProperties(uniqueProperties);
 
         // Fetch payments
         const paymentsData = await fetchPayments();
-        setPayments(paymentsData);
+        if (paymentsData) {
+          setPayments(paymentsData);
+        }
       } catch (error) {
         console.error('Error loading rent tracker data:', error);
       } finally {
@@ -51,9 +62,7 @@ const RentTracker = () => {
     };
 
     loadData();
-    // Set up periodic refresh
-    const refreshInterval = setInterval(loadData, 30000); // Refresh every 30 seconds
-
+    const refreshInterval = setInterval(loadData, 30000);
     return () => clearInterval(refreshInterval);
   }, []);
 

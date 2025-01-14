@@ -133,14 +133,27 @@ export const generateRentDates = async (req, res) => {
 export const getRentDatesByLease = async (req, res) => {
   try {
     const { leaseId } = req.params;
+    
+    if (!leaseId) {
+      return res.status(400).json({ message: 'Lease ID is required' });
+    }
+
     const rentDates = await RentDate.find({ leaseId })
       .populate('payment')
-      .sort('rentDate');
-    res.status(200).json(rentDates);
+      .sort('rentDate')
+      .lean(); // Add lean() for better performance
+
+    if (!rentDates) {
+      return res.status(404).json({ message: 'No rent dates found' });
+    }
+
+    return res.status(200).json(rentDates);
   } catch (error) {
-    res.status(500).json({ message: `Error fetching rent dates: ${error.message}` });
+    console.error('Error in getRentDatesByLease:', error);
+    return res.status(500).json({ message: error.message });
   }
 };
+
 
 export const updateRentDatePayment = async (req, res) => {
   try {

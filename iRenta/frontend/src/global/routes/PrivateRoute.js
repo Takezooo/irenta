@@ -15,9 +15,7 @@ const PrivateRoute = ({
 
   useEffect(() => {
     const validateToken = async () => {
-      console.log("Validating token...");
       const refreshToken = GetRefreshToken();
-      console.log("Retrieved Refresh Token:", refreshToken);
 
       if (!token && refreshToken) {
         try {
@@ -35,13 +33,6 @@ const PrivateRoute = ({
     validateToken();
   }, [token, login, logout]);
 
-  // Debug logs
-  console.log("Auth Status:", {
-    userType: user?.userType,
-    tenantBadge: user?.tenantBadge,
-    requireTenantBadge,
-  });
-
   // Add loading screen
   if (isLoading && loading) {
     return <LoadingScreen />;
@@ -52,11 +43,9 @@ const PrivateRoute = ({
   }
 
   if (!allowedRoles.includes(user.userType)) {
-    console.log("Redirecting to not-authorized: User role mismatch");
     return <Navigate to="/not-authorized" />;
   }
   if (requireTenantBadge && !user.tenantBadge) {
-    console.log("Redirecting to not-authorized: Tenant badge required");
     return <Navigate to="/not-authorized" />;
   }
 

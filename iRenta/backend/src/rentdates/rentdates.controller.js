@@ -140,9 +140,8 @@ export const getRentDatesByLease = async (req, res) => {
 
     const rentDates = await RentDate.find({ leaseId })
       .populate('payment')
-      .sort('rentDate')
-      .lean(); // Add lean() for better performance
-
+      .sort('rentDate');
+      
     if (!rentDates) {
       return res.status(404).json({ message: 'No rent dates found' });
     }

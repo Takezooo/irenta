@@ -7,6 +7,7 @@ import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import Topbar from "../components/global/Topbar.js";
 import Sidebar from "../components/global/Sidebar.js";
 import { Footer } from "../components/global/Footer.js";
+import LoadingScreen from "../components/global/Loading.js";
 
 import { AuthContext } from "../global/contexts/AuthContext.js";
 import { ThemeContext } from "../contexts/ThemeContext.js";
@@ -23,14 +24,22 @@ const LandingPage = () => {
   const { darkMode } = useContext(ThemeContext); // Access dark mode context
   const { setSelectedProperty } = useProperty();
   const [likedListings, setLikedListings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const navigate = useNavigate();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-console.log(user);
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchListings();
-      setListings(data); // assuming fetchListings returns an array
+      try {
+        const data = await fetchListings();
+        setListings(data || []);
+        setLikedListings(user?.likedListings || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false); // Ensure loading stops
+      }
     };
     fetchData();
   }, []);
@@ -85,10 +94,21 @@ console.log(user);
     try {
       const updatedLikes = await toggleLike(listingId);
       setLikedListings(updatedLikes); // Update local state
+      setListings((prevListings) =>
+        prevListings.map((listing) =>
+          listing._id === listingId
+            ? { ...listing, liked: !listing.liked } // Assume 'liked' is a field
+            : listing
+        )
+      );
     } catch (error) {
       console.error("Error toggling like:", error);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen/>;
+  }
 
   return (
     <div
@@ -108,7 +128,9 @@ console.log(user);
                 <button
                   onClick={handleBrowseListing}
                   className={`underline ${
-                    darkMode ? "text-gray-300 hover:text-gray-200" : "text-black"
+                    darkMode
+                      ? "text-gray-300 hover:text-gray-200"
+                      : "text-black"
                   }`}
                 >
                   See more
@@ -128,13 +150,16 @@ console.log(user);
                           ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-700"
                           : "bg-white border-gray-300 hover:shadow-lg"
                       }`}
-                      onClick={() => handleViewProperty(listing)}
                     >
                       <div className="relative flex-shrink-0 h-48 md:h-56">
                         <img
-                          src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                          src={
+                            listing.images?.[0]?.link ||
+                            "/placeholder-image.jpg"
+                          }
                           alt={listing.title}
                           className="w-full h-full object-cover"
+                          onClick={() => handleViewProperty(listing)}
                         />
                         <button
                           onClick={() => handleLikeToggle(listing._id)}
@@ -152,7 +177,10 @@ console.log(user);
                         </button>
                       </div>
 
-                      <div className="p-4 flex-grow flex flex-col justify-between">
+                      <div
+                        className="p-4 flex-grow flex flex-col justify-between"
+                        onClick={() => handleViewProperty(listing)}
+                      >
                         <h3 className="text-lg font-semibold truncate">
                           {listing.title}
                         </h3>
@@ -191,7 +219,9 @@ console.log(user);
               <h1 className="font-extrabold text-5xl lg:text-6xl mb-2 sm:text-7xl">
                 WELCOME TO <br /> iRENTA
               </h1>
-              <p className="text-m mb-[20px]">Please choose an option to continue.</p>
+              <p className="text-m mb-[20px]">
+                Please choose an option to continue.
+              </p>
               <div className="flex flex-col lg:flex-row gap-4">
                 <Link to="/login">
                   <button
@@ -269,7 +299,10 @@ console.log(user);
                       {/* Image Section */}
                       <div className="relative flex-shrink-0 h-2/3">
                         <img
-                          src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                          src={
+                            listing.images?.[0]?.link ||
+                            "/placeholder-image.jpg"
+                          }
                           alt={listing.title}
                           onClick={() => handleViewProperty(listing)}
                           className="w-full h-full object-cover"
@@ -297,7 +330,9 @@ console.log(user);
                         }`}
                         onClick={() => handleViewProperty(listing)}
                       >
-                        <h3 className="text-lg font-semibold truncate">{listing.title}</h3>
+                        <h3 className="text-lg font-semibold truncate">
+                          {listing.title}
+                        </h3>
                         <p
                           className={`text-sm line-clamp-2 ${
                             darkMode ? "text-gray-400" : "text-gray-500"
@@ -351,9 +386,10 @@ console.log(user);
               This is a placeholder description for the additional div. It
               includes a brief overview and is styled for aesthetic alignment.
             </p>
-            <button 
-            className="mt-4 inline-block text-black underline"
-            onClick={handleAboutUs}>
+            <button
+              className="mt-4 inline-block text-black underline"
+              onClick={handleAboutUs}
+            >
               See more
             </button>
           </div>

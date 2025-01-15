@@ -25,7 +25,7 @@ import userRoutes from './src/users/users.route.js';
 import tenantRoutes from './src/tenants/tenants.route.js';
 import paymentsRoutes from './src/payments/payments.route.js';
 import maintenanceRoutes from './src/maintenance/maintenance.route.js';
-import rentDateRoutes from './src/rentdates/rentdates.model.js'
+import rentDatesRoutes from './src/rentdates/rentdates.route.js'
 import listingRoutes from './src/listings/listings.route.js';
 import termRoutes from './src/terms/terms.route.js';
 import leaseRoutes from './src/leases/leases.route.js';
@@ -40,7 +40,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
-app.use('/api/rentdates', rentDateRoutes);
+app.use('/api/rentdates', rentDatesRoutes);
 
 // anything related to litings
 app.use('/api/listings', listingRoutes);

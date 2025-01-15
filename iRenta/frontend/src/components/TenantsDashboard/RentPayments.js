@@ -96,12 +96,20 @@ const RentPayments = () => {
       e.preventDefault();
       try {
         const tenantId = user._id; // Get from auth context
-        await createPayment({
-          ...formData,
-          tenantId,
-          rentDateId: selectedRentDate._id,
-          paymentDate: new Date(),
-        });
+        const paymentData = {
+          rentDateId: formData.rentDateId,
+          tenantId: tenantId,
+          paidAmount: Number(formData.paidAmount),
+          paymentMethod: formData.paymentMethod,
+          referenceNumber: formData.referenceNumber || '',
+          remarks: formData.remarks || '',
+          paymentDate: new Date().toISOString()
+        };
+    
+        console.log('Submitting payment data:', paymentData);
+    
+        const response = await createPayment(paymentData);
+        console.log('Payment response:', response);
         setShowPaymentModal(false);
         loadPayments();
         loadTenantAndRentDates();

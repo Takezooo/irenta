@@ -14,10 +14,17 @@ const calculateToBePaid = (rentDate) => {
 // Fetch payments
 export const getPayments = async (req, res) => {
   try {
-    const payments = await Payment.find().populate(
-      "tenantId",
-      "seekerId propertyId leaseId"
-    );
+    const payments = await Payment.find()
+      .populate({
+        path: 'tenantId',
+        select: 'info.firstName info.lastName info.email'
+      })
+      .populate({
+        path: 'rentDateId',
+        select: 'rentDate dueDate endDate baseAmount status'
+      })
+      .sort({ paymentDate: -1 });
+
     res.status(200).json(payments);
   } catch (error) {
     console.error("Error fetching payments:", error);
@@ -25,10 +32,8 @@ export const getPayments = async (req, res) => {
   }
 };
 
-// Add a new payment
 export const addPayment = async (req, res) => {
   try {
-    // Get data from request body
     const {
       rentDateId,
       tenantId,
@@ -41,41 +46,42 @@ export const addPayment = async (req, res) => {
     // Validate required fields
     if (!rentDateId || !tenantId || !paidAmount || !paymentMethod) {
       return res.status(400).json({ 
-        message: "Missing required fields: rentDateId, tenantId, paidAmount, and paymentMethod are required" 
+        message: "Missing required fields" 
       });
     }
 
-    // Find rent date
+    // Get rent date to determine toBePaid amount
     const rentDate = await RentDate.findById(rentDateId);
     if (!rentDate) {
       return res.status(404).json({ message: 'Rent date not found' });
     }
 
-    // Calculate amount to be paid
-    const toBePaid = calculateToBePaid(rentDate);
-
-    // Create new payment
+    // Create payment
     const payment = new Payment({
       rentDateId,
       tenantId,
-      toBePaid,
+      toBePaid: rentDate.baseAmount,
       paidAmount,
       paymentMethod,
       referenceNumber,
       remarks,
-      status: 'Pending' // Default status
+      paymentDate: new Date()
     });
 
-    // Save payment
     const savedPayment = await payment.save();
 
     // Update rent date status
-    await RentDate.findByIdAndUpdate(rentDate._id, {
+    await RentDate.findByIdAndUpdate(rentDateId, {
       status: 'Paid',
       payment: savedPayment._id
     });
 
-    res.status(201).json(savedPayment);
+    // Populate and return the saved payment
+    const populatedPayment = await Payment.findById(savedPayment._id)
+      .populate('tenantId', 'info.firstName info.lastName info.email')
+      .populate('rentDateId');
+
+    res.status(201).json(populatedPayment);
   } catch (error) {
     console.error("Error creating payment:", error);
     res.status(400).json({ message: error.message });

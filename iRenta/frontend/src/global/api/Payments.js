@@ -34,3 +34,4 @@ export const updatePaymentStatus = async (paymentId, status) => {
     throw error;
   }
 };
+

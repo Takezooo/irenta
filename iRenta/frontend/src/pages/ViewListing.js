@@ -14,6 +14,8 @@ import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
 import { createReservation } from "../global/api/Reservations";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+// import RenderPanorama from "../components/Panorama/Panorama"
+import RenderImage from "../components/Panorama/RenderImage";
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
@@ -24,18 +26,20 @@ export const ViewListing = () => {
   const [ownerData, setOwnerData] = useState([]);
   const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
   const { selectedProperty } = useProperty();
-  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
-    useContext(ChatDropdownContext);
+  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } = useContext(ChatDropdownContext);
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Use ThemeContext
   const navigate = useNavigate();
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
+  const [propertyImages, setProperyImages] = useState([])
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
     libraries: LIBRARIES, // Pass static array
   });
+
+
 
   // Fetch user's liked listings on page load
   useEffect(() => {
@@ -62,6 +66,7 @@ export const ViewListing = () => {
       try {
         const owner = await fetchOwnerData(selectedProperty?.userId);
         setOwnerData(owner);
+        setProperyImages(selectedProperty?.images)
       } catch (error) {
         console.error("Error fetching property owner data:", error);
       }
@@ -191,54 +196,7 @@ export const ViewListing = () => {
 
         <div className="flex flex-col items-center gap-6">
           {/* Image Gallery */}
-          <div className="w-full lg:w-3/4">
-            <div className="relative flex flex-col lg:flex-row h-auto lg:h-96 gap-4">
-              {/* Main Image */}
-              <div
-                className={`w-full lg:w-1/2 h-64 lg:h-full rounded-lg shadow-md flex items-center justify-center ${
-                  darkMode ? "bg-gray-800" : "bg-gray-200"
-                }`}
-              >
-                <img
-                  src={
-                    selectedProperty?.images?.[0]?.link || "/placeholder-image.jpg"
-                  }
-                  alt={selectedProperty?.title || "Main Image"}
-                  className="h-full w-full object-cover rounded-lg"
-                />
-              </div>
-              {/* Thumbnail Images */}
-              <div className="grid grid-cols-4 lg:grid-cols-2 gap-4 lg:grid-rows-2 w-full lg:w-1/2">
-                {selectedProperty?.images?.slice(1, 5).map((image, index) => (
-                  <div
-                    key={index}
-                    className={`h-24 lg:h-full rounded-md shadow-md flex items-center justify-center ${
-                      darkMode ? "bg-gray-700" : "bg-gray-300"
-                    }`}
-                  >
-                    <img
-                      src={image.link || "/placeholder-image.jpg"}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="h-full w-full object-cover rounded-md"
-                    />
-                  </div>
-                ))}
-
-                {/* Add placeholders for missing images */}
-                {Array.from({
-                  length: Math.max(0, 4 - (selectedProperty?.images?.length || 0) + 1),
-                }).map((_, index) => (
-                  <div
-                    key={`placeholder-${index}`}
-                    className={`h-24 lg:h-full rounded-md shadow-md ${
-                      darkMode ? "bg-gray-700" : "bg-gray-300"
-                    }`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-          </div>
-
+            <RenderImage propertyImages={propertyImages} darkMode={darkMode}/>
           {/* Property Details */}
           <div className="flex flex-col lg:flex-row gap-6 w-full lg:w-3/4">
             {/* Details Section */}

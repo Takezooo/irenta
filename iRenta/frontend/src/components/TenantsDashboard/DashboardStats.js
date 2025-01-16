@@ -1,26 +1,89 @@
-// frontend/src/components/TenantDashboard/DashboardStats.js
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { AuthContext } from "../../global/contexts/AuthContext";
 import { ThemeContext } from '../../contexts/ThemeContext';
+import { getCurrentTenant } from '../../global/api/Tenants';
+import { fetchRentDatesByLease } from '../../global/api/RentDates';
+import { fetchLeaseById } from '../../global/api/Leases';
+import { fetchPayments } from '../../global/api/Payments';
+import { fetchTenantMaintenanceRequests } from '../../global/api/Maintenance';
 
 const DashboardStats = () => {
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
+  const [stats, setStats] = useState({
+    nextPayment: { amount: 0, dueDate: '' },
+    maintenanceRequests: { total: 0, pending: 0 },
+    leaseStatus: { start: '', end: '', daysRemaining: 0 }
+  });
+  const [recentActivity, setRecentActivity] = useState([]);
 
-  const stats = {
-    nextPayment: {
-      amount: 1500,
-      dueDate: '2024-03-01'
-    },
-    maintenanceRequests: {
-      total: 3,
-      pending: 1
-    },
-    leaseStatus: {
-      start: '2024-01-01',
-      end: '2024-12-31',
-      daysRemaining: 300
-    }
-  };
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // Get current tenant data
+        const tenantData = await getCurrentTenant();
+        if (!tenantData) return;
 
+        // Get lease details
+        const maintenanceData = await fetchTenantMaintenanceRequests(user._id);
+        const leaseData = await fetchLeaseById(tenantData.leaseId._id);
+
+        if (leaseData) {
+          const endDate = new Date(leaseData.contractDetails.endDate);
+          const today = new Date();
+          const daysRemaining = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+          // Get rent dates
+          const rentDates = await fetchRentDatesByLease(tenantData.leaseId._id);
+          const nextRentDate = rentDates.find(
+            date => 
+              (date.status === "Upcoming" || 
+               date.status === "Pending" || 
+               date.status === "Confirmed") && 
+              new Date(date.dueDate) > today
+          );
+          // Get payments
+          const payments = await fetchPayments(user?._id);
+          
+          setStats({
+            nextPayment: {
+              amount: nextRentDate ? nextRentDate.baseAmount : 0,
+              dueDate: nextRentDate?.dueDate || ''
+            },
+            maintenanceRequests: {
+              total: maintenanceData?.length || 0,
+              pending: maintenanceData?.filter(req => req.status === 'Pending').length || 0
+            },
+            leaseStatus: {
+              start: leaseData.contractDetails.startDate,
+              end: leaseData.contractDetails.endDate,
+              daysRemaining
+            }
+          });
+
+          // Set recent activity
+          const activities = [
+            ...payments.map(payment => ({
+              type: 'payment',
+              date: payment.date,
+              description: `Rent payment ${payment.status}`
+            })),
+            ...maintenanceData.map(req => ({
+              type: 'maintenance',
+              date: req.createdAt,
+              description: `Maintenance request: ${req.title}`
+            }))
+          ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+
+          setRecentActivity(activities);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
   return (
     <div className="space-y-6">
       {/* Quick Stats */}
@@ -29,7 +92,7 @@ const DashboardStats = () => {
           <h3 className="text-lg font-semibold mb-2">Next Payment</h3>
           <p className="text-2xl font-bold">₱{stats.nextPayment.amount}</p>
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Due on {new Date(stats.nextPayment.dueDate).toLocaleDateString()}
+            Due on {stats.nextPayment.dueDate ? new Date(stats.nextPayment.dueDate).toLocaleDateString() : 'N/A'}
           </p>
         </div>
 
@@ -54,11 +117,7 @@ const DashboardStats = () => {
       <div className={`rounded-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
         <div className="space-y-4">
-          {[
-            { type: 'payment', date: '2024-02-01', description: 'Rent payment processed' },
-            { type: 'maintenance', date: '2024-01-28', description: 'Maintenance request completed' },
-            { type: 'notice', date: '2024-01-25', description: 'Building maintenance notice' }
-          ].map((activity, index) => (
+          {recentActivity.map((activity, index) => (
             <div 
               key={index}
               className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}

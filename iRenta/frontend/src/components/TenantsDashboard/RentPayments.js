@@ -48,33 +48,8 @@ const RentPayments = () => {
   useEffect(() => {
     loadTenantAndRentDates();
     loadPayments();
-  }, []); // Add leaseId as dependency
-
-  // const checkUpcomingRentDates = (dates) => {
-  //   const today = new Date();
-  //   const upcomingDates = dates.filter(date => {
-  //     const dueDate = new Date(date.dueDate);
-  //     const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-  //     return diffDays <= 7 && diffDays > 0 && !date.payment;
-  //   });
-
-  //   if (upcomingDates.length > 0) {
-  //     // Send email notification
-  //     sendRentDateNotification(upcomingDates);
-  //   }
-  // };
-
-  // const sendRentDateNotification = async (upcomingDates) => {
-  //   try {
-  //     await axios.post('/api/notifications/rent-due', {
-  //       dates: upcomingDates,
-  //       tenantId: 'current-tenant-id' // Get from auth context
-  //     });
-  //   } catch (error) {
-  //     console.error('Error sending notification:', error);
-  //   }
-  // };
-
+  }, []);
+  
   const PaymentModal = () => {
     const [formData, setFormData] = useState({
       paidAmount: selectedRentDate?.baseAmount || "",

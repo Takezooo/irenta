@@ -181,30 +181,28 @@ const ReservationPage = () => {
             </div>
           )}
           {/* Submit Additional Documents */}
-          {selectedProperty?.askForValidId === true && (
-            <div>
-              <label
-                className={`block text-sm font-medium ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Upload Valid ID
-                <span className="text-xs">
-                  (make sure that the signature is visible)
-                </span>
-              </label>
-              <input
-                type="file"
-                accept=".jpg,.jpeg,.png" // Restrict file types
-                onChange={handleFileUpload}
-                className={`mt-1 block w-full border rounded-md px-4 py-2 ${
-                  darkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-gray-50 text-black border-gray-300"
-                }`}
-              />
-            </div>
-          )}
+          <div>
+            <label
+              className={`block text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Upload Valid ID
+              <span className="text-xs">
+                (make sure that the signature is visible)
+              </span>
+            </label>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png" // Restrict file types
+              onChange={handleFileUpload}
+              className={`mt-1 block w-full border rounded-md px-4 py-2 ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-gray-50 text-black border-gray-300"
+              }`}
+            />
+          </div>
 
           {/* Message Field */}
           <div>
@@ -228,27 +226,26 @@ const ReservationPage = () => {
           </div>
 
           {/* Agree Checkbox */}
-          {checkIfTermsExist() && (
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className={`mr-2 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-gray-50 border-gray-300 text-black"
-                }`}
-              />
-              <label
-                className={`text-sm ${
-                  darkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                I agree to the terms and conditions
-              </label>
-            </div>
-          )}
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className={`mr-2 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-gray-50 border-gray-300 text-black"
+              }`}
+            />
+            <label
+              className={`text-sm ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              I agree to the terms and conditions
+            </label>
+          </div>
 
           {/* Submit Button */}
           <div className="text-center">

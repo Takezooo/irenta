@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../../global/contexts/AuthContext";
 import { ThemeContext } from "../../../contexts/ThemeContext";
 import { fetchTenantList } from "../../../global/api/Tenants";
 import { fetchRentDatesByLease } from "../../../global/api/RentDates";
 import {
-  fetchPayments,
+  fetchLandlordPayments,
   createPayment,
   updatePaymentStatus,
 } from "../../../global/api/Payments";
@@ -42,6 +43,7 @@ const RefreshButton = ({ onRefresh, isLoading }) => (
 );
 
 const RentTracker = () => {
+  const {user} = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
   const [tenants, setTenants] = useState([]);
   const [rentDates, setRentDates] = useState({});
@@ -61,7 +63,7 @@ const RentTracker = () => {
       // Fetch all data in parallel
       const [tenantsData, paymentsData] = await Promise.all([
         fetchTenantList(),
-        fetchPayments(),
+        fetchLandlordPayments(user?._id)
       ]);
 
       if (!tenantsData || !paymentsData) {
@@ -132,7 +134,7 @@ const RentTracker = () => {
       try {
         const [tenantsData, paymentsData] = await Promise.all([
           fetchTenantList(),
-          fetchPayments(),
+          fetchLandlordPayments(user?._id),
         ]);
 
         console.log("Fetched payments:", paymentsData); // Add logging

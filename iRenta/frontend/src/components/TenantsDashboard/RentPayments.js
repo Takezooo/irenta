@@ -36,7 +36,7 @@ const RentPayments = () => {
       }
 
       // Fetch payments
-      const paymentsData = await fetchPayments();
+      const paymentsData = await fetchPayments(user?._id);
       setPayments(paymentsData);
     } catch (error) {
       console.error("Error loading tenant and rent dates:", error);

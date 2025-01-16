@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { GetToken } from '../utils/Token';
 
 const API_BASE_URL = "http://localhost:5000/api/payments";
 
-export const fetchPayments = async () => {
+export const fetchPayments = async (tenantId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}`);
+    const response = await axios.get(`${API_BASE_URL}/${tenantId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching payments:", error);
@@ -18,6 +19,21 @@ export const createPayment = async (paymentData) => {
     return response.data;
   } catch (error) {
     console.error("Error creating payment:", error);
+    throw error;
+  }
+};
+
+export const fetchLandlordPayments = async (landlordId) => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/landlord-payments/${landlordId}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching landlord payments:", error);
     throw error;
   }
 };

@@ -103,7 +103,9 @@ export const GetLeaseById = async (req, res) => {
   try {
     const { id } = req.params; // Extract the lease ID from the URL
 
-    const lease = await Lease.findById(id); // Fetch the lease by ID
+    const lease = await Lease.findById(id) // Fetch the lease by ID
+    .populate('tenant')
+    .populate('landlord', 'info.firstName info.lastName credentials.email info.phoneNumber');
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });

@@ -191,9 +191,7 @@ const ViewLease = () => {
         leaseId,
         landlordId: leaseDetails.landlord, // Use landlord ID from lease details
       };
-  
-      console.log("Payload to be sent to registerTenant:", tenantData);
-  
+    
       // Register user as waitlisted and update tenantBadge
       await registerToWaitlist(tenantData);
 

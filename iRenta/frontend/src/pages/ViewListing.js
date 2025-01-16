@@ -8,6 +8,7 @@ import { AuthContext } from "../global/contexts/AuthContext";
 import { ThemeContext } from "../contexts/ThemeContext"; // Import ThemeContext
 import { useProperty } from "../global/contexts/PropertyContext";
 import { ChatDropdownContext } from "../global/contexts/ChatDropdownContext";
+import LoadingScreen from "../components/global/Loading";
 import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../global/api/Chats";
 import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
@@ -167,7 +168,7 @@ export const ViewListing = () => {
     setShowOcularPopup(false);
   };
 
-  if (!isLoaded) return <div>Loading map...</div>;
+  if (!isLoaded) return <LoadingScreen />;
 
   return (
     <div
@@ -370,7 +371,6 @@ export const ViewListing = () => {
                   <li>Jollibee</li>
                   <li>Simbahan</li>
                   <li>SM</li>
-                  {/* Add more items here */}
                 </ul>
               </div>
 

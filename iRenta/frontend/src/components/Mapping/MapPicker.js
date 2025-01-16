@@ -17,8 +17,6 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
     libraries: LIBRARIES, // Pass static array
   });
 
-  console.log(window.google);
-
   const [selectedLocation, setSelectedLocation] = useState(center);
   const [address, setAddress] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -56,7 +54,7 @@ const MapPicker = ({ center, zoom, onLocationChange }) => {
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
     };
-
+    console.log(location);
     setSelectedLocation(location);
 
     try {

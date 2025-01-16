@@ -13,6 +13,7 @@ import { ThemeContext } from "../contexts/ThemeContext";
 import { useProperty } from "../global/contexts/PropertyContext";
 import { useMapLogic, MapListings } from "../components/Mapping/MapListings";
 
+
 const BrowseListing = () => {
   const [listings, setListings] = useState([]);
   const [likedListings, setLikedListings] = useState([]);
@@ -22,6 +23,12 @@ const BrowseListing = () => {
   const { setSelectedProperty } = useProperty();
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
+  const [ center, setCenter ] = useState({
+      lng: 0,
+      lat: 0,
+    });
+    const [selectedCenter, setSelectedCenter] = useState("My Location"); // Default value
+
   const authToken = GetToken();
   const navigate = useNavigate();
 
@@ -47,7 +54,8 @@ const BrowseListing = () => {
   const { isLoaded, nearbyListings, mapCenter } = useMapLogic({
     fetchListings,
     initialCenter: { lat: 14.454, lng: 120.937 },
-    RADIUS: radius, // Pass the dynamic radius
+    RADIUS: radius,
+    CENTER: center,
   });
 
   const handleRadiusChange = (event) => {
@@ -66,6 +74,39 @@ const BrowseListing = () => {
       console.error("Error toggling like:", error);
     }
   };
+
+  const handleCenterChange = (event) => {
+    const selectedLocation = event.target.value;
+  
+    switch (selectedLocation) {
+      case "PNU":
+        const pnuCenter = { lat: 14.587681, lng: 120.982816 };
+        setCenter(pnuCenter); // Update local center state
+        break;
+      case "ADAMSON":
+        const adamsonCenter = { lat: 14.586207, lng: 120.986373 };
+        setCenter(adamsonCenter); // Update local center state
+        break;
+      case "TUP":
+        const tupCenter = { lat: 14.587394044654793, lng: 120.98484635353088 };
+        setCenter(tupCenter); // Update local center state
+        break;
+      case "My Location":
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            setCenter(userLocation); // Default to user's current location
+          },
+        )
+        break;
+      default:
+        console.error("Unknown location selected:", selectedLocation);
+    }
+  };
+  
 
   const openMapFullScreen = () => setIsMapFullScreen(true);
   const closeMapFullScreen = () => setIsMapFullScreen(false);
@@ -129,6 +170,31 @@ const BrowseListing = () => {
                 <option value={5}>5 km</option>
                 <option value={10}>10 km</option>
                 <option value={20}>20 km</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="center" className="block mb-2 font-medium">
+                Select Center
+              </label>
+              <select
+                id="center"
+                value={selectedCenter} // Bind to the selectedCenter state
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedCenter(value); // Update the selectedCenter state
+                  handleCenterChange(e); // Call the existing handleCenterChange logic
+                }}
+                className={`px-4 py-2 border rounded ${
+                  darkMode
+                    ? "bg-gray-800 text-white border-gray-700"
+                    : "bg-white text-black border-gray-300"
+                }`}
+              >
+                <option value="PNU">PNU</option>
+                <option value="ADAMSON">Adamson</option>
+                <option value="TUP">TUP</option>
+                <option value="My Location">My Location</option>
               </select>
             </div>
 

@@ -10,7 +10,7 @@ const PHILIPPINES_BOUNDS = {
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
-export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3 }) => {
+export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3, CENTER}) => {
   const [listings, setListings] = useState([]);
   const [nearbyListings, setNearbyListings] = useState([]);
   const [mapCenter, setMapCenter] = useState(null); // Start with null to ensure location is fetched first
@@ -111,6 +111,26 @@ export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3 }) => {
     };
     setMapCenter(userLocation); // Trigger filtering through useEffect
   };
+
+  useEffect(() => {
+    if (CENTER) {
+      setMapCenter(CENTER); // Use the provided CENTER if available
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setMapCenter(userLocation); // Default to user's current location
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setMapCenter(initialCenter); // Fallback to initial center if location fails
+        }
+      );
+    }
+  }, [CENTER]);
 
   if (loadError) {
     console.error("Error loading Google Maps API:", loadError);

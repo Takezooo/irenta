@@ -182,14 +182,14 @@ const LikedListing = () => {
             )}
           </div>
 
-          <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen">
+          {/* <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-screen">
             <iframe
               className="w-full h-full border-none"
               src="https://maps.google.com/maps?q=Bacoor&t=&z=13&ie=UTF8&iwloc=&output=embed"
               allowFullScreen
               title="Map"
             ></iframe>
-          </div>
+          </div> */}
         </div>
       )}
 

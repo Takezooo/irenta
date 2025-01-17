@@ -872,14 +872,15 @@ const EditListing = () => {
                         darkMode ? "text-blue-400" : "text-blue-600"
                       }`}
                     >
-                      Placeholder Title
+                      
+                      {title || "Placeholder Title"}
                     </h2>
                     <p
                       className={`mt-2 ${
                         darkMode ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
-                      Ermita, Manila
+                      {address.street + ", " + address.city || "Ermita, Manila"}
                     </p>
                   </div>
 
@@ -893,7 +894,7 @@ const EditListing = () => {
                         darkMode ? "text-gray-300" : "text-gray-800"
                       }`}
                     >
-                      ₱4,000 / head / month
+                      {price || "₱4,000"} / head / month
                     </h3>
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <button
@@ -945,12 +946,13 @@ const EditListing = () => {
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        <li>Fully Furnished</li>
-                        <li>6 Bed and Bedframe</li>
-                        <li>Aircon</li>
-                        <li>WiFi / Internet</li>
-                        <li>Electricity Bill</li>
-                        <li>Water Bill</li>
+                          {selectedAmenities.length > 0 ? (
+                            selectedAmenities.map((amenity, index) => (
+                              <li key={index}>{amenity}</li>
+                            ))
+                          ) : (
+                            <li>No amenities selected</li>
+                          )}
                       </ul>
                     </div>
                     <div>
@@ -959,16 +961,17 @@ const EditListing = () => {
                           darkMode ? "text-gray-300" : "text-gray-800"
                         }`}
                       >
-                        Payment Terms
+                        Dorm Details
                       </h4>
                       <ul
                         className={`space-y-1 ${
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        <li>Advance Payment: 1 month</li>
-                        <li>Lease Term: 6 months</li>
-                        <li>Pay Period: Monthly</li>
+                        <li>Bedroom/s: {bedroomNumber}</li>
+                        <li>Bathroom/s: {bathroomNumber}</li>
+                        <li>Unit Size: {propertySize}</li>
+                        <li>Type: {type}</li>
                       </ul>
                     </div>
                   </div>

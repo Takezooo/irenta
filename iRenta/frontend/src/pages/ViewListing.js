@@ -39,7 +39,7 @@ export const ViewListing = () => {
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
     libraries: LIBRARIES, // Pass static array
   });
-
+console.log(selectedProperty)
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {

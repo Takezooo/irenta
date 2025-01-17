@@ -161,7 +161,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </Link>
           </div>
 
-          <div className="flex-1 flex ml-[30%]">
+          {/* <div className="flex-1 flex ml-[30%]">
             <div className="w-full max-w-xs">
               <input
                 type="text"
@@ -169,7 +169,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 placeholder="Search..."
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-3">
             <div className="relative group">
@@ -436,13 +436,13 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </div>
 
             {/* Search Bar */}
-            <div className="w-full flex justify-end">
+            {/* <div className="w-full flex justify-end">
               <div className="max-w-xs">
                 <button className="h-full w-full py-4 hover:bg-gray-200 dark:hover:bg-gray-600 text-blue-500 hover:text-blue-600 flex justify-center items-center">
                   <FaSearch className="text-2xl" />
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile Nav bar */}

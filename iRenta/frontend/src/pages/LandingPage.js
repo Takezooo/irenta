@@ -16,40 +16,64 @@ import { toggleLike } from "../global/api/Users.js";
 import { fetchListings } from "../global/api/Listings.js";
 
 const LandingPage = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [listings, setListings] = useState([]);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [filteredListings, setFilteredListings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // Search term
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
-  const { darkMode } = useContext(ThemeContext); // Access dark mode context
+  const { darkMode } = useContext(ThemeContext); // Dark mode context
   const { setSelectedProperty } = useProperty();
   const [likedListings, setLikedListings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
   const navigate = useNavigate();
 
+  const amenitiesList = [
+    "Fully Furnished",
+    "6 Bed and Bedframe",
+    "Aircon",
+    "WiFi / Internet",
+    "Electricity Bill",
+    "Water Bill",
+  ];
+
   const toggleSidebar = () => setIsOpen(!isOpen);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchListings();
-        setListings(data || []);
-        setLikedListings(user?.likedListings || []);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false); // Ensure loading stops
-      }
-    };
-    fetchData();
-  }, []);
 
   const handleBrowseListing = () => navigate("/browse-listing");
   const handleAboutUs = () => navigate("/about-us");
 
-  const handleViewProperty = (listing) => {
-    setSelectedProperty(listing);
-    navigate(`/${listing._id}`);
+  const filterListings = () => {
+    let results = [...listings];
+  
+    // Filter by search query
+    if (searchTerm) {
+      results = results.filter((listing) =>
+        listing.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  
+    // Filter by price range
+    if (minPrice) {
+      results = results.filter((listing) => listing.price >= parseFloat(minPrice));
+    }
+    if (maxPrice) {
+      results = results.filter((listing) => listing.price <= parseFloat(maxPrice));
+    }
+  
+    // Filter by selected amenities
+    if (selectedAmenities.length > 0) {
+      results = results.filter((listing) =>
+        selectedAmenities.every((amenity) =>
+          listing.amenities?.includes(amenity)
+        )
+      );
+    }
+  
+    setFilteredListings(results);
   };
 
   const scrollContainerRef = useRef(null);
@@ -86,6 +110,33 @@ const LandingPage = () => {
     }
   };
 
+
+  useEffect(() => {
+    filterListings();
+  }, [searchTerm, minPrice, maxPrice, selectedAmenities]);
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchListings();
+        setListings(data || []);
+        setLikedListings(user?.likedListings || []);
+        setFilteredListings(data || []);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+      } finally {
+        setIsLoading(false); // Ensure loading stops
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleViewProperty = (listing) => {
+    setSelectedProperty(listing);
+    navigate(`/${listing._id}`);
+  };
+
   const handleLikeToggle = async (listingId) => {
     if (!user) {
       navigate("/login");
@@ -93,11 +144,11 @@ const LandingPage = () => {
     }
     try {
       const updatedLikes = await toggleLike(listingId);
-      setLikedListings(updatedLikes); // Update local state
+      setLikedListings(updatedLikes);
       setListings((prevListings) =>
         prevListings.map((listing) =>
           listing._id === listingId
-            ? { ...listing, liked: !listing.liked } // Assume 'liked' is a field
+            ? { ...listing, liked: !listing.liked }
             : listing
         )
       );
@@ -107,7 +158,7 @@ const LandingPage = () => {
   };
 
   if (isLoading) {
-    return <LoadingScreen/>;
+    return <LoadingScreen />;
   }
 
   return (
@@ -121,45 +172,91 @@ const LandingPage = () => {
 
       {user ? (
         <>
-          <div className="pt-8">
+          <div className="pt-8 min-h-screen">
             <div className="mx-auto flex align-center flex-col rounded-xl mt-24 lg:mt-16 w-[90%]">
-              <div className="flex flex-row w-full items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Properties</h2>
-                <button
-                  onClick={handleBrowseListing}
-                  className={`underline ${
-                    darkMode
-                      ? "text-gray-300 hover:text-gray-200"
-                      : "text-black"
-                  }`}
-                >
-                  See more
-                </button>
+              {/* Filters */}
+              <div className="flex flex-col lg:flex-row items-center gap-4 mb-4">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full lg:w-64 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Search property name..."
+                />
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="Min Price"
+                  className="w-full lg:w-32 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm"
+                />
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Max Price"
+                  className="w-full lg:w-32 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm"
+                />
+                <div className="flex flex-wrap gap-2">
+                  {amenitiesList.map((amenity) => (
+                    <label key={amenity} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        value={amenity}
+                        checked={selectedAmenities.includes(amenity)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setSelectedAmenities((prev) =>
+                            prev.includes(value)
+                              ? prev.filter((item) => item !== value)
+                              : [...prev, value]
+                          );
+                        }}
+                        className="rounded text-blue-500 focus:ring-blue-500"
+                      />
+                      {amenity}
+                    </label>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex flex-col flex-grow overflow-y-auto">
-                <div
+              {/* Listings */}
+              <div className="relative">
+                {showLeftArrow && (
+                  <button
+                    onClick={scrollLeft}
+                    className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaChevronLeft />
+                  </button>
+                )}
+              <div
                   ref={scrollContainerRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4"
+                  className="flex overflow-x-hidden space-x-4"
                 >
-                  {listings.map((listing) => (
+                  {filteredListings.map((listing) => (
                     <div
                       key={listing._id}
-                      className={`flex-shrink-0 rounded-lg shadow-md border overflow-hidden ${
+                      className={`flex-shrink-0 h-96 w-72 rounded-lg shadow-md border overflow-hidden ${
                         darkMode
                           ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-700"
                           : "bg-white border-gray-300 hover:shadow-lg"
                       }`}
                     >
-                      <div className="relative flex-shrink-0 h-48 md:h-56">
+                      {/* Image Section */}
+                      <div className="relative flex-shrink-0 h-2/3">
                         <img
                           src={
                             listing.images?.[0]?.link ||
                             "/placeholder-image.jpg"
                           }
                           alt={listing.title}
-                          className="w-full h-full object-cover"
                           onClick={() => handleViewProperty(listing)}
+                          className="w-full h-full object-cover"
                         />
                         <button
                           onClick={() => handleLikeToggle(listing._id)}
@@ -167,7 +264,7 @@ const LandingPage = () => {
                             darkMode
                               ? "bg-gray-700 text-gray-300"
                               : "bg-white text-gray-600"
-                          }`}
+                          } hover:text-red-500`}
                         >
                           {likedListings?.includes(listing._id) ? (
                             <AiFillHeart size={20} className="text-red-500" />
@@ -177,8 +274,11 @@ const LandingPage = () => {
                         </button>
                       </div>
 
+                      {/* Details Section */}
                       <div
-                        className="p-4 flex-grow flex flex-col justify-between"
+                        className={`p-4 flex-grow h-1/3 flex flex-col justify-between ${
+                          darkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
                         onClick={() => handleViewProperty(listing)}
                       >
                         <h3 className="text-lg font-semibold truncate">
@@ -192,7 +292,7 @@ const LandingPage = () => {
                           {listing.description}
                         </p>
                         <p
-                          className={`font-bold mt-2 ${
+                          className={`justify-end font-bold mt-2 ${
                             darkMode ? "text-gray-200" : "text-gray-700"
                           }`}
                         >
@@ -202,8 +302,8 @@ const LandingPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
             </div>
+          </div>
           </div>
         </>
       ) : (
@@ -395,8 +495,10 @@ const LandingPage = () => {
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
+    
   );
 };
 

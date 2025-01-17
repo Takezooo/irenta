@@ -11,7 +11,7 @@ import RequireAuth from "../../global/middlewares/RequireAuth.js";
 const router = express.Router();
 
 // Fetch all templates
-router.get("/", fetchTermsTemplates);
+router.get("/landlord/:landlordId", fetchTermsTemplates);
 
 // Create a new template (protected route)
 router.post("/", RequireAuth, createTermsTemplate);

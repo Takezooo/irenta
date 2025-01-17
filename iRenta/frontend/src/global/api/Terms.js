@@ -3,10 +3,9 @@ import { GetToken } from "../utils/Token.js";
 
 const API_BASE_URL = "http://localhost:5000/api/terms";
 
-// Fetch all templates
-export const fetchTermsTemplates = async () => {
+export const fetchTermsTemplates = async (landlordId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/`);
+    const response = await axios.get(`${API_BASE_URL}/landlord/${landlordId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch terms templates:", error);

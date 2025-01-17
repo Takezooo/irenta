@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
 import {
   fetchTermsTemplates,
   createTermsTemplate,
   updateTermsTemplate,
+  attachTermsToListing,
 } from "../../global/api/Terms.js";
-import { attachTermsToListing } from "../../global/api/Terms.js"; // API to attach terms to listings
+import { fetchOwnerListings } from "../../global/api/Listings.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 const TermsManagement = () => {
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [formData, setFormData] = useState({ title: "", content: "" });
@@ -15,12 +18,17 @@ const TermsManagement = () => {
   const [listings, setListings] = useState([]); // Listings fetched from backend
   const [selectedListingId, setSelectedListingId] = useState(""); // Selected listing for attaching terms
   const [selectedTermsId, setSelectedTermsId] = useState(""); // Selected terms template for attaching
-
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    listing: "",
+    terms: "",
+  });
   // Fetch terms templates and listings
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const templates = await fetchTermsTemplates();
+        const templates = await fetchTermsTemplates(user._id);
         setTermsTemplates(templates);
       } catch (error) {
         console.error("Failed to fetch terms templates:", error);
@@ -29,8 +37,7 @@ const TermsManagement = () => {
 
     const fetchListings = async () => {
       try {
-        const response = await fetch("/api/listings"); // Adjust API route if needed
-        const data = await response.json();
+        const data = await fetchOwnerListings();
         setListings(data);
       } catch (error) {
         console.error("Failed to fetch listings:", error);
@@ -43,6 +50,16 @@ const TermsManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+
+    if (!formData.title.trim()) {
+      setErrors((prev) => ({ ...prev, title: "Title is required" }));
+      return;
+    }
+    if (!formData.content.trim()) {
+      setErrors((prev) => ({ ...prev, content: "Content is required" }));
+      return;
+    }
 
     try {
       if (editingTemplateId) {
@@ -58,7 +75,10 @@ const TermsManagement = () => {
       const updatedTemplates = await fetchTermsTemplates();
       setTermsTemplates(updatedTemplates);
     } catch (error) {
-      console.error("Failed to save terms template:", error);
+      setErrors((prev) => ({
+        ...prev,
+        submit: error.response?.data?.message || "Failed to save template",
+      }));
     }
   };
 
@@ -74,8 +94,17 @@ const TermsManagement = () => {
 
   // Handle attaching terms to a listing
   const handleAttachTerms = async () => {
-    if (!selectedListingId || !selectedTermsId) {
-      alert("Please select both a listing and a terms template.");
+    setErrors({}); // Clear previous errors
+
+    if (!selectedListingId) {
+      setErrors((prev) => ({ ...prev, listing: "Please select a listing" }));
+      return;
+    }
+    if (!selectedTermsId) {
+      setErrors((prev) => ({
+        ...prev,
+        terms: "Please select a terms template",
+      }));
       return;
     }
 
@@ -135,6 +164,9 @@ const TermsManagement = () => {
                   : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             />
+            {errors.title && (
+              <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+            )}
           </div>
           <div>
             <label
@@ -157,6 +189,9 @@ const TermsManagement = () => {
                   : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             ></textarea>
+            {errors.content && (
+              <p className="text-red-500 text-xs mt-1">{errors.content}</p>
+            )}
           </div>
           <div className="flex gap-4">
             <button
@@ -296,6 +331,9 @@ const TermsManagement = () => {
                 </option>
               ))}
             </select>
+            {errors.listing && (
+              <p className="text-red-500 text-xs mt-1">{errors.listing}</p>
+            )}
           </div>
           <div>
             <label
@@ -321,6 +359,9 @@ const TermsManagement = () => {
                 </option>
               ))}
             </select>
+            {errors.terms && (
+              <p className="text-red-500 text-xs mt-1">{errors.terms}</p>
+            )}
           </div>
         </div>
         <button

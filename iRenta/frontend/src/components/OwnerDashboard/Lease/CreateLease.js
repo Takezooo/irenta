@@ -60,7 +60,7 @@ const CreateLease = ({ seekerId }) => {
       customTermsAndConditions: "",
       rulesAndRegulations: "",
     },
-    leaseType: "Fixed",
+    leaseType: "Fixed-Term",
   });
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const CreateLease = ({ seekerId }) => {
 
     const fetchPreloadedTerms = async () => {
       try {
-        const terms = await fetchTermsTemplates();
+        const terms = await fetchTermsTemplates(user._id);
         setPreloadedTerms(terms);
       } catch (err) {
         console.error("Failed to fetch terms and conditions:", err);
@@ -136,7 +136,7 @@ const CreateLease = ({ seekerId }) => {
     }
 
     const durationInDays = (end - start) / (1000 * 60 * 60 * 24);
-    const moveDurationInDays = (moveStart - moveEnd) / (1000 * 60 * 60 * 24);
+    const moveDurationInDays = (moveEnd - moveStart) / (1000 * 60 * 60 * 24);
     if (durationInDays < 30) {
       toast.error("Lease terms must be at least 1 month.");
       return false;
@@ -176,7 +176,7 @@ const CreateLease = ({ seekerId }) => {
       newErrors.termsAndConditionsId = "Please select terms and conditions.";
     if (!formData.contractDetails.rulesAndRegulations)
       newErrors.rulesAndRegulations = "Rules and Regulations is required.";
-    if (formData.leaseType === "Fixed") {
+    if (formData.leaseType === "Fixed-Term") {
       if (!formData.contractDetails.moveInDate)
         newErrors.moveInDate = "Move-in date is required.";
       if (!formData.contractDetails.moveOutDate)
@@ -696,7 +696,7 @@ const CreateLease = ({ seekerId }) => {
                     : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
                 }`}
               >
-                <option value="Fixed">Fixed</option>
+                <option value="Fixed-Term">Fixed-Term</option>
                 <option value="Month-to-Month">Month-to-Month</option>
               </select>
             </div>

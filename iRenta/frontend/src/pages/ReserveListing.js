@@ -10,15 +10,15 @@ import { ThemeContext } from "../contexts/ThemeContext.js"; // Import ThemeConte
 import { useProperty } from "../global/contexts/PropertyContext";
 
 const ReserveListing = () => {
-  const [reservations, setReservations] = useState([]); // List of reserved properties
-  const [showPopout, setShowPopout] = useState(false); // Toggle Popout visibility
-  const [activeProperty, setActiveProperty] = useState(null); // Track the active property
-  const [requestDetails, setRequestDetails] = useState(null); // Add state for request details
+  const [reservations, setReservations] = useState([]);
+  const [showPopout, setShowPopout] = useState(false);
+  const [activeProperty, setActiveProperty] = useState(null);
+  const [requestDetails, setRequestDetails] = useState(null);
   const { setSelectedProperty } = useProperty();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext); // Access user from AuthContext
-  const { darkMode } = useContext(ThemeContext); // Access darkMode from ThemeContext
-  const isOwner = user?.userType === "Owner"; // Determine if the user is an Owner
+  const { user } = useContext(AuthContext);
+  const { darkMode } = useContext(ThemeContext);
+  const isOwner = user?.userType === "Owner";
 
   useEffect(() => {
     const fetchData = async () => {

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../global/contexts/AuthContext";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { fetchPayments, createPayment } from "../../global/api/Payments";
-import { fetchRentDatesByLease } from "../../global/api/RentDates";
 import { getCurrentTenant } from "../../global/api/Tenants";
 
 const RentPayments = () => {
@@ -14,20 +13,30 @@ const RentPayments = () => {
   const [rentDates, setRentDates] = useState([]);
   const [selectedRentDate, setSelectedRentDate] = useState(null);
   const [tenantDetails, setTenantDetails] = useState(null);
+  const [errors, setErrors] = useState({
+    loading: '',
+    fetch: '',
+    payment: '',
+    general: ''
+  });
 
   const loadPayments = async () => {
+    setErrors(prev => ({...prev, loading: ''}));
     try {
       const data = await fetchPayments();
       setPayments(data);
     } catch (error) {
-      console.error("Error loading payments:", error);
+      setErrors(prev => ({
+        ...prev, 
+        loading: error.message || 'Error loading payments'
+      }));
     }
   };
 
   const loadTenantAndRentDates = async () => {
+    setErrors(prev => ({...prev, fetch: ''}));
     try {
       setIsLoading(true);
-      // First fetch tenant details
       const tenant = await getCurrentTenant();
       setTenantDetails(tenant);
 
@@ -35,11 +44,13 @@ const RentPayments = () => {
         setRentDates(tenant.rentDates);
       }
 
-      // Fetch payments
       const paymentsData = await fetchPayments(user?._id);
       setPayments(paymentsData);
     } catch (error) {
-      console.error("Error loading tenant and rent dates:", error);
+      setErrors(prev => ({
+        ...prev,
+        fetch: error.message || 'Error loading tenant data'
+      }));
     } finally {
       setIsLoading(false);
     }
@@ -49,13 +60,22 @@ const RentPayments = () => {
     loadTenantAndRentDates();
     loadPayments();
   }, []);
-  
+
   const PaymentModal = () => {
     const [formData, setFormData] = useState({
       paidAmount: selectedRentDate?.baseAmount || "",
       paymentMethod: "Bank Transfer",
       referenceNumber: "",
       remarks: "",
+    });
+
+    const [formErrors, setFormErrors] = useState({
+      rentDate: '',
+      paidAmount: '',
+      paymentMethod: '',
+      referenceNumber: '',
+      remarks: '',
+      submit: ''
     });
 
     useEffect(() => {
@@ -67,40 +87,71 @@ const RentPayments = () => {
       }
     }, [selectedRentDate]);
 
+    const validatePayment = (amount, rentDate) => {
+      return amount >= rentDate.baseAmount;
+    };
+
+    const validateForm = () => {
+      let newErrors = {};
+      let isValid = true;
+
+      if (!selectedRentDate) {
+        newErrors.rentDate = 'Please select a rent period';
+        isValid = false;
+      }
+
+      if (!formData.paidAmount) {
+        newErrors.paidAmount = 'Amount is required';
+        isValid = false;
+      } else if (!validatePayment(formData.paidAmount, selectedRentDate)) {
+        newErrors.paidAmount = `Payment amount must be at least ₱${selectedRentDate.baseAmount}`;
+        isValid = false;
+      }
+
+      if (['Bank Transfer', 'GCash', 'Maya'].includes(formData.paymentMethod) 
+          && !formData.referenceNumber) {
+        newErrors.referenceNumber = `Reference number is required for ${formData.paymentMethod}`;
+        isValid = false;
+      }
+
+      setFormErrors(prevErrors => ({...prevErrors, ...newErrors}));
+      return isValid;
+    };
+
     const handleSubmit = async (e) => {
       e.preventDefault();
+      setFormErrors({});
+      
       try {
-        const tenantId = user._id; // Get from auth context
+        if (!validateForm()) {
+          return;
+        }
+
         const paymentData = {
-          rentDateId: formData.rentDateId,
-          tenantId: tenantId,
+          rentDateId: selectedRentDate._id,
+          tenantId: user._id,
           paidAmount: Number(formData.paidAmount),
           paymentMethod: formData.paymentMethod,
           referenceNumber: formData.referenceNumber || '',
           remarks: formData.remarks || '',
           paymentDate: new Date().toISOString()
         };
-    
-        console.log('Submitting payment data:', paymentData);
-    
-        const response = await createPayment(paymentData);
-        console.log('Payment response:', response);
+
+        await createPayment(paymentData);
         setShowPaymentModal(false);
-        loadPayments();
-        loadTenantAndRentDates();
+        await Promise.all([loadPayments(), loadTenantAndRentDates()]);
       } catch (error) {
-        console.error("Error submitting payment:", error);
+        setFormErrors(prev => ({
+          ...prev,
+          submit: error.message || 'Failed to process payment'
+        }));
       }
     };
 
     if (rentDates.length === 0) {
       return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className={`${
-              darkMode ? "bg-gray-800" : "bg-white"
-            } p-6 rounded-lg`}
-          >
+          <div className={`${darkMode ? "bg-gray-800" : "bg-white"} p-6 rounded-lg`}>
             <p>No rent dates available</p>
             <button
               onClick={() => setShowPaymentModal(false)}
@@ -115,14 +166,16 @@ const RentPayments = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div
-          className={`${
-            darkMode ? "bg-gray-800" : "bg-white"
-          } p-6 rounded-lg w-96`}
-        >
+        <div className={`${darkMode ? "bg-gray-800" : "bg-white"} p-6 rounded-lg w-96`}>
           <h3 className="text-lg font-semibold mb-4">Make Payment</h3>
+          
+          {formErrors.submit && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+              {formErrors.submit}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Rent Date Selection */}
             <div>
               <label className="block text-sm mb-1">Rent Period</label>
               <select
@@ -132,11 +185,11 @@ const RentPayments = () => {
                     (date) => date._id === e.target.value
                   );
                   setSelectedRentDate(selected);
+                  setFormErrors(prev => ({...prev, rentDate: ''}));
                 }}
                 className={`w-full p-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  formErrors.rentDate ? 'border-red-500' :
+                  darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
                 required
               >
@@ -145,51 +198,58 @@ const RentPayments = () => {
                   .filter((date) => !date.payment && date.status !== "Paid")
                   .map((date) => (
                     <option key={date._id} value={date._id}>
-                      {`${new Date(
-                        date.rentDate
-                      ).toLocaleDateString()} - ${new Date(
+                      {`${new Date(date.rentDate).toLocaleDateString()} - ${new Date(
                         date.endDate
                       ).toLocaleDateString()}`}
                       {` (₱${date.baseAmount.toFixed(2)})`}
                     </option>
                   ))}
               </select>
+              {formErrors.rentDate && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.rentDate}</p>
+              )}
             </div>
+
             <div>
               <label className="block text-sm mb-1">Amount to Pay</label>
               <input
                 type="number"
                 value={formData.paidAmount}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData({
                     ...formData,
                     paidAmount: parseFloat(e.target.value),
-                  })
-                }
+                  });
+                  setFormErrors(prev => ({...prev, paidAmount: ''}));
+                }}
                 className={`w-full p-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  formErrors.paidAmount ? 'border-red-500' :
+                  darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
                 required
               />
+              {formErrors.paidAmount && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.paidAmount}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm mb-1">Payment Method</label>
               <select
                 value={formData.paymentMethod}
-                onChange={(e) =>
-                  setFormData({ ...formData, paymentMethod: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, paymentMethod: e.target.value });
+                  setFormErrors(prev => ({...prev, paymentMethod: ''}));
+                }}
                 className={`w-full p-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  formErrors.paymentMethod ? 'border-red-500' :
+                  darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
                 required
               >
                 <option value="Bank Transfer">Bank Transfer</option>
+                <option value="GCash">GCash</option>
+                <option value="Maya">Maya</option>
                 <option value="Cash">Cash</option>
               </select>
             </div>
@@ -199,28 +259,30 @@ const RentPayments = () => {
               <input
                 type="text"
                 value={formData.referenceNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, referenceNumber: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, referenceNumber: e.target.value });
+                  setFormErrors(prev => ({...prev, referenceNumber: ''}));
+                }}
                 className={`w-full p-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  formErrors.referenceNumber ? 'border-red-500' :
+                  darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
               />
+              {formErrors.referenceNumber && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.referenceNumber}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm mb-1">Remarks</label>
               <textarea
                 value={formData.remarks}
-                onChange={(e) =>
-                  setFormData({ ...formData, remarks: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, remarks: e.target.value });
+                  setFormErrors(prev => ({...prev, remarks: ''}));
+                }}
                 className={`w-full p-2 rounded border ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
                 rows="3"
               />
@@ -248,6 +310,7 @@ const RentPayments = () => {
       </div>
     );
   };
+
   const calculateTotalPaid = () => {
     return payments
       .filter((payment) => payment.status === "Confirmed")
@@ -262,11 +325,19 @@ const RentPayments = () => {
   };
 
   return (
-    <div
-      className={`rounded-lg ${
-        darkMode ? "bg-gray-800" : "bg-white"
-      } p-6 shadow`}
-    >
+    <div className={`rounded-lg ${darkMode ? "bg-gray-800" : "bg-white"} p-6 shadow`}>
+      {errors.general && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errors.general}
+        </div>
+      )}
+      
+      {errors.fetch && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errors.fetch}
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold">Payment Summary</h3>
         <button

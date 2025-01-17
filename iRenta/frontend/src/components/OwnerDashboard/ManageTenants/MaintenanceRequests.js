@@ -40,9 +40,6 @@ const MaintenanceRequests = () => {
 
     loadRequests();
     
-    // Set up periodic refresh
-    const refreshInterval = setInterval(loadRequests, 30000);
-    return () => clearInterval(refreshInterval);
   }, []);
 
   // Show loading state

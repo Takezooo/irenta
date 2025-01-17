@@ -1,20 +1,20 @@
-// frontend/src/components/OwnerDashboard/ManageTenants/ManageTenant.js
 import React, { useState, useEffect, useContext } from "react";
-import { Waitlist } from "./WaitList";
+import { AuthContext } from "../../../global/contexts/AuthContext";
 import { ThemeContext } from "../../../contexts/ThemeContext";
 import { fetchTenantList } from "../../../global/api/Tenants";
 import { fetchRentDatesByLease } from "../../../global/api/RentDates";
-import { fetchPayments } from "../../../global/api/Payments";
-import { fetchSpecificList } from "../../../global/api/Listings";
+import { fetchLandlordPayments } from "../../../global/api/Payments";
+import { Waitlist } from "./WaitList";
 
 const TenantsList = () => {
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("current");
   const [tenants, setTenants] = useState(() => {
-    const saved = localStorage.getItem('tenants');
+    const saved = localStorage.getItem("tenants");
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const [rentDates, setRentDates] = useState({});
   const [payments, setPayments] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState("all");
@@ -25,9 +25,8 @@ const TenantsList = () => {
       try {
         // Fetch tenants
         const tenantsData = await fetchTenantList();
-        console.log(tenantsData);
         setTenants(tenantsData);
-  
+
         // Fetch properties
         const propertyTitles = [
           ...new Set(tenantsData.map((tenant) => tenant.propertyId.title)),
@@ -40,20 +39,20 @@ const TenantsList = () => {
           rentDatesData[tenant.leaseId] = dates;
         }
         setRentDates(rentDatesData);
-  
+
         // Fetch payments
-        const paymentsData = await fetchPayments();
+        const paymentsData = await fetchLandlordPayments(user?._id);
         setPayments(paymentsData);
       } catch (error) {
         console.error("Error loading tenant data:", error);
       }
     };
-  
+
     loadData();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('tenants', JSON.stringify(tenants));
+    localStorage.setItem("tenants", JSON.stringify(tenants));
   }, [tenants]);
 
   const filteredTenants =
@@ -217,7 +216,6 @@ const TenantsList = () => {
             >
               <tr>
                 <th className="px-6 py-3 text-left">Tenant</th>
-                <th className="px-6 py-3 text-left">Property</th>
                 <th className="px-6 py-3 text-left">Payment Date</th>
                 <th className="px-6 py-3 text-left">Amount</th>
                 <th className="px-6 py-3 text-left">Status</th>
@@ -227,10 +225,10 @@ const TenantsList = () => {
               {payments.map((payment) => (
                 <tr key={payment._id}>
                   <td className="px-6 py-4">
-                    {payment.tenantId.seekerId.info.firstName}{" "}
-                    {payment.tenantId.seekerId.info.lastName}
+                    {payment.tenantId?.info.firstName}{" "}
+                    {payment.tenantId?.info.lastName}
                   </td>
-                  <td className="px-6 py-4">{payment.propertyId.title}</td>
+                  {/* <td className="px-6 py-4">{payment.propertyId.title}</td> */}
                   <td className="px-6 py-4">
                     {new Date(payment.paymentDate).toLocaleDateString()}
                   </td>

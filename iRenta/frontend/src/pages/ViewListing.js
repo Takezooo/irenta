@@ -40,8 +40,6 @@ export const ViewListing = () => {
     libraries: LIBRARIES, // Pass static array
   });
 
-
-
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {

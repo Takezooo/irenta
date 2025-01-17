@@ -30,7 +30,6 @@ const CreateLease = ({ seekerId }) => {
       try {
         const data = await fetchOwnerListings();
         setListings(data);
-        console.log(data);
       } catch (err) {
         console.error("Failed to fetch listings:", err);
       }

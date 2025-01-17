@@ -31,13 +31,6 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  // const [userProfile, setUserProfile] = useState({
-  //   info: {
-  //     firstName: "",
-  //     lastName: "",
-  //     profile: { link: "" },
-  //   },
-  // });
 
   const storedToken = GetToken();
   const notifRef = useRef(null);
@@ -63,31 +56,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   };
 
   useEffect(() => {
-    console.log("Dark mode:", darkMode);
-  }, [darkMode]);
-
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     if (user?.id) {
-  //       try {
-  //         const user_data = await fetchUserData(user.id, storedToken);
-  //         setUserProfile(user_data);
-  //       } catch (err) {
-  //         console.error("Failed to fetch user data:", err);
-  //       }
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [user, storedToken]);
-
-  useEffect(() => {
     if (user?.id) {
-      console.log(`Subscribing to notifications for user ${user.id}`);
       subscribeToNotifications(user.id); // Subscribe to user's room
 
       socket.on("newNotification", (notification) => {
-        console.log("Received notification:", notification); // Debug log
         setNotifications((prev) => [notification, ...prev]);
         setUnreadCount((prev) => prev + 1); // Increment unread count
       });

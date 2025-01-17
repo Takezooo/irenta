@@ -18,7 +18,6 @@ const ReservePopout = ({
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
   const [isLoading, setIsLoading] = useState(false);
   const [validIdBase64, setValidIdBase64] = useState("");
-  // const [reservation, setReservation] = useState(null);
   const navigate = useNavigate();
 
   const dummyProperty = {

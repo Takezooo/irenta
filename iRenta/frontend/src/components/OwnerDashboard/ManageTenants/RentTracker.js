@@ -31,19 +31,8 @@ const PaymentStatus = ({ status }) => {
   );
 };
 
-// Refresh Button Component
-const RefreshButton = ({ onRefresh, isLoading }) => (
-  <button
-    onClick={onRefresh}
-    disabled={isLoading}
-    className="p-2 rounded hover:bg-gray-100 disabled:opacity-50"
-  >
-    {isLoading ? "Refreshing..." : "Refresh"}
-  </button>
-);
-
 const RentTracker = () => {
-  const {user} = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
   const [tenants, setTenants] = useState([]);
   const [rentDates, setRentDates] = useState({});
@@ -51,19 +40,24 @@ const RentTracker = () => {
   const [selectedProperty, setSelectedProperty] = useState("all");
   const [properties, setProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPaymentHistoryModal, setShowPaymentHistoryModal] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState(null);
+  const [errors, setErrors] = useState({
+    fetch: "",
+    payment: "",
+    confirmation: "",
+    general: "",
+  });
 
   const loadData = async () => {
     setIsLoading(true);
-    setError(null);
+    setErrors((prev) => ({ ...prev, fetch: "" }));
     try {
       // Fetch all data in parallel
       const [tenantsData, paymentsData] = await Promise.all([
         fetchTenantList(),
-        fetchLandlordPayments(user?._id)
+        fetchLandlordPayments(user?._id),
       ]);
 
       if (!tenantsData || !paymentsData) {
@@ -72,7 +66,6 @@ const RentTracker = () => {
 
       setTenants(tenantsData);
       setPayments(paymentsData);
-
       // Fetch rent dates for each tenant
       const rentDatesPromises = tenantsData.map((tenant) =>
         fetchRentDatesByLease(tenant.leaseId._id)
@@ -93,7 +86,10 @@ const RentTracker = () => {
       ];
       setProperties(uniqueProperties);
     } catch (error) {
-      setError(error.message);
+      setErrors((prev) => ({
+        ...prev,
+        fetch: error.message || "Failed to load rent tracker data",
+      }));
       console.error("Error loading rent tracker data:", error);
     } finally {
       setIsLoading(false);
@@ -103,41 +99,32 @@ const RentTracker = () => {
   const handleConfirmPayment = async (paymentId) => {
     try {
       await updatePaymentStatus(paymentId, "Confirmed");
-      await loadData();
     } catch (error) {
-      console.error("Error confirming payment:", error);
+      setErrors((prev) => ({
+        ...prev,
+        confirmation: error.message || "Failed to confirm payment",
+      }));
     }
   };
 
   const getPaymentsForTenant = (tenantId) => {
-    console.log('Fetching payments for tenant:', tenantId);
-    console.log('Available payments:', payments);
-    
-    return payments.filter(payment => {
+    return payments.filter((payment) => {
       // Check both the populated and unpopulated tenantId
       const paymentTenantId = payment.tenantId?._id || payment.tenantId;
-      console.log('Payment tenant ID:', paymentTenantId);
-      
       // Convert both IDs to strings for comparison
       const paymentIdStr = String(paymentTenantId);
       const tenantIdStr = String(tenantId);
-      
-      console.log('Comparing:', paymentIdStr, 'with:', tenantIdStr);
       return paymentIdStr === tenantIdStr;
     });
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
       try {
         const [tenantsData, paymentsData] = await Promise.all([
           fetchTenantList(),
           fetchLandlordPayments(user?._id),
         ]);
-
-        console.log("Fetched payments:", paymentsData); // Add logging
 
         if (!tenantsData || !paymentsData) {
           throw new Error("Failed to load data");
@@ -146,11 +133,11 @@ const RentTracker = () => {
         setTenants(tenantsData);
         setPayments(paymentsData);
         loadData();
-        const refreshInterval = setInterval(loadData, 30000);
-        return () => clearInterval(refreshInterval);
       } catch (error) {
-        console.error("Error in fetchData:", error);
-        setError(error.message);
+        setErrors((prev) => ({
+          ...prev,
+          fetch: error.message || "Error in fetchData",
+        }));
       } finally {
         setIsLoading(false);
       }
@@ -160,22 +147,9 @@ const RentTracker = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <p className="text-red-500 mb-4">Error: {error}</p>
-        <button
-          onClick={loadData}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
       </div>
     );
   }
@@ -199,10 +173,20 @@ const RentTracker = () => {
 
   return (
     <div className={`pt-20 pb-4 p-6 ${darkMode ? "text-white" : "text-black"}`}>
-      {/* Header with Refresh Button */}
+      {errors.general && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errors.general}
+        </div>
+      )}
+
+      {errors.fetch && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          {errors.fetch}
+        </div>
+      )}
+      {/* Header with  Button */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Rent Tracker</h2>
-        <RefreshButton onRefresh={loadData} isLoading={isLoading} />
       </div>
 
       {/* Stats Overview */}
@@ -341,6 +325,12 @@ const RentTracker = () => {
         </div>
       )}
 
+      {errors.confirmation && (
+        <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
+          {errors.confirmation}
+        </div>
+      )}
+
       {showPaymentHistoryModal && (
         <PaymentHistoryModal
           selectedTenant={selectedTenant}
@@ -357,7 +347,7 @@ const RentTracker = () => {
           setShowPaymentModal={setShowPaymentModal}
           darkMode={darkMode}
           rentDates={rentDates}
-          loadData={loadData}
+          // loadData={loadData}
         />
       )}
     </div>
@@ -371,14 +361,37 @@ const PaymentHistoryModal = ({
   darkMode,
   onConfirmPayment,
 }) => {
-  console.log('Selected tenant:', selectedTenant);
-  console.log('Payment history data:', payments);
+  const [modalErrors, setModalErrors] = useState({
+    confirmation: "",
+  });
+
+  const handleConfirm = async (paymentId) => {
+    setModalErrors({ confirmation: "" });
+    try {
+      await onConfirmPayment(paymentId);
+    } catch (error) {
+      setModalErrors({
+        confirmation: error.message || "Failed to confirm payment",
+      });
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`${darkMode ? "bg-gray-800" : "bg-white"} p-6 rounded-lg w-[800px]`}>
+      <div
+        className={`${
+          darkMode ? "bg-gray-800" : "bg-white"
+        } p-6 rounded-lg w-[800px]`}
+      >
         <h3 className="text-lg font-semibold mb-4">
           Payment History - {selectedTenant?.seekerId?.info?.firstName}
         </h3>
+
+        {modalErrors.confirmation && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+            {modalErrors.confirmation}
+          </div>
+        )}
 
         {payments && payments.length > 0 ? (
           <div className="overflow-x-auto">
@@ -443,7 +456,6 @@ const PaymentModal = ({
   setShowPaymentModal,
   darkMode,
   rentDates,
-  loadData,
 }) => {
   const [formData, setFormData] = useState({
     paidAmount: "",
@@ -454,7 +466,14 @@ const PaymentModal = ({
     status: "Pending",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({
+    rentDateId: "",
+    paidAmount: "",
+    paymentMethod: "",
+    referenceNumber: "",
+    remarks: "",
+    general: "", // For general errors
+  });
 
   const validatePayment = (amount, rentDate) => {
     return amount >= rentDate.baseAmount;
@@ -463,15 +482,31 @@ const PaymentModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
+    let newErrors = {};
 
     try {
+      if (!formData.rentDateId) {
+        newErrors.rentDateId = "Please select a rent period";
+      }
+
+      if (
+        ["Bank Transfer", "GCash", "Maya"].includes(formData.paymentMethod) &&
+        !formData.referenceNumber
+      ) {
+        newErrors.referenceNumber = `Reference number is required for ${formData.paymentMethod}`;
+      }
+
       const selectedRentDate = rentDates[selectedTenant.leaseId._id].find(
         (date) => date._id === formData.rentDateId
       );
 
       if (!validatePayment(formData.paidAmount, selectedRentDate)) {
-        throw new Error("Payment amount must be at least the base amount");
+        newErrors.paidAmount = `Payment amount must be at least ₱${selectedRentDate.baseAmount}`;
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
       }
 
       await createPayment({
@@ -481,10 +516,10 @@ const PaymentModal = ({
       });
 
       setShowPaymentModal(false);
-      await loadData();
     } catch (error) {
-      setError(error.message);
-      console.error("Error submitting payment:", error);
+      setErrors({
+        general: error.message || "An error occurred while processing payment",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -506,13 +541,18 @@ const PaymentModal = ({
           Record Payment for {selectedTenant?.seekerId.info.firstName}
         </h3>
 
-        {error && (
+        {errors.general && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-            {error}
+            {errors.general}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.general && (
+            <div className="p-2 bg-red-100 text-red-700 rounded text-sm">
+              {errors.general}
+            </div>
+          )}
           <div>
             <label className="block text-sm mb-1">Rent Period</label>
             <select
@@ -539,25 +579,9 @@ const PaymentModal = ({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Payment Status</label>
-            <select
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
-              }
-              className={`w-full p-2 rounded border ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-              }`}
-              required
-            >
-              <option value="Pending">Pending</option>
-              <option value="Confirmed">Confirmed</option>
-            </select>
+            {errors.rentDateId && (
+              <p className="text-red-500 text-xs mt-1">{errors.rentDateId}</p>
+            )}
           </div>
 
           <div>
@@ -577,6 +601,9 @@ const PaymentModal = ({
               min="0"
               step="0.01"
             />
+            {errors.paidAmount && (
+              <p className="text-red-500 text-xs mt-1">{errors.paidAmount}</p>
+            )}
           </div>
 
           <div>
@@ -594,9 +621,9 @@ const PaymentModal = ({
               required
             >
               <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Cash">Cash</option>
               <option value="GCash">GCash</option>
               <option value="Maya">Maya</option>
+              <option value="Cash">Cash</option>
             </select>
           </div>
 
@@ -614,6 +641,11 @@ const PaymentModal = ({
                   : "bg-white border-gray-300"
               }`}
             />
+            {errors.referenceNumber && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.referenceNumber}
+              </p>
+            )}
           </div>
 
           <div>

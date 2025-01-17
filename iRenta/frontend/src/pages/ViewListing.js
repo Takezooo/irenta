@@ -20,20 +20,21 @@ import RenderImage from "../components/Panorama/RenderImage";
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
-
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
   const [location, setLocation] = useState("Bacoor");
   const [ownerData, setOwnerData] = useState([]);
   const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
   const { selectedProperty } = useProperty();
-  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } = useContext(ChatDropdownContext);
+  const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
+    useContext(ChatDropdownContext);
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Use ThemeContext
   const navigate = useNavigate();
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
-  const [propertyImages, setProperyImages] = useState([])
+  const [propertyImages, setProperyImages] = useState([]);
+  console.log(selectedProperty);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
@@ -65,7 +66,7 @@ console.log(selectedProperty)
       try {
         const owner = await fetchOwnerData(selectedProperty?.userId);
         setOwnerData(owner);
-        setProperyImages(selectedProperty?.images)
+        setProperyImages(selectedProperty?.images);
       } catch (error) {
         console.error("Error fetching property owner data:", error);
       }
@@ -148,7 +149,7 @@ console.log(selectedProperty)
   };
 
   const handleReserveListing = async () => {
-    navigate('/request-reservation');
+    navigate("/request-reservation");
   };
 
   useEffect(() => {
@@ -195,7 +196,7 @@ console.log(selectedProperty)
 
         <div className="flex flex-col items-center gap-6">
           {/* Image Gallery */}
-            <RenderImage propertyImages={propertyImages} darkMode={darkMode}/>
+          <RenderImage propertyImages={propertyImages} darkMode={darkMode} />
           {/* Property Details */}
           <div className="flex flex-col lg:flex-row gap-6 w-full lg:w-3/4">
             {/* Details Section */}
@@ -230,6 +231,8 @@ console.log(selectedProperty)
                         darkMode ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
+                      {selectedProperty?.address?.houseNumber}{" "}
+                      {selectedProperty?.address?.street}{" "}
                       {selectedProperty?.address?.city}
                     </p>
                   </div>
@@ -240,7 +243,7 @@ console.log(selectedProperty)
                     }`}
                   >
                     <h3 className="text-lg sm:text-2xl font-semibold mb-4">
-                    ₱ {selectedProperty?.price} / head / month
+                      ₱ {selectedProperty?.price} / head / month
                     </h3>
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">
@@ -315,18 +318,24 @@ console.log(selectedProperty)
                       >
                         Amenities & Inclusions
                       </h4>
-                      <ul
-                        className={`space-y-1 ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        <li>Fully Furnished</li>
-                        <li>6 Bed and Bedframe</li>
-                        <li>Aircon</li>
-                        <li>WiFi / Internet</li>
-                        <li>Electricity Bill</li>
-                        <li>Water Bill</li>
-                      </ul>
+                      {(selectedProperty?.amenities || []).map(
+                        (amenity, index) => (
+                          <div key={index} className="flex items-center">
+                            <svg
+                              className="w-4 h-4 mr-2 text-green-500"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>{amenity}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                     <div>
                       <h4
@@ -334,16 +343,17 @@ console.log(selectedProperty)
                           darkMode ? "text-gray-300" : "text-gray-800"
                         }`}
                       >
-                        Payment Terms
+                        Dorm Details
                       </h4>
                       <ul
                         className={`space-y-1 ${
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        <li>Advance Payment: 1 month</li>
-                        <li>Lease Term: 6 months</li>
-                        <li>Pay Period: Monthly</li>
+                        <li>Bedroom/s: {selectedProperty?.bedroomNumber}</li>
+                        <li>Bathroom/s: {selectedProperty?.bathroomNumber}</li>
+                        <li>Unit Size: {selectedProperty?.propertySize}</li>
+                        <li>Type: {selectedProperty?.type}</li>
                       </ul>
                     </div>
                   </div>
@@ -353,7 +363,7 @@ console.log(selectedProperty)
 
             {/* Nearby Establishments */}
             <div className="w-full lg:w-1/3 flex flex-col gap-6">
-              <div
+              {/* <div
                 className={`rounded-lg shadow-md p-4 ${
                   darkMode
                     ? "bg-gray-800 text-gray-300"
@@ -370,7 +380,7 @@ console.log(selectedProperty)
                   <li>Simbahan</li>
                   <li>SM</li>
                 </ul>
-              </div>
+              </div> */}
 
               {/* Property Owner */}
               <div
@@ -434,42 +444,45 @@ console.log(selectedProperty)
           >
             <h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
             <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
-            {selectedProperty?.address?.lng && selectedProperty?.address?.lat && (
-              <GoogleMap
-                center={{
-                  lat: selectedProperty.address.lat, 
-                  lng: selectedProperty.address.lng
-                }}
-                zoom={17}
-                mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
-                options={{
-                  mapId: "7faff3f15533dffa", 
-                  fullscreenControl: false,
-                  streetViewControl: false,
-                  mapTypeControl: false,
-                  gestureHandling: "none", 
-                  zoomControl: false,
-                  styles: [
-                    {
-                      featureType: "poi",
-                      stylers: [{ visibility: "off" }],
-                    },
-                    {
-                      featureType: "road",
-                      elementType: "labels.icon",
-                      stylers: [{ visibility: "off" }],
-                    },
-                    {
-                      featureType: "transit",
-                      elementType: "labels.icon",
-                      stylers: [{ visibility: "off" }],
-                    },
-                  ],
-                }}
-              >
-                {selectedProperty.address && <MarkerF position={selectedProperty.address} />}
-              </GoogleMap>
-            )}
+              {selectedProperty?.address?.lng &&
+                selectedProperty?.address?.lat && (
+                  <GoogleMap
+                    center={{
+                      lat: selectedProperty.address.lat,
+                      lng: selectedProperty.address.lng,
+                    }}
+                    zoom={17}
+                    mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
+                    options={{
+                      mapId: "7faff3f15533dffa",
+                      fullscreenControl: false,
+                      streetViewControl: false,
+                      mapTypeControl: false,
+                      gestureHandling: "none",
+                      zoomControl: false,
+                      styles: [
+                        {
+                          featureType: "poi",
+                          stylers: [{ visibility: "off" }],
+                        },
+                        {
+                          featureType: "road",
+                          elementType: "labels.icon",
+                          stylers: [{ visibility: "off" }],
+                        },
+                        {
+                          featureType: "transit",
+                          elementType: "labels.icon",
+                          stylers: [{ visibility: "off" }],
+                        },
+                      ],
+                    }}
+                  >
+                    {selectedProperty.address && (
+                      <MarkerF position={selectedProperty.address} />
+                    )}
+                  </GoogleMap>
+                )}
             </div>
           </div>
 

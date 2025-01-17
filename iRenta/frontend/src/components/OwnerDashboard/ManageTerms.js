@@ -12,6 +12,28 @@ import { ThemeContext } from "../../contexts/ThemeContext";
 const TermsManagement = () => {
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
+  <style>
+  {`
+    /* Custom scrollbar styles */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: ${darkMode ? "#374151" : "#f3f4f6"};
+      border-radius: 3px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: ${darkMode ? "#4B5563" : "#CBD5E0"};
+      border-radius: 3px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: ${darkMode ? "#6B7280" : "#A0AEC0"};
+    }
+  `}
+</style>
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [editingTemplateId, setEditingTemplateId] = useState(null);
@@ -238,16 +260,27 @@ const TermsManagement = () => {
           >
             <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
               <tr>
-                {["Title", "Content", "Actions"].map((header) => (
-                  <th
-                    key={header}
-                    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                      darkMode ? "text-gray-300" : "text-gray-600"
-                    }`}
-                  >
-                    {header}
-                  </th>
-                ))}
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Title
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-2/3 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Content
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/12 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -258,17 +291,26 @@ const TermsManagement = () => {
                     darkMode ? "border-gray-700" : "border-gray-200"
                   }`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <strong
-                      className={darkMode ? "text-gray-300" : "text-gray-800"}
+                  <td className="px-6 py-4">
+                    <div className="text-sm break-words">
+                      <strong
+                        className={darkMode ? "text-gray-300" : "text-gray-800"}
+                      >
+                        {template.title}
+                      </strong>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div
+                      className={`text-sm whitespace-pre-wrap break-words max-h-40 overflow-y-auto ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                      style={{ maxWidth: "400px" }} // Adjust this value as needed
                     >
-                      {template.title}
-                    </strong>
+                      {template.content}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {template.content}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4">
                     <button
                       className={`px-4 py-2 rounded text-xs font-bold ${
                         darkMode

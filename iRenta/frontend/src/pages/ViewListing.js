@@ -8,11 +8,17 @@ import { AuthContext } from "../global/contexts/AuthContext";
 import { ThemeContext } from "../contexts/ThemeContext"; // Import ThemeContext
 import { useProperty } from "../global/contexts/PropertyContext";
 import { ChatDropdownContext } from "../global/contexts/ChatDropdownContext";
+import LoadingScreen from "../components/global/Loading";
 import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../global/api/Chats";
 import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
 import { createReservation } from "../global/api/Reservations";
+import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+// import RenderPanorama from "../components/Panorama/Panorama"
+import RenderImage from "../components/Panorama/RenderImage";
+
+const LIBRARIES = ["places"]; // Static array for libraries
 
 export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
@@ -27,6 +33,14 @@ export const ViewListing = () => {
   const navigate = useNavigate();
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
+  const [propertyImages, setProperyImages] = useState([]);
+  console.log(selectedProperty);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
+    libraries: LIBRARIES, // Pass static array
+  });
+console.log(selectedProperty)
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {
@@ -52,6 +66,7 @@ export const ViewListing = () => {
       try {
         const owner = await fetchOwnerData(selectedProperty?.userId);
         setOwnerData(owner);
+        setProperyImages(selectedProperty?.images);
       } catch (error) {
         console.error("Error fetching property owner data:", error);
       }
@@ -134,7 +149,7 @@ export const ViewListing = () => {
   };
 
   const handleReserveListing = async () => {
-    navigate('/request-reservation');
+    navigate("/request-reservation");
   };
 
   useEffect(() => {
@@ -151,6 +166,8 @@ export const ViewListing = () => {
   const closePopup = () => {
     setShowOcularPopup(false);
   };
+
+  if (!isLoaded) return <LoadingScreen />;
 
   return (
     <div
@@ -179,54 +196,7 @@ export const ViewListing = () => {
 
         <div className="flex flex-col items-center gap-6">
           {/* Image Gallery */}
-          <div className="w-full lg:w-3/4">
-            <div className="relative flex flex-col lg:flex-row h-auto lg:h-96 gap-4">
-              {/* Main Image */}
-              <div
-                className={`w-full lg:w-1/2 h-64 lg:h-full rounded-lg shadow-md flex items-center justify-center ${
-                  darkMode ? "bg-gray-800" : "bg-gray-200"
-                }`}
-              >
-                <img
-                  src={
-                    selectedProperty?.images?.[0]?.link || "/placeholder-image.jpg"
-                  }
-                  alt={selectedProperty?.title || "Main Image"}
-                  className="h-full w-full object-cover rounded-lg"
-                />
-              </div>
-              {/* Thumbnail Images */}
-              <div className="grid grid-cols-4 lg:grid-cols-2 gap-4 lg:grid-rows-2 w-full lg:w-1/2">
-                {selectedProperty?.images?.slice(1, 5).map((image, index) => (
-                  <div
-                    key={index}
-                    className={`h-24 lg:h-full rounded-md shadow-md flex items-center justify-center ${
-                      darkMode ? "bg-gray-700" : "bg-gray-300"
-                    }`}
-                  >
-                    <img
-                      src={image.link || "/placeholder-image.jpg"}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="h-full w-full object-cover rounded-md"
-                    />
-                  </div>
-                ))}
-
-                {/* Add placeholders for missing images */}
-                {Array.from({
-                  length: Math.max(0, 4 - (selectedProperty?.images?.length || 0) + 1),
-                }).map((_, index) => (
-                  <div
-                    key={`placeholder-${index}`}
-                    className={`h-24 lg:h-full rounded-md shadow-md ${
-                      darkMode ? "bg-gray-700" : "bg-gray-300"
-                    }`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-          </div>
-
+          <RenderImage propertyImages={propertyImages} darkMode={darkMode} />
           {/* Property Details */}
           <div className="flex flex-col lg:flex-row gap-6 w-full lg:w-3/4">
             {/* Details Section */}
@@ -261,6 +231,8 @@ export const ViewListing = () => {
                         darkMode ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
+                      {selectedProperty?.address?.houseNumber}{" "}
+                      {selectedProperty?.address?.street}{" "}
                       {selectedProperty?.address?.city}
                     </p>
                   </div>
@@ -271,7 +243,7 @@ export const ViewListing = () => {
                     }`}
                   >
                     <h3 className="text-lg sm:text-2xl font-semibold mb-4">
-                    ₱ {selectedProperty?.price} / head / month
+                      ₱ {selectedProperty?.price} / head / month
                     </h3>
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">
@@ -346,18 +318,24 @@ export const ViewListing = () => {
                       >
                         Amenities & Inclusions
                       </h4>
-                      <ul
-                        className={`space-y-1 ${
-                          darkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        <li>Fully Furnished</li>
-                        <li>6 Bed and Bedframe</li>
-                        <li>Aircon</li>
-                        <li>WiFi / Internet</li>
-                        <li>Electricity Bill</li>
-                        <li>Water Bill</li>
-                      </ul>
+                      {(selectedProperty?.amenities || []).map(
+                        (amenity, index) => (
+                          <div key={index} className="flex items-center">
+                            <svg
+                              className="w-4 h-4 mr-2 text-green-500"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>{amenity}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                     <div>
                       <h4
@@ -365,16 +343,17 @@ export const ViewListing = () => {
                           darkMode ? "text-gray-300" : "text-gray-800"
                         }`}
                       >
-                        Payment Terms
+                        Dorm Details
                       </h4>
                       <ul
                         className={`space-y-1 ${
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        <li>Advance Payment: 1 month</li>
-                        <li>Lease Term: 6 months</li>
-                        <li>Pay Period: Monthly</li>
+                        <li>Bedroom/s: {selectedProperty?.bedroomNumber}</li>
+                        <li>Bathroom/s: {selectedProperty?.bathroomNumber}</li>
+                        <li>Unit Size: {selectedProperty?.propertySize}</li>
+                        <li>Type: {selectedProperty?.type}</li>
                       </ul>
                     </div>
                   </div>
@@ -384,7 +363,7 @@ export const ViewListing = () => {
 
             {/* Nearby Establishments */}
             <div className="w-full lg:w-1/3 flex flex-col gap-6">
-              <div
+              {/* <div
                 className={`rounded-lg shadow-md p-4 ${
                   darkMode
                     ? "bg-gray-800 text-gray-300"
@@ -400,9 +379,8 @@ export const ViewListing = () => {
                   <li>Jollibee</li>
                   <li>Simbahan</li>
                   <li>SM</li>
-                  {/* Add more items here */}
                 </ul>
-              </div>
+              </div> */}
 
               {/* Property Owner */}
               <div
@@ -466,12 +444,45 @@ export const ViewListing = () => {
           >
             <h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
             <div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
-              <iframe
-                className="w-full h-full border-none"
-                src={`https://maps.google.com/maps?q=${location}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                allowFullScreen
-                title="Pinned Location Map"
-              ></iframe>
+              {selectedProperty?.address?.lng &&
+                selectedProperty?.address?.lat && (
+                  <GoogleMap
+                    center={{
+                      lat: selectedProperty.address.lat,
+                      lng: selectedProperty.address.lng,
+                    }}
+                    zoom={17}
+                    mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
+                    options={{
+                      mapId: "7faff3f15533dffa",
+                      fullscreenControl: false,
+                      streetViewControl: false,
+                      mapTypeControl: false,
+                      gestureHandling: "none",
+                      zoomControl: false,
+                      styles: [
+                        {
+                          featureType: "poi",
+                          stylers: [{ visibility: "off" }],
+                        },
+                        {
+                          featureType: "road",
+                          elementType: "labels.icon",
+                          stylers: [{ visibility: "off" }],
+                        },
+                        {
+                          featureType: "transit",
+                          elementType: "labels.icon",
+                          stylers: [{ visibility: "off" }],
+                        },
+                      ],
+                    }}
+                  >
+                    {selectedProperty.address && (
+                      <MarkerF position={selectedProperty.address} />
+                    )}
+                  </GoogleMap>
+                )}
             </div>
           </div>
 

@@ -12,7 +12,7 @@ import {
 
 import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
-import ManageTenants from "../OwnerDashboard/Tenants/ManageTenants.js";
+import ManageTenants from "../OwnerDashboard/ManageTenants/ManageTenant.js";
 import OcularVisitCalendar from "../OwnerDashboard/OcularVisitCalendar.js";
 import ManageLease from "../OwnerDashboard/Lease/ManageLease.js";
 import TermsManagement from "../OwnerDashboard/ManageTerms.js";

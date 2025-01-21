@@ -114,12 +114,10 @@ const ManageLease = ({ seekerId }) => {
   };
 
   const handleDownload = (leaseId) => {
-    console.log(filteredLeases);
     if (!leaseId) {
       console.error("Error: leaseId is undefined.");
       return;
     }
-    console.log("Downloading PDF for lease ID:", leaseId);
     downloadPdf(leaseId);
   };
 

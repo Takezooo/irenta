@@ -11,7 +11,7 @@ import Topbar from "../components/global/Topbar";
 const ViewProfile = () => {
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState({
     info: {
       firstName: "",

@@ -22,6 +22,10 @@ app.use(cors({
 
 // Import routes
 import userRoutes from './src/users/users.route.js';
+import tenantRoutes from './src/tenants/tenants.route.js';
+import paymentsRoutes from './src/payments/payments.route.js';
+import maintenanceRoutes from './src/maintenance/maintenance.route.js';
+import rentDatesRoutes from './src/rentdates/rentdates.route.js'
 import listingRoutes from './src/listings/listings.route.js';
 import termRoutes from './src/terms/terms.route.js';
 import leaseRoutes from './src/leases/leases.route.js';
@@ -31,12 +35,17 @@ import chatRoutes from './src/chats/chat.route.js';
 import notifRoutes from './src/notifications/notifications.route.js'
 import mapRoutes from './src/maps/maps.routes.js'
 
-app.use("/api/users", userRoutes);
+app.use('/api/users', userRoutes);
+// anything related to managing tenants
+app.use('/api/tenants', tenantRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/rentdates', rentDatesRoutes);
 
 // anything related to litings
-app.use("/api/listings", listingRoutes);
-app.use("/api/terms", termRoutes);
-app.use("/api/leases", leaseRoutes);
+app.use('/api/listings', listingRoutes);
+app.use('/api/terms', termRoutes);
+app.use('/api/leases', leaseRoutes);
 
 // anything related to interactions with owners
 app.use('/api/chats', chatRoutes);

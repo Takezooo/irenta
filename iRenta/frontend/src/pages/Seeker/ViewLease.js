@@ -2,6 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 import SignaturePad from "react-signature-canvas";
 import { useLocation } from "react-router-dom";
 import { ThemeContext } from "../../contexts/ThemeContext";
+import { AuthContext } from "../../global/contexts/AuthContext";
+import { GetToken } from "../../global/utils/Token";
+import { fetchUserData } from "../../global/api/Users";
+import { registerToWaitlist } from "../../global/api/Tenants";
+import { sendNotification } from "../../global/api/Notifications";
 import {
   fetchLeaseById,
   updateLease,
@@ -21,6 +26,30 @@ const ViewLease = () => {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const signaturePadRef = React.useRef();
   const { darkMode } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
+  const [userProfile, setUserProfile] = useState({
+    info: {
+      firstName: "",
+      lastName: "",
+    },
+  });
+
+  const storedToken = GetToken();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (user?.id) {
+        try {
+          const user_data = await fetchUserData(user.id, storedToken);
+          setUserProfile(user_data);
+        } catch (err) {
+          console.error("Failed to fetch user data:", err);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [user, storedToken]);
 
   useEffect(() => {
     const getLeaseDetails = async () => {
@@ -155,7 +184,26 @@ const ViewLease = () => {
       formData.append("uploadedSignature", signatureFile);
 
       await updateLease(leaseId, formData);
+
+      const tenantData = {
+        seekerId: user.id,
+        propertyId: leaseDetails.property.propertyId,
+        leaseId,
+        landlordId: leaseDetails.landlord, // Use landlord ID from lease details
+      };
+    
+      // Register user as waitlisted and update tenantBadge
+      await registerToWaitlist(tenantData);
+
+      // Send notification to owner
+      await sendNotification(leaseDetails.landlord, {
+        type: "SignedContract",
+        leaseId: leaseId,
+        message: `Lease Agreement has been signed by ${userProfile?.info?.firstName} ${userProfile?.info?.lastName}`,
+      });
+
       alert("Lease updated and sent back to the owner.");
+
       setSignatureFile(null); // Clear temporary file
     } catch (error) {
       console.error("Error submitting lease:", error);

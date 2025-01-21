@@ -2,8 +2,9 @@ import Terms from "./terms.model.js";
 import Listing from "../listings/listings.model.js";
 // Fetch all terms templates
 export const fetchTermsTemplates = async (req, res) => {
+  const {landlordId} = req.params;
   try {
-    const terms = await Terms.find();
+    const terms = await Terms.find({createdBy: landlordId});
     res.status(200).json(terms);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch terms templates" });
@@ -90,4 +91,5 @@ export const attachTermsToListing = async (req, res) => {
     res.status(500).json({ message: "Failed to attach terms to listing." });
   }
 };
+
 

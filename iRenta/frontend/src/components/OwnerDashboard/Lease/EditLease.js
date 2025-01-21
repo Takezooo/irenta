@@ -74,7 +74,6 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
       if (formData.status === "Draft" || formData.status === "Ready") {
         const updatedLease = await updateLease(leaseId, formData);
         alert("Lease updated successfully!");
-        console.log("Updated lease:", updatedLease);
         onLeaseUpdated();
       } else {
         alert("Only leases with status 'Pending' can be edited.");

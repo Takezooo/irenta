@@ -1,26 +1,56 @@
 import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../global/contexts/AuthContext.js";
 import {
   fetchTermsTemplates,
   createTermsTemplate,
   updateTermsTemplate,
+  attachTermsToListing,
 } from "../../global/api/Terms.js";
-import { attachTermsToListing } from "../../global/api/Terms.js"; // API to attach terms to listings
+import { fetchOwnerListings } from "../../global/api/Listings.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 const TermsManagement = () => {
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext); // Access ThemeContext for dark mode
+  <style>
+  {`
+    /* Custom scrollbar styles */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: ${darkMode ? "#374151" : "#f3f4f6"};
+      border-radius: 3px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: ${darkMode ? "#4B5563" : "#CBD5E0"};
+      border-radius: 3px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: ${darkMode ? "#6B7280" : "#A0AEC0"};
+    }
+  `}
+</style>
   const [termsTemplates, setTermsTemplates] = useState([]);
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [listings, setListings] = useState([]); // Listings fetched from backend
   const [selectedListingId, setSelectedListingId] = useState(""); // Selected listing for attaching terms
   const [selectedTermsId, setSelectedTermsId] = useState(""); // Selected terms template for attaching
-
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    listing: "",
+    terms: "",
+  });
   // Fetch terms templates and listings
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const templates = await fetchTermsTemplates();
+        const templates = await fetchTermsTemplates(user._id);
         setTermsTemplates(templates);
       } catch (error) {
         console.error("Failed to fetch terms templates:", error);
@@ -29,8 +59,7 @@ const TermsManagement = () => {
 
     const fetchListings = async () => {
       try {
-        const response = await fetch("/api/listings"); // Adjust API route if needed
-        const data = await response.json();
+        const data = await fetchOwnerListings();
         setListings(data);
       } catch (error) {
         console.error("Failed to fetch listings:", error);
@@ -43,6 +72,16 @@ const TermsManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+
+    if (!formData.title.trim()) {
+      setErrors((prev) => ({ ...prev, title: "Title is required" }));
+      return;
+    }
+    if (!formData.content.trim()) {
+      setErrors((prev) => ({ ...prev, content: "Content is required" }));
+      return;
+    }
 
     try {
       if (editingTemplateId) {
@@ -58,7 +97,10 @@ const TermsManagement = () => {
       const updatedTemplates = await fetchTermsTemplates();
       setTermsTemplates(updatedTemplates);
     } catch (error) {
-      console.error("Failed to save terms template:", error);
+      setErrors((prev) => ({
+        ...prev,
+        submit: error.response?.data?.message || "Failed to save template",
+      }));
     }
   };
 
@@ -74,8 +116,17 @@ const TermsManagement = () => {
 
   // Handle attaching terms to a listing
   const handleAttachTerms = async () => {
-    if (!selectedListingId || !selectedTermsId) {
-      alert("Please select both a listing and a terms template.");
+    setErrors({}); // Clear previous errors
+
+    if (!selectedListingId) {
+      setErrors((prev) => ({ ...prev, listing: "Please select a listing" }));
+      return;
+    }
+    if (!selectedTermsId) {
+      setErrors((prev) => ({
+        ...prev,
+        terms: "Please select a terms template",
+      }));
       return;
     }
 
@@ -135,6 +186,9 @@ const TermsManagement = () => {
                   : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             />
+            {errors.title && (
+              <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+            )}
           </div>
           <div>
             <label
@@ -157,6 +211,9 @@ const TermsManagement = () => {
                   : "bg-white text-black border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             ></textarea>
+            {errors.content && (
+              <p className="text-red-500 text-xs mt-1">{errors.content}</p>
+            )}
           </div>
           <div className="flex gap-4">
             <button
@@ -203,16 +260,27 @@ const TermsManagement = () => {
           >
             <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
               <tr>
-                {["Title", "Content", "Actions"].map((header) => (
-                  <th
-                    key={header}
-                    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-                      darkMode ? "text-gray-300" : "text-gray-600"
-                    }`}
-                  >
-                    {header}
-                  </th>
-                ))}
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/4 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Title
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-2/3 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Content
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-1/12 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -223,17 +291,26 @@ const TermsManagement = () => {
                     darkMode ? "border-gray-700" : "border-gray-200"
                   }`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <strong
-                      className={darkMode ? "text-gray-300" : "text-gray-800"}
+                  <td className="px-6 py-4">
+                    <div className="text-sm break-words">
+                      <strong
+                        className={darkMode ? "text-gray-300" : "text-gray-800"}
+                      >
+                        {template.title}
+                      </strong>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div
+                      className={`text-sm whitespace-pre-wrap break-words max-h-40 overflow-y-auto ${
+                        darkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                      style={{ maxWidth: "400px" }} // Adjust this value as needed
                     >
-                      {template.title}
-                    </strong>
+                      {template.content}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {template.content}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4">
                     <button
                       className={`px-4 py-2 rounded text-xs font-bold ${
                         darkMode
@@ -296,6 +373,9 @@ const TermsManagement = () => {
                 </option>
               ))}
             </select>
+            {errors.listing && (
+              <p className="text-red-500 text-xs mt-1">{errors.listing}</p>
+            )}
           </div>
           <div>
             <label
@@ -321,6 +401,9 @@ const TermsManagement = () => {
                 </option>
               ))}
             </select>
+            {errors.terms && (
+              <p className="text-red-500 text-xs mt-1">{errors.terms}</p>
+            )}
           </div>
         </div>
         <button

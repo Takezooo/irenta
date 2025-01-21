@@ -1,30 +1,32 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 //change the listing model
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
   type: { type: String, required: true },
-  bedroomNumber: { type: Number},
-  bathroomNumber: { type: Number},
-  propertySize: { type: String, required: true},
+  bedroomNumber: { type: Number },
+  bathroomNumber: { type: Number },
+  propertySize: { type: String, required: true },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference the User model
+    ref: "User", // Reference the User model
     required: true,
   },
-  images: [{
-    id: { type: String },
-    name: { type: String },
-    link: { type: String },
-  }],
+  images: [
+    {
+      id: { type: String },
+      name: { type: String },
+      link: { type: String },
+    },
+  ],
   address: {
     houseNumber: { type: String, required: true },
     street: { type: String, required: true },
     city: { type: String, required: true },
     zip: { type: String },
-    lng: { type: String },
-    lat: { type: String },
+    lng: { type: Number },
+    lat: { type: Number },
   },
   visitAvailability: {
     startTime: { type: String }, // e.g., "09:00"
@@ -40,6 +42,7 @@ const listingSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  onHold: { type: Boolean, default: false }, // set to true someone reserved
   askForValidId: {
     type: Boolean,
     default: false,

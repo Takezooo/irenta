@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token";
 
-const API_BASE_URL = "http://localhost:5000/api/ocular";
+const API_BASE_URL = "https://irenta-production.up.railway.app/api/ocular";
 
 export const scheduleOcularVisit = async (propertyId, date, time) => {
   const authToken = GetToken();

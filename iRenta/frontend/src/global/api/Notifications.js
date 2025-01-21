@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token";
 
-const API_BASE_URL = "http://localhost:5000/api/notifications";
+const API_BASE_URL = "https://irenta-production.up.railway.app/api/notifications";
 
 export const fetchNotifications = async () => {
   const authToken = GetToken();

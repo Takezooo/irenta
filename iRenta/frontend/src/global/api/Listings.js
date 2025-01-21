@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token.js";
 
-const API_BASE_URL = "http://localhost:5000/api/listings"; // Update with your backend API endpoint
+const API_BASE_URL = "https://irenta-production.up.railway.app/api/listings"; // Update with your backend API endpoint
 
 export const fetchListings = async () => {
   try {

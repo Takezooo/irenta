@@ -12,7 +12,7 @@ export const NotificationProvider = ({ children }) => {
   const fetchNotifications = async () => {
     const authToken = GetToken();
     try {
-      const { data } = await axios.get('http://localhost:5000/api/notifications', {
+      const { data } = await axios.get('https://irenta-production.up.railway.app/api/notifications', {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       setNotifications(data);
@@ -26,7 +26,7 @@ export const NotificationProvider = ({ children }) => {
     const authToken = GetToken();
     try {
       await axios.post(
-        'http://localhost:5000/api/notifications/mark-as-viewed',
+        'https://irenta-production.up.railway.app/api/notifications/mark-as-viewed',
         { notificationId },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );

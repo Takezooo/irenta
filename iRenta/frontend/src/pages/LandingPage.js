@@ -486,7 +486,7 @@ const LandingPage = () => {
       <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
         <div className="h-28 w-28 p-2 bg-gray-100 rounded-lg flex items-center justify-center shadow-md mr-6">
           <img
-            src="../assets/images/iRenta.png"
+            src="./assets/images/iRenta.png"
             className="h-full"
             alt="iRenta Logo"
           />

@@ -5,7 +5,7 @@ export const Footer = () => {
     <footer 
     className="bg-blue-900 text-white py-8"
     style={{ 
-      backgroundImage: "../assets/images/bg-overlay-footer.png", 
+      backgroundImage: "./assets/images/bg-overlay-footer.png", 
       backgroundSize: "cover", 
       backgroundPosition: "center", 
       backgroundBlendMode: "overlay" 
@@ -18,7 +18,7 @@ export const Footer = () => {
       <div className="flex justify-center md:justify-start">
         <div className="w-10 h-12 bg-gray-300 flex items-center justify-center">
           <img
-              src="../../../public/assets/images/iRenta.png"
+              src="./assets/images/iRenta.png"
               className="h-8 me-3"
               alt="iRenta Logo"
           />
@@ -53,7 +53,7 @@ export const Footer = () => {
             <div className="w-50 h-50 flex items-center justify-center">
               <a href="#" className="flex items-center justify-center hover:bg-gray-500 transition rounded-full">
               <img
-                src="../assets/images/facebook-icon.png"
+                src="./assets/images/facebook-icon.png"
                 className="h-25 me-0.5"
                 alt="facebook icon"
               />
@@ -62,7 +62,7 @@ export const Footer = () => {
             <div className="w-50 h-50 flex items-center justify-center">
               <a href="#" className="flex items-center justify-center hover:bg-gray-500 transition rounded-full">
               <img
-                src="../assets/images/instagram-icon.png"
+                src="./assets/images/instagram-icon.png"
                 className="h-25 me-0.5"
                 alt="instagram icon"
               />
@@ -71,7 +71,7 @@ export const Footer = () => {
             <div className="w-50 h-50 flex items-center justify-center">
               <a href="#" className="flex items-center justify-center hover:bg-gray-500 transition rounded-full">
               <img
-                src="../assets/images/x-icon.png"
+                src="./assets/images/x-icon.png"
                 className="h-25 me-0.5"
                 alt="twitter/x icon"
               />

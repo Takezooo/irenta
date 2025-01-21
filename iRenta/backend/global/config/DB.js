@@ -9,7 +9,6 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       ssl: true, // Ensures SSL is enabled
-      sslValidate: false, // Skip SSL certificate validation (optional)
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

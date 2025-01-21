@@ -18,7 +18,7 @@ export const Footer = () => {
       <div className="flex justify-center md:justify-start">
         <div className="w-10 h-12 bg-gray-300 flex items-center justify-center">
           <img
-              src="./assets/images/iRenta.png"
+              src="./assets/images/irenta.png"
               className="h-8 me-3"
               alt="iRenta Logo"
           />

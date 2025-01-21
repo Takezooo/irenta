@@ -151,7 +151,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             )}
             <Link to="/" className="flex ms-2 md:me-24">
               <img
-                src="../assets/images/iRenta.png"
+                src="../../../public/assets/images/iRenta.png"
                 className="h-8 me-3"
                 alt="iRenta Logo"
               />
@@ -425,7 +425,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               )}
               <Link to="/" className="flex flex-shrink-0 ms-2">
                 <img
-                  src="../assets/images/iRenta.png"
+                  src="../../../public/assets/images/iRenta.png"
                   className="h-8 w-auto me-3"
                   alt="iRenta Logo"
                 />

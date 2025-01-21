@@ -15,7 +15,7 @@ const server = http.createServer(app); // Create the HTTP server
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: "https://irenta-9hgap1xxb-takezooos-projects.vercel.app",
+    origin: "https://irenta-takezooos-projects.vercel.app",
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
 })); 

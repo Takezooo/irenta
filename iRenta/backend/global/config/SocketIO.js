@@ -4,7 +4,7 @@ import Chat from "../../src/chats/chat.model.js";
 const socketIO = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "https://irenta-9hgap1xxb-takezooos-projects.vercel.app", // Allow all origins
+      origin: "https://irenta-takezooos-projects.vercel.app", // Allow all origins
       methods: ["GET", "POST"],
     },
   });

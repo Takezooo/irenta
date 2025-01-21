@@ -31,7 +31,6 @@ const LandingPage = () => {
   const { setSelectedProperty } = useProperty();
   const [likedListings, setLikedListings] = useState([]);
   const navigate = useNavigate();
-
   const amenitiesList = [
     "Fully Furnished",
     "6 Bed and Bedframe",
@@ -48,22 +47,26 @@ const LandingPage = () => {
 
   const filterListings = () => {
     let results = [...listings];
-  
+
     // Filter by search query
     if (searchTerm) {
       results = results.filter((listing) =>
         listing.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  
+
     // Filter by price range
     if (minPrice) {
-      results = results.filter((listing) => listing.price >= parseFloat(minPrice));
+      results = results.filter(
+        (listing) => listing.price >= parseFloat(minPrice)
+      );
     }
     if (maxPrice) {
-      results = results.filter((listing) => listing.price <= parseFloat(maxPrice));
+      results = results.filter(
+        (listing) => listing.price <= parseFloat(maxPrice)
+      );
     }
-  
+
     // Filter by selected amenities
     if (selectedAmenities.length > 0) {
       results = results.filter((listing) =>
@@ -72,7 +75,7 @@ const LandingPage = () => {
         )
       );
     }
-  
+
     setFilteredListings(results);
   };
 
@@ -110,11 +113,9 @@ const LandingPage = () => {
     }
   };
 
-
   useEffect(() => {
     filterListings();
   }, [searchTerm, minPrice, maxPrice, selectedAmenities]);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -199,7 +200,10 @@ const LandingPage = () => {
                 />
                 <div className="flex flex-wrap gap-2">
                   {amenitiesList.map((amenity) => (
-                    <label key={amenity} className="flex items-center gap-2 text-sm">
+                    <label
+                      key={amenity}
+                      className="flex items-center gap-2 text-sm"
+                    >
                       <input
                         type="checkbox"
                         value={amenity}
@@ -218,6 +222,16 @@ const LandingPage = () => {
                     </label>
                   ))}
                 </div>
+                <button
+                  onClick={handleBrowseListing}
+                  className={`mt-4 inline-block underline ${
+                    darkMode
+                      ? "text-gray-400 hover:text-gray-200"
+                      : "text-black hover:text-gray-700"
+                  }`}
+                >
+                  See more
+                </button>
               </div>
 
               {/* Listings */}
@@ -234,7 +248,7 @@ const LandingPage = () => {
                     <FaChevronLeft />
                   </button>
                 )}
-              <div
+                <div
                   ref={scrollContainerRef}
                   className="flex overflow-x-hidden space-x-4"
                 >
@@ -302,8 +316,8 @@ const LandingPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
             </div>
-          </div>
           </div>
         </>
       ) : (
@@ -498,7 +512,6 @@ const LandingPage = () => {
 
       <Footer />
     </div>
-    
   );
 };
 

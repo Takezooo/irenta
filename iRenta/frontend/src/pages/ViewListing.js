@@ -244,10 +244,10 @@ export const ViewListing = () => {
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">
                         <button
-                          disabled={user.userType === "Owner"}
+                          disabled={user && user.userType === "Owner"}
                           onClick={handleOpenPopup}
                           className={`${
-                            user.userType === "Owner"
+                            user && user.userType === "Owner"
                               ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
                               : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
                           }`}
@@ -255,10 +255,10 @@ export const ViewListing = () => {
                           Request Visit
                         </button>
                         <button
-                          disabled={user.userType === "Owner"}
+                          disabled={user && user.userType === "Owner"}
                           onClick={handleReserveListing}
                           className={`${
-                            user.userType === "Owner"
+                            user && user.userType === "Owner"
                               ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
                               : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
                           }`}

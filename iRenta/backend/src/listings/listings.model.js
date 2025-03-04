@@ -48,6 +48,7 @@ const listingSchema = new mongoose.Schema({
     default: false,
     required: false,
   },
+  vacant: { type: Numner, default: 0, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

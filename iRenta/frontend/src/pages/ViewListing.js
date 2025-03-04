@@ -263,7 +263,7 @@ export const ViewListing = () => {
                               : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
                           }`}
                         >
-                          Reserve Listing
+                          Book Now
                         </button>
                       </div>
                       <button
@@ -320,7 +320,7 @@ export const ViewListing = () => {
                             >
                               <path d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>{amenity}</span>
+                            <span>{amenity.name}: ₱{amenity.fee}.00</span>
                           </div>
                         )
                       )}
@@ -342,6 +342,7 @@ export const ViewListing = () => {
                         <li>Bathroom/s: {selectedProperty?.bathroomNumber}</li>
                         <li>Unit Size: {selectedProperty?.propertySize}</li>
                         <li>Type: {selectedProperty?.type}</li>
+                        <li>Available Space: {selectedProperty?.vacant}</li>
                       </ul>
                     </div>
                   </div>

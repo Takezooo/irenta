@@ -32,7 +32,12 @@ const listingSchema = new mongoose.Schema({
     startTime: { type: String }, // e.g., "09:00"
     endTime: { type: String }, // e.g., "18:00"
   },
-  amenities: [{ type: String }],
+  amenities: [
+    {
+      name: { type: String, required: true },
+      fee: { type: Number, default: 0 },
+    },
+  ],
   termsAndConditionsId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "TermsAndConditions", // Reference to the Terms schema
@@ -48,7 +53,7 @@ const listingSchema = new mongoose.Schema({
     default: false,
     required: false,
   },
-  vacant: { type: Numner, default: 0, required: true },
+  vacant: { type: Number, default: 0, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

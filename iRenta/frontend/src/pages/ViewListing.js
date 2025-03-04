@@ -24,7 +24,7 @@ export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
   const [location, setLocation] = useState("Bacoor");
   const [ownerData, setOwnerData] = useState([]);
-  const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
+  // const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
   const { selectedProperty } = useProperty();
   const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
     useContext(ChatDropdownContext);
@@ -34,13 +34,11 @@ export const ViewListing = () => {
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
   const [propertyImages, setProperyImages] = useState([]);
-  console.log(selectedProperty);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
     libraries: LIBRARIES, // Pass static array
   });
-console.log(selectedProperty)
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {
@@ -80,7 +78,6 @@ console.log(selectedProperty)
       if (selectedProperty?._id && user) {
         try {
           const result = await checkVisitRequest(selectedProperty._id, user.id);
-          setHasRequestedVisit(result.hasRequestedVisit);
         } catch (error) {
           console.error("Error checking visit request status:", error);
         }
@@ -138,7 +135,6 @@ console.log(selectedProperty)
 
     try {
       await scheduleOcularVisit(propertyId, selectedDate, selectedTime);
-      setHasRequestedVisit(true); // This triggers a re-render
       alert("Request visit scheduled!");
     } catch (err) {
       console.error(
@@ -152,9 +148,9 @@ console.log(selectedProperty)
     navigate("/request-reservation");
   };
 
-  useEffect(() => {
-    setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
-  }, [hasRequestedVisit]);
+  // useEffect(() => {
+  //   setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
+  // }, [hasRequestedVisit]);
 
   const handleOpenPopup = () => {
     if (!user) {
@@ -248,32 +244,24 @@ console.log(selectedProperty)
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">
                         <button
+                          disabled={user.userType === "Owner"}
                           onClick={handleOpenPopup}
-                          disabled={hasRequestedVisit} // Disable based on visit request status
                           className={`${
-                            !hasRequestedVisit
-                              ? "bg-blue-500 text-white hover:bg-blue-600"
-                              : `${
-                                  darkMode
-                                    ? "bg-gray-700 text-gray-500"
-                                    : "bg-gray-300 text-gray-600"
-                                } cursor-not-allowed`
-                          } px-4 py-2 rounded-full`}
+                            user.userType === "Owner"
+                              ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
+                              : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+                          }`}
                         >
                           Request Visit
                         </button>
                         <button
-                          disabled={!hasRequestedVisit} // Disable based on visit request status
+                          disabled={user.userType === "Owner"}
                           onClick={handleReserveListing}
                           className={`${
-                            hasRequestedVisit
-                              ? "bg-blue-500 text-white hover:bg-blue-600"
-                              : `${
-                                  darkMode
-                                    ? "bg-gray-700 text-gray-500"
-                                    : "bg-gray-300 text-gray-600"
-                                } cursor-not-allowed`
-                          } px-4 py-2 rounded-full`}
+                            user.userType === "Owner"
+                              ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
+                              : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+                          }`}
                         >
                           Reserve Listing
                         </button>

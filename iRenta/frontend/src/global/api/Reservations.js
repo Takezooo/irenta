@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token";
 
-const API_BASE_URL = "https://irenta-production.up.railway.app/api/reservations";
+const API_BASE_URL = "http://localhost:5000/api/reservations";
 
 export const createReservation = async (formData) => {
   const authToken = GetToken();

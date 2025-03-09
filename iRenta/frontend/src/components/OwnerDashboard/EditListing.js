@@ -7,7 +7,7 @@ import MapPicker from "../Mapping/MapPicker.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { GetToken } from "../../global/utils/Token.js";
 
-const API_LINK = "https://irenta-production.up.railway.app/api";
+const API_LINK = "http://localhost:5000/api";
 
 const EditListing = () => {
   const { darkMode } = useContext(ThemeContext);
@@ -29,6 +29,10 @@ const EditListing = () => {
   const [bathroomNumber, setBathroomNumber] = useState("");
   const [propertySize, setPropertySize] = useState("");
   const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [customAmenity, setCustomAmenity] = useState({
+    name: "",
+    fee: 0,
+  });
   const [address, setAddress] = useState({
     houseNumber: "",
     street: "",
@@ -43,12 +47,12 @@ const EditListing = () => {
   });
   const [lat, setLat] = useState(0);
   const [lng, setLng] = useState(0);
-  console.log(lat, lng)
+  const [vacant, setVacant] = useState(0);
+  console.log(lat, lng);
   // Fetch the data for the specific listing
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        
         const response = await axios.get(`${API_LINK}/listings/${id}`, {
           headers: {
             Authorization: `Bearer ${storedToken}`,
@@ -57,6 +61,7 @@ const EditListing = () => {
 
         if (response.status === 200) {
           const listing = response.data;
+          console.log(listing);
           setLat(parseFloat(listing.address.lat) || 0);
           setLng(parseFloat(listing.address.lng) || 0);
           // Populate state with fetched data
@@ -76,10 +81,13 @@ const EditListing = () => {
             lng: listing.address.lng || 0,
             lat: listing.address.lat || 0,
           });
-          setVisitAvailability(listing.visitAvailability || {
-            startTime: "",
-            endTime: "",
-          });
+          setVisitAvailability(
+            listing.visitAvailability || {
+              startTime: "",
+              endTime: "",
+            }
+          );
+          setVacant(listing.vacant || 0);
           setExistingImages(listing.images || []);
         }
       } catch (error) {
@@ -93,20 +101,21 @@ const EditListing = () => {
   }, [id, storedToken, navigate]);
 
   console.log(selectedImages);
-  console.log(existingImages)
+  console.log(existingImages);
   // Handlers
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
 
     // Filter out invalid files
-    const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
+    const invalidFiles = files.filter(
+      (file) => !allowedTypes.includes(file.type)
+    );
     const newFiles = files.filter(
       (file) =>
         allowedTypes.includes(file.type) &&
         !selectedImages.some(
-          (image) =>
-            image instanceof File && image.name === file.name // Avoid duplicate files
+          (image) => image instanceof File && image.name === file.name // Avoid duplicate files
         )
     );
 
@@ -138,12 +147,37 @@ const EditListing = () => {
 
   const handleRemoveExistingImages = (index) => {
     const removedImage = existingImages[index]; // Get the image that is about to be removed
-    
+
     // Remove the image from the existingImages array
     setExistingImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    
+
     // Add the removed image to the removedImages array
-    setRemovedImages((prevRemovedImages) => [...prevRemovedImages, removedImage]);
+    setRemovedImages((prevRemovedImages) => [
+      ...prevRemovedImages,
+      removedImage,
+    ]);
+  };
+
+  const handleAddCustomAmenity = () => {
+    if (customAmenity.name.trim() === "") {
+      alert("Please enter a name for the custom amenity.");
+      return;
+    }
+
+    if (selectedAmenities.some((a) => a.name === customAmenity.name.trim())) {
+      alert("This amenity already exists.");
+      return;
+    }
+
+    setSelectedAmenities((prev) => [
+      ...prev,
+      {
+        name: customAmenity.name.trim(),
+        fee: parseFloat(customAmenity.fee) || 0,
+      },
+    ]);
+
+    setCustomAmenity({ name: "", fee: 0 });
   };
 
   const handleAmenityChange = (e) => {
@@ -230,16 +264,16 @@ const EditListing = () => {
       alert("Please fill out all address fields manually.");
       return;
     }
-  
+
     // Validate required fields
     if (!title || !address.houseNumber || !address.street || !address.city) {
       alert("Please fill out all required fields.");
       return;
     }
-  
+
     try {
       const formData = new FormData();
-  
+
       // Append non-file data as a JSON string
       formData.append(
         "data",
@@ -254,16 +288,19 @@ const EditListing = () => {
           address,
           visitAvailability,
           amenities: selectedAmenities,
+          vacant,
           removedImages: removedImages,
         })
       );
-  
-      const newImageFiles = selectedImages.filter((image) => image instanceof File); // Newly added files
+
+      const newImageFiles = selectedImages.filter(
+        (image) => image instanceof File
+      ); // Newly added files
       // Append new image files to the FormData
       newImageFiles.forEach((file) => {
         formData.append("files", file); // Use "newImages" key for new files
       });
-  
+
       // Make the API request
       const response = await axios.put(`${API_LINK}/listings/${id}`, formData, {
         headers: {
@@ -271,7 +308,7 @@ const EditListing = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       if (response.status === 200) {
         alert("Listing updated successfully!");
         navigate("/owner-dashboard");
@@ -281,12 +318,11 @@ const EditListing = () => {
       alert("An error occurred while updating the listing.");
     }
   };
-  
 
   if (lat === 0 || lng === 0) {
     return <div>Loading map...</div>; // Show loading or default content until lat/lng is valid
   }
-  
+
   return (
     <div>
       <div
@@ -331,8 +367,8 @@ const EditListing = () => {
                   darkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Photos • {existingImages.length + selectedImages.length} / 10 • You can add up to 10
-                photos.
+                Photos • {existingImages.length + selectedImages.length} / 10 •
+                You can add up to 10 photos.
               </p>
               <div className="flex items-center">
                 <label
@@ -361,7 +397,9 @@ const EditListing = () => {
                   }`}
                 >
                   {existingImages.length + selectedImages.length > 0
-                    ? `${existingImages.length + selectedImages.length} file(s) selected`
+                    ? `${
+                        existingImages.length + selectedImages.length
+                      } file(s) selected`
                     : "No file chosen"}
                 </span>
               </div>
@@ -375,9 +413,12 @@ const EditListing = () => {
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {existingImages.map((image, index) => {
                       return (
-                        <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
+                        <div
+                          key={index}
+                          className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
+                        >
                           <img
-                            src={image.link} // Use the "link" property for fetched images
+                            src={image.link}
                             alt={`Preview ${index}`}
                             className="w-full h-full object-cover"
                           />
@@ -396,7 +437,10 @@ const EditListing = () => {
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     {selectedImages.map((image, index) => {
                       return (
-                        <div key={index} className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden">
+                        <div
+                          key={index}
+                          className="relative w-full h-24 bg-gray-200 rounded-md overflow-hidden"
+                        >
                           <img
                             src={URL.createObjectURL(image)} // Create object URL for the image
                             alt={`Preview ${index}`}
@@ -508,6 +552,28 @@ const EditListing = () => {
                   />
                 </div>
 
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Vacant Spaces
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Enter number of vacant spaces"
+                    value={vacant}
+                    onChange={(e) => setVacant(parseInt(e.target.value) || 0)} // Ensure it's a number
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
                 {/* Price per Month */}
                 <div>
                   <label
@@ -532,44 +598,127 @@ const EditListing = () => {
 
                 {/* Amenities & Inclusions */}
                 <div>
-                <label
-                  className={`block text-sm font-medium mb-1 ${
-                    darkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  Amenities & Inclusions
-                </label>
-                <div
-                  className={`space-y-2 rounded-lg p-2 border ${
-                    darkMode
-                      ? "bg-gray-800 text-gray-300 border-gray-700"
-                      : "bg-white text-gray-700 border-gray-300"
-                  }`}
-                >
-                  {[
-                    "Fully Furnished",
-                    "Semi Furnished",
-                    "Aircon",
-                    "WiFi / Internet",
-                    "Electricity Bill",
-                    "Water Bill",
-                  ].map((amenity) => (
-                    <label key={amenity} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        value={amenity}
-                        className={`form-checkbox ${
-                          darkMode ? "text-blue-400" : "text-blue-500"
-                        }`}
-                        checked={selectedAmenities.includes(amenity)} // Automatically checks based on selectedAmenities
-                        onChange={handleAmenityChange}
-                      />
-                      <span>{amenity}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Amenities & Inclusions
+                  </label>
+                  <div
+                    className={`space-y-2 rounded-lg p-2 border ${
+                      darkMode
+                        ? "bg-gray-800 border-gray-700"
+                        : "bg-white border-gray-300"
+                    }`}
+                  >
+                    {/* Existing amenities list */}
 
+                    {selectedAmenities.map((amenity) => (
+                      <div
+                        key={amenity.name}
+                        className="flex items-center gap-2"
+                      >
+                        {/* Checkbox to select/deselect the amenity */}
+                        <input
+                          type="checkbox"
+                          checked={true}
+                          onChange={() => {
+                            setSelectedAmenities(
+                              (prev) =>
+                                prev.filter((a) => a.name !== amenity.name) // Remove from list if unchecked
+                            );
+                          }}
+                          className={`form-checkbox ${
+                            darkMode ? "text-blue-400" : "text-blue-500"
+                          }`}
+                        />
+
+                        {/* Amenity Name */}
+                        <span className="capitalize">{amenity.name}</span>
+
+                        {/* Fee Input */}
+                        <input
+                          type="number"
+                          placeholder="Fee"
+                          min="0"
+                          value={amenity.fee}
+                          onChange={(e) => {
+                            const newFee = parseInt(e.target.value, 10) || 0;
+                            setSelectedAmenities((prev) =>
+                              prev.map((a) =>
+                                a.name === amenity.name
+                                  ? { ...a, fee: newFee }
+                                  : a
+                              )
+                            );
+                          }}
+                          className={`ml-2 p-1 w-20 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                      </div>
+                    ))}
+
+                    {/* Add Custom Amenity Section */}
+                    <div className="mt-4">
+                      <label
+                        className={`block text-sm font-medium mb-1 ${
+                          darkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        Add Custom Amenity
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <input
+                          type="text"
+                          placeholder="Amenity Name"
+                          value={customAmenity.name}
+                          onChange={(e) =>
+                            setCustomAmenity({
+                              ...customAmenity,
+                              name: e.target.value,
+                            })
+                          }
+                          className={`flex-grow p-2 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Fee"
+                          min="0"
+                          value={customAmenity.fee}
+                          onChange={(e) =>
+                            setCustomAmenity({
+                              ...customAmenity,
+                              fee: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className={`w-20 p-2 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        <button
+                          onClick={handleAddCustomAmenity}
+                          className={`px-4 py-2 rounded ${
+                            darkMode
+                              ? "bg-blue-600 text-white hover:bg-blue-500"
+                              : "bg-blue-500 text-white hover:bg-blue-600"
+                          }`}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Property Size */}
                 <div>
@@ -776,8 +925,8 @@ const EditListing = () => {
                         : "bg-white text-gray-800 border-gray-300"
                     }`}
                     center={{
-                      lat: lat, 
-                      lng: lng
+                      lat: lat,
+                      lng: lng,
                     }}
                     onLocationChange={handleLocationChange}
                   />
@@ -785,24 +934,25 @@ const EditListing = () => {
               </div>
             </div>
 
-          {/* Fixed Footer */}
-          <div
-            className={`absolute bottom-0 left-0 right-0 p-6 ${
-              darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-            }`}
-          >
-            <button
-              className={`w-full py-3 rounded-lg ${
+            {/* Fixed Footer */}
+            <div
+              className={`absolute bottom-0 left-0 right-0 p-6 ${
                 darkMode
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  ? "border-gray-700 bg-gray-800"
+                  : "border-gray-200 bg-white"
               }`}
-              onClick={handleFormSubmit}
             >
-              Update Listing
-            </button>
-          </div>
-
+              <button
+                className={`w-full py-3 rounded-lg ${
+                  darkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                onClick={handleFormSubmit}
+              >
+                Update Listing
+              </button>
+            </div>
           </div>
         </div>
 
@@ -825,37 +975,90 @@ const EditListing = () => {
                 {/* Image Gallery */}
                 <div className="w-full xl:w-1/2">
                   <div className="relative">
+                    {/* Thumbnail Images */}
+                    {/* Main Image */}
                     <div
-                      className={`h-60 sm:h-80 rounded-lg shadow-md mb-4 flex items-center justify-center ${
+                      className={`h-60 sm:h-80 rounded-lg shadow-md mb-4 flex items-center justify-center overflow-hidden ${
                         darkMode
                           ? "bg-gray-700 text-gray-300"
                           : "bg-gray-200 text-gray-600"
                       }`}
                     >
-                      <span>Main Image</span>
+                      {existingImages.length + selectedImages.length > 0 ? (
+                        <img
+                          src={
+                            existingImages.length > 0
+                              ? existingImages[0].link // First existing image
+                              : URL.createObjectURL(selectedImages[0]) // First uploaded image
+                          }
+                          alt="Main Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>Main Image</span>
+                      )}
                     </div>
+
                     {/* Thumbnail Images */}
                     <div className="flex justify-between space-x-2 overflow-x-auto">
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
+                      {existingImages.slice(0, 4).map((image, index) => (
+                        <div
+                          key={`existing-${index}`}
+                          className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                            darkMode ? "bg-gray-600" : "bg-gray-300"
+                          } overflow-hidden relative`}
+                        >
+                          <img
+                            src={image.link}
+                            alt={`Existing ${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full p-1"
+                            onClick={() => handleRemoveExistingImages(index)}
+                          >
+                            <IoClose className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+
+                      {selectedImages
+                        .slice(0, 4 - existingImages.length)
+                        .map((image, index) => (
+                          <div
+                            key={`selected-${index}`}
+                            className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                              darkMode ? "bg-gray-600" : "bg-gray-300"
+                            } overflow-hidden relative`}
+                          >
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Selected ${index}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full p-1"
+                              onClick={() => handleRemoveImage(index)}
+                            >
+                              <IoClose className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+
+                      {/* Placeholder divs to maintain layout if fewer than 4 images */}
+                      {Array.from({
+                        length: Math.max(
+                          4 - (existingImages.length + selectedImages.length),
+                          0
+                        ),
+                      }).map((_, i) => (
+                        <div
+                          key={`placeholder-${i}`}
+                          className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                            darkMode ? "bg-gray-600" : "bg-gray-300"
+                          }`}
+                        ></div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -872,7 +1075,6 @@ const EditListing = () => {
                         darkMode ? "text-blue-400" : "text-blue-600"
                       }`}
                     >
-                      
                       {title || "Placeholder Title"}
                     </h2>
                     <p
@@ -946,13 +1148,16 @@ const EditListing = () => {
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                          {selectedAmenities.length > 0 ? (
-                            selectedAmenities.map((amenity, index) => (
-                              <li key={index}>{amenity}</li>
-                            ))
-                          ) : (
-                            <li>No amenities selected</li>
-                          )}
+                        {selectedAmenities.length > 0 ? (
+                          selectedAmenities.map((amenity, index) => (
+                            <li key={index}>
+                              {amenity.name}{" "}
+                              {amenity.fee > 0 ? `(₱${amenity.fee})` : ""}
+                            </li>
+                          ))
+                        ) : (
+                          <li>No amenities selected</li>
+                        )}
                       </ul>
                     </div>
                     <div>
@@ -972,6 +1177,7 @@ const EditListing = () => {
                         <li>Bathroom/s: {bathroomNumber}</li>
                         <li>Unit Size: {propertySize}</li>
                         <li>Type: {type}</li>
+                        <li>Vacant Space: {vacant}</li>
                       </ul>
                     </div>
                   </div>

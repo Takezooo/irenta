@@ -99,7 +99,7 @@ const LandingPage = () => {
       container.addEventListener("scroll", handleScroll);
       return () => container.removeEventListener("scroll", handleScroll);
     }
-  }, []);
+  }, [user]);
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -252,7 +252,7 @@ const LandingPage = () => {
                   ref={scrollContainerRef}
                   className="flex overflow-x-hidden space-x-4"
                 >
-                  {filteredListings.map((listing) => (
+                  {listings.map((listing) => (
                     <div
                       key={listing._id}
                       className={`flex-shrink-0 h-96 w-72 rounded-lg shadow-md border overflow-hidden ${
@@ -316,6 +316,18 @@ const LandingPage = () => {
                     </div>
                   ))}
                 </div>
+                {showRightArrow && (
+                  <button
+                    onClick={scrollRight}
+                    className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    }`}
+                  >
+                    <FaChevronRight />
+                  </button>
+                )}
               </div>
             </div>
           </div>

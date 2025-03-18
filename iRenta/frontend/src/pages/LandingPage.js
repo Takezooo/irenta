@@ -121,9 +121,11 @@ const LandingPage = () => {
     const fetchData = async () => {
       try {
         const data = await fetchListings();
-        setListings(data || []);
+        const filteredData =
+          data?.filter((listing) => listing.vacant > 0) || [];
+        setListings(filteredData || []);
         setLikedListings(user?.likedListings || []);
-        setFilteredListings(data || []);
+        setFilteredListings(filteredData || []);
       } catch (error) {
         console.error("Error fetching listings:", error);
       } finally {

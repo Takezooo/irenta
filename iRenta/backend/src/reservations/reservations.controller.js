@@ -77,6 +77,15 @@ export const updateReservationStatus = async (req, res) => {
 
     reservation.status = status;
     await reservation.save();
+
+    if (status === "Approved") {
+      const listing = await Listing.findById(reservation.listingId);
+      if (listing && listing.vacant > 0) {
+        listing.vacant -= 1;
+        await listing.save();
+      }
+    }
+
     // Notify Seeker
     const notification = new Notification({
       userId: reservation.seekerId,

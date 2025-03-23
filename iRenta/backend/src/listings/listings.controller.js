@@ -3,6 +3,7 @@ import Reservation from "../reservations/reservations.model.js";
 import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 import driveService from "../../global/utils/Drive.js";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config(); // Load environment variables
 
@@ -38,6 +39,28 @@ export const GetListingById = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const GetListingsByUser = async (req, res) => {
+  try {
+    const userId = req.params.id; // Get user ID from URL params
+    console.log("Fetching listings for user:", userId); // Debugging log
+
+    // Fix: Query using `userId` instead of `owner`
+    const listings = await Listing.find({ userId: new mongoose.Types.ObjectId(userId) });
+
+    if (!listings.length) {
+      console.warn("No listings found for user:", userId);
+      return res.status(404).json({ message: "No listings found for this user" });
+    }
+
+    res.status(200).json(listings);
+  } catch (err) {
+    console.error("Error fetching user listings:", err.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
 export const DisplayListings = async (req, res) => {
   try {
     // Fetch all listings (no authentication required)

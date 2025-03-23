@@ -63,6 +63,7 @@ export const ViewListing = () => {
       }
       try {
         const owner = await fetchOwnerData(selectedProperty?.userId);
+        console.log(owner)
         setOwnerData(owner);
         setProperyImages(selectedProperty?.images);
       } catch (error) {
@@ -161,6 +162,14 @@ export const ViewListing = () => {
 
   const closePopup = () => {
     setShowOcularPopup(false);
+  };
+
+  const handleViewProfilePage = (profileId) => {
+    if (!profileId) {
+      console.error("User ID is missing!");
+      return;
+    }
+    navigate(`/profile/${profileId}`);  // Navigate to the clicked user's profile
   };
 
   if (!isLoaded) return <LoadingScreen />;
@@ -390,6 +399,7 @@ export const ViewListing = () => {
                         ownerData?.info?.profile?.link ||
                         "https://via.placeholder.com/150"
                       }
+                      onClick={() => handleViewProfilePage(selectedProperty?.userId)}
                       alt="Profile"
                       className="h-full w-full object-cover"
                     />

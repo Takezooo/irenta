@@ -12,6 +12,16 @@ export const fetchListings = async () => {
   }
 };
 
+export const fetchSpecificUserListings = async (id) => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/users/${id}`); // Use the correct API route
+    return data; // Listings with images included
+  } catch (err) {
+    console.error("Failed to fetch listings:", err.response?.data?.message || err);
+    return null;
+  }
+};
+
 export const fetchSpecificList = async (id) => {
   try {
     const { data } = await axios.get(`${API_BASE_URL}/${id}`);

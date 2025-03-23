@@ -13,7 +13,6 @@ import { ThemeContext } from "../contexts/ThemeContext";
 import { useProperty } from "../global/contexts/PropertyContext";
 import { useMapLogic, MapListings } from "../components/Mapping/MapListings";
 
-
 const BrowseListing = () => {
   const [listings, setListings] = useState([]);
   const [likedListings, setLikedListings] = useState([]);
@@ -23,11 +22,11 @@ const BrowseListing = () => {
   const { setSelectedProperty } = useProperty();
   const { user } = useContext(AuthContext);
   const { darkMode } = useContext(ThemeContext);
-  const [ center, setCenter ] = useState({
-      lng: 0,
-      lat: 0,
-    });
-    const [selectedCenter, setSelectedCenter] = useState("My Location"); // Default value
+  const [center, setCenter] = useState({
+    lng: 0,
+    lat: 0,
+  });
+  const [selectedCenter, setSelectedCenter] = useState("My Location"); // Default value
 
   const authToken = GetToken();
   const navigate = useNavigate();
@@ -35,20 +34,31 @@ const BrowseListing = () => {
   const listingsPerPage = 12;
 
   useEffect(() => {
-    const fetchCurrentUserData = async () => {
-      if (user) {
-        const userdata = await fetchUserData(user?.id, authToken);
-        setLikedListings(userdata?.likedListings);
-      } else {
-        setLikedListings([]);
+    const fetchData = async () => {
+      try {
+        console.log("Fetching listings...");
+        const data = await fetchListings();
+
+        let filteredData;
+        if (!user) {
+          filteredData = data?.filter((listing) => listing.vacant > 0) || [];
+          setLikedListings([]);
+        } else {
+          filteredData =
+            data?.filter(
+              (listing) =>
+                listing.vacant > 0 && listing.userId.toString() !== user.id
+            ) || [];
+          const userdata = await fetchUserData(user?.id, authToken);
+          setLikedListings(userdata?.likedListings || []);
+        }
+        setListings(filteredData);
+      } catch (error) {
+        console.error("Error fetching or filtering listings:", error);
       }
     };
-    const fetchData = async () => {
-      const data = await fetchListings();
-      setListings(data);
-    };
     fetchData();
-    fetchCurrentUserData();
+    // fetchCurrentUserData();
   }, [authToken, user]);
 
   const { isLoaded, nearbyListings, mapCenter } = useMapLogic({
@@ -57,6 +67,14 @@ const BrowseListing = () => {
     RADIUS: radius,
     CENTER: center,
   });
+
+  const filteredNearbyListings = user
+  ? nearbyListings.filter(
+      (listing) =>
+        listing.userId?.toString() !== user.id &&
+        listing.vacant > 0
+    )
+  : nearbyListings.filter((listing) => listing.vacant > 0);
 
   const handleRadiusChange = (event) => {
     setRadius(Number(event.target.value)); // Update the radius dynamically
@@ -77,7 +95,7 @@ const BrowseListing = () => {
 
   const handleCenterChange = (event) => {
     const selectedLocation = event.target.value;
-  
+
     switch (selectedLocation) {
       case "PNU":
         const pnuCenter = { lat: 14.587681, lng: 120.982816 };
@@ -92,21 +110,18 @@ const BrowseListing = () => {
         setCenter(tupCenter); // Update local center state
         break;
       case "My Location":
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            setCenter(userLocation); // Default to user's current location
-          },
-        )
+        navigator.geolocation.getCurrentPosition((position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setCenter(userLocation); // Default to user's current location
+        });
         break;
       default:
         console.error("Unknown location selected:", selectedLocation);
     }
   };
-  
 
   const openMapFullScreen = () => setIsMapFullScreen(true);
   const closeMapFullScreen = () => setIsMapFullScreen(false);
@@ -199,7 +214,7 @@ const BrowseListing = () => {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              {nearbyListings.map((listing) => (
+              {filteredNearbyListings.map((listing) => (
                 <div
                   key={listing._id}
                   className={`flex flex-col rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all ${
@@ -210,7 +225,9 @@ const BrowseListing = () => {
                 >
                   <div className="relative flex-shrink-0 h-2/3">
                     <img
-                      src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                      src={
+                        listing.images?.[0]?.link || "/placeholder-image.jpg"
+                      }
                       alt={listing.title}
                       onClick={() => handleViewProperty(listing)}
                       className="w-full h-full object-cover"
@@ -282,7 +299,7 @@ const BrowseListing = () => {
             <MapListings
               isLoaded={isLoaded}
               mapCenter={mapCenter}
-              nearbyListings={nearbyListings}
+              nearbyListings={filteredNearbyListings}
               handleViewProperty={handleViewProperty}
             />
           </div>

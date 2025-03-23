@@ -118,22 +118,34 @@ const LandingPage = () => {
   }, [searchTerm, minPrice, maxPrice, selectedAmenities]);
 
   useEffect(() => {
-    const fetchData = async () => {
+      const fetchData = async () => {
       try {
+        console.log("Fetching listings...");
         const data = await fetchListings();
-        const filteredData =
-          data?.filter((listing) => listing.vacant > 0) || [];
-        setListings(filteredData || []);
-        setLikedListings(user?.likedListings || []);
-        setFilteredListings(filteredData || []);
+        console.log("Listings fetched:", data);
+  
+        let filteredData;
+        if (!user) {
+          filteredData = data?.filter((listing) => listing.vacant > 0) || [];
+        } else {
+          filteredData = data?.filter((listing) => listing.vacant > 0 && listing.userId.toString() !== user.id) || [];
+        }
+
+        console.log("filteredData fetched:", filteredData);
+        setListings(filteredData);
+        setFilteredListings(filteredData);
+        // setLikedListings(user?.likedListings || []);
       } catch (error) {
         console.error("Error fetching listings:", error);
       } finally {
-        setIsLoading(false); // Ensure loading stops
+        console.log("Setting isLoading to false");
+        setIsLoading(false);
       }
     };
+  
     fetchData();
-  }, []);
+  }, [user]);
+  
 
   const handleViewProperty = (listing) => {
     setSelectedProperty(listing);

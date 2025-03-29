@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 
 import Topbar from "../components/global/Topbar.js";
@@ -190,59 +190,93 @@ const LandingPage = () => {
           <div className="pt-8 min-h-screen">
             <div className="mx-auto flex align-center flex-col rounded-xl mt-24 lg:mt-16 w-[90%]">
               {/* Filters */}
-              <div className="flex flex-col lg:flex-row items-center gap-4 mb-4">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full lg:w-64 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Search property name..."
-                />
-                <input
-                  type="number"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  placeholder="Min Price"
-                  className="w-full lg:w-32 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm"
-                />
-                <input
-                  type="number"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  placeholder="Max Price"
-                  className="w-full lg:w-32 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 shadow-sm text-sm"
-                />
-                <div className="flex flex-wrap gap-2">
-                  {amenitiesList.map((amenity) => (
-                    <label
-                      key={amenity}
-                      className="flex items-center gap-2 text-sm"
+              <div className="z-50 flex flex-col sm:flex-row gap-2 justify-end mb-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full sm:w-fit rounded-md py-2 px-4 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      darkMode
+                        ? "bg-gray-600 text-gray-300 border-gray-500 placeholder-gray-400"
+                        : "bg-gray-100 text-gray-900 border-gray-300"
+                    }`}
+                    placeholder="Search property name..."
+                  />
+                  <div className="block">
+                    <button
+                      onClick={() => setIsOpen(!isOpen)}
+                      className={`rounded-lg px-4 py-2 flex items-center gap-2 shadow-md ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                          : "bg-gray-200 hover:bg-gray-300"
+                      }`}
                     >
-                      <input
-                        type="checkbox"
-                        value={amenity}
-                        checked={selectedAmenities.includes(amenity)}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setSelectedAmenities((prev) =>
-                            prev.includes(value)
-                              ? prev.filter((item) => item !== value)
-                              : [...prev, value]
-                          );
-                        }}
-                        className="rounded text-blue-500 focus:ring-blue-500"
-                      />
-                      {amenity}
-                    </label>
-                  ))}
+                      Filter
+                      {isOpen ? (<FaChevronUp />) : (<FaChevronDown />)}
+                    </button>
+                    {isOpen && (
+                      <div className={`z-50 mt-2 absolute w-72 p-4 shadow-lg rounded-lg ${
+                        darkMode
+                          ? "bg-gray-700 text-gray-300"
+                          : "bg-white text-gray-900"
+                      }`}>
+                        <div className="flex flex-col gap-4">
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              value={minPrice}
+                              onChange={(e) => setMinPrice(e.target.value)}
+                              placeholder="Min Price"
+                              className={`w-full rounded-md py-2 px-4 text-sm border ${
+                                darkMode
+                                  ? "bg-gray-600 text-gray-300 border-gray-500"
+                                  : "bg-gray-100 text-gray-900 border-gray-300"
+                              }`}
+                            />
+                            <input
+                              type="number"
+                              value={maxPrice}
+                              onChange={(e) => setMaxPrice(e.target.value)}
+                              placeholder="Max Price"
+                              className={`w-full rounded-md py-2 px-4 text-sm border ${
+                                darkMode
+                                  ? "bg-gray-600 text-gray-300 border-gray-500"
+                                  : "bg-gray-100 text-gray-900 border-gray-300"
+                              }`}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {amenitiesList.map((amenity) => (
+                              <label key={amenity} className={`flex items-center gap-2 text-sm ${
+                                darkMode ? "text-gray-300" : "text-gray-900"
+                              }`}>
+                                <input
+                                  type="checkbox"
+                                  value={amenity}
+                                  checked={selectedAmenities.includes(amenity)}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    setSelectedAmenities((prev) =>
+                                      prev.includes(value)
+                                        ? prev.filter((item) => item !== value)
+                                        : [...prev, value]
+                                    );
+                                  }}
+                                  className="rounded text-blue-500 focus:ring-blue-500"
+                                />
+                                {amenity}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={handleBrowseListing}
-                  className={`mt-4 inline-block underline ${
-                    darkMode
-                      ? "text-gray-400 hover:text-gray-200"
-                      : "text-black hover:text-gray-700"
-                  }`}
+                  className="inline-block bg-blue-500 hover:bg-blue-600 rounded-full py-2 px-4 text-gray-200 hover:text-gray-300"
                 >
                   See more
                 </button>
@@ -250,7 +284,7 @@ const LandingPage = () => {
 
               {/* Listings */}
               <div className="relative">
-                {showLeftArrow && (
+                {/* {showLeftArrow && (
                   <button
                     onClick={scrollLeft}
                     className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md ${
@@ -261,10 +295,10 @@ const LandingPage = () => {
                   >
                     <FaChevronLeft />
                   </button>
-                )}
+                )} */}
                 <div
-                  ref={scrollContainerRef}
-                  className="flex overflow-x-hidden space-x-4"
+                  // ref={scrollContainerRef}
+                  className="flex flex-wrap space-x-4"
                 >
                   {listings.map((listing) => (
                     <div
@@ -330,7 +364,7 @@ const LandingPage = () => {
                     </div>
                   ))}
                 </div>
-                {showRightArrow && (
+                {/* {showRightArrow && (
                   <button
                     onClick={scrollRight}
                     className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md ${
@@ -341,7 +375,7 @@ const LandingPage = () => {
                   >
                     <FaChevronRight />
                   </button>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -509,7 +543,7 @@ const LandingPage = () => {
         </>
       )}
 
-      <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
+      {/* <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
         <div className="h-28 w-28 p-2 bg-gray-100 rounded-lg flex items-center justify-center shadow-md mr-6">
           <img
             src="./assets/images/irenta.png"
@@ -534,7 +568,7 @@ const LandingPage = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Footer />
     </div>

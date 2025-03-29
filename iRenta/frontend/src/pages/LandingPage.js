@@ -190,7 +190,7 @@ const LandingPage = () => {
           <div className="pt-8 min-h-screen">
             <div className="mx-auto flex align-center flex-col rounded-xl mt-24 lg:mt-16 w-[90%]">
               {/* Filters */}
-              <div className="z-50 flex flex-col sm:flex-row gap-2 justify-end mb-4">
+              <div className="flex flex-col sm:flex-row gap-2 justify-end mb-4">
                 <div className="flex gap-2">
                   <input
                     type="text"

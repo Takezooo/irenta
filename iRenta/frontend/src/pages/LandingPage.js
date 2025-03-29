@@ -540,35 +540,34 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+          <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
+            <div className="h-28 w-28 p-2 bg-gray-100 rounded-lg flex items-center justify-center shadow-md mr-6">
+              <img
+                src="./assets/images/irenta.png"
+                className="h-full"
+                alt="iRenta Logo"
+              />
+            </div>
+            <div className="w-[40%]">
+              <div>
+                <h3 className="text-3xl font-bold">iRenta</h3>
+              </div>
+              <div className="bg-gray-300 p-6 mt-2 rounded-xl text-black text-wrap">
+                <p className="mt-2 text-sm">
+                  This is a placeholder description for the additional div. It
+                  includes a brief overview and is styled for aesthetic alignment.
+                </p>
+                <button
+                  className="mt-4 inline-block text-black underline"
+                  onClick={handleAboutUs}
+                >
+                  See more
+                </button>
+              </div>
+            </div>
+          </div>
         </>
       )}
-
-      {/* <div className="my-36 bg-gradient-to-r from-blue-950 to-gray-900 text-white flex items-center justify-evenly py-14 px-24 relative">
-        <div className="h-28 w-28 p-2 bg-gray-100 rounded-lg flex items-center justify-center shadow-md mr-6">
-          <img
-            src="./assets/images/irenta.png"
-            className="h-full"
-            alt="iRenta Logo"
-          />
-        </div>
-        <div className="w-[40%]">
-          <div>
-            <h3 className="text-3xl font-bold">iRenta</h3>
-          </div>
-          <div className="bg-gray-300 p-6 mt-2 rounded-xl text-black text-wrap">
-            <p className="mt-2 text-sm">
-              This is a placeholder description for the additional div. It
-              includes a brief overview and is styled for aesthetic alignment.
-            </p>
-            <button
-              className="mt-4 inline-block text-black underline"
-              onClick={handleAboutUs}
-            >
-              See more
-            </button>
-          </div>
-        </div>
-      </div> */}
 
       <Footer />
     </div>

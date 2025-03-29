@@ -377,6 +377,26 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     </ul>
                   ) : (
                     <ul className="py-3">
+                      <li
+                        className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
+                        onClick={toggleDarkMode} // Move the onClick here
+                      >
+                        <span className="px-4 text-sm font-medium dark:text-gray-100">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>
+                      </li>
+                      <hr className="w-full my-2 mb-4"></hr>
                       <li className="flex w-full justify-center">
                         <Link
                           to="/login"
@@ -653,6 +673,24 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   ) : (
                     // Logged-out Dropdown
                     <ul className="py-3">
+                      <li className="flex gap-4 items-center text-left mx-4 my-2 bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <div
+                          className={`w-12 h-6 flex items-center ${
+                            darkMode ? "bg-gray-800" : "bg-gray-300"
+                          } rounded-full p-1 cursor-pointer transition-colors duration-300`}
+                          onClick={toggleDarkMode}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${
+                              darkMode ? "translate-x-6" : "translate-x-0"
+                            } transition-transform duration-300`}
+                          ></div>
+                        </div>
+                        <span className="text-sm py-2 font-medium dark:text-white">
+                          {darkMode ? "Dark Mode" : "Light Mode"}
+                        </span>
+                      </li>
+                      <hr className="w-full my-2"></hr>
                       <li className="flex w-full justify-center">
                         <Link
                           to="/login"

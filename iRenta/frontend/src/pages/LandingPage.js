@@ -203,10 +203,10 @@ const LandingPage = () => {
                     }`}
                     placeholder="Search property name..."
                   />
-                  <div className="block">
+                  <div className="relative w-full lg:w-auto">
                     <button
                       onClick={() => setIsOpen(!isOpen)}
-                      className={`rounded-lg px-4 py-2 flex items-center gap-2 shadow-md ${
+                      className={`w-full rounded-lg px-4 py-2 flex items-center gap-2 shadow-md justify-between ${
                         darkMode
                           ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
                           : "bg-gray-200 hover:bg-gray-300"
@@ -216,70 +216,70 @@ const LandingPage = () => {
                       {isOpen ? (<FaChevronUp />) : (<FaChevronDown />)}
                     </button>
                     {isOpen && (
-                      <div className={`z-50 mt-2 absolute w-72 p-4 shadow-lg rounded-lg ${
-                        darkMode
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-white text-gray-900"
-                      }`}>
-                        <div className="flex flex-col gap-4">
-                          <div className="flex gap-2">
-                            <input
-                              type="number"
-                              value={minPrice}
-                              onChange={(e) => setMinPrice(e.target.value)}
-                              placeholder="Min Price"
-                              className={`w-full rounded-md py-2 px-4 text-sm border ${
-                                darkMode
-                                  ? "bg-gray-600 text-gray-300 border-gray-500"
-                                  : "bg-gray-100 text-gray-900 border-gray-300"
-                              }`}
-                            />
-                            <input
-                              type="number"
-                              value={maxPrice}
-                              onChange={(e) => setMaxPrice(e.target.value)}
-                              placeholder="Max Price"
-                              className={`w-full rounded-md py-2 px-4 text-sm border ${
-                                darkMode
-                                  ? "bg-gray-600 text-gray-300 border-gray-500"
-                                  : "bg-gray-100 text-gray-900 border-gray-300"
-                              }`}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            {amenitiesList.map((amenity) => (
-                              <label key={amenity} className={`flex items-center gap-2 text-sm ${
-                                darkMode ? "text-gray-300" : "text-gray-900"
-                              }`}>
-                                <input
-                                  type="checkbox"
-                                  value={amenity}
-                                  checked={selectedAmenities.includes(amenity)}
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    setSelectedAmenities((prev) =>
-                                      prev.includes(value)
-                                        ? prev.filter((item) => item !== value)
-                                        : [...prev, value]
-                                    );
-                                  }}
-                                  className="rounded text-blue-500 focus:ring-blue-500"
-                                />
-                                {amenity}
-                              </label>
-                            ))}
-                          </div>
+                    <div className={`mt-2 absolute top-full right-0 w-full lg:w-80 p-4 shadow-lg rounded-lg border z-50 ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600"
+                        : "bg-white text-gray-900 border-gray-300"
+                    }`}>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            placeholder="Min Price"
+                            className={`w-1/2 rounded-md py-2 px-4 text-sm border ${
+                              darkMode
+                                ? "bg-gray-600 text-gray-300 border-gray-500"
+                                : "bg-gray-100 text-gray-900 border-gray-300"
+                            }`}
+                          />
+                          <input
+                            type="number"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            placeholder="Max Price"
+                            className={`w-1/2 rounded-md py-2 px-4 text-sm border ${
+                              darkMode
+                                ? "bg-gray-600 text-gray-300 border-gray-500"
+                                : "bg-gray-100 text-gray-900 border-gray-300"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {amenitiesList.map((amenity) => (
+                            <label key={amenity} className={`flex items-center gap-2 text-sm ${
+                              darkMode ? "text-gray-300" : "text-gray-900"
+                            }`}>
+                              <input
+                                type="checkbox"
+                                value={amenity}
+                                checked={selectedAmenities.includes(amenity)}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  setSelectedAmenities((prev) =>
+                                    prev.includes(value)
+                                      ? prev.filter((item) => item !== value)
+                                      : [...prev, value]
+                                  );
+                                }}
+                                className="rounded text-blue-500 focus:ring-blue-500"
+                              />
+                              {amenity}
+                            </label>
+                          ))}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
                   </div>
                 </div>
-                <button
+                {/* <button
                   onClick={handleBrowseListing}
                   className="inline-block bg-blue-500 hover:bg-blue-600 rounded-full py-2 px-4 text-gray-200 hover:text-gray-300"
                 >
                   See more
-                </button>
+                </button> */}
               </div>
 
               {/* Listings */}
@@ -303,7 +303,7 @@ const LandingPage = () => {
                   {listings.map((listing) => (
                     <div
                       key={listing._id}
-                      className={`flex-shrink-0 h-96 w-72 rounded-lg shadow-md border overflow-hidden ${
+                      className={`flex-shrink-0 h-96 w-full sm:w-72 rounded-lg shadow-md border overflow-hidden ${
                         darkMode
                           ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-700"
                           : "bg-white border-gray-300 hover:shadow-lg"

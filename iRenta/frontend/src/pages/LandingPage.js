@@ -127,9 +127,9 @@ const LandingPage = () => {
   
         let filteredData;
         if (!user) {
-          filteredData = data?.filter((listing) => listing.vacant > 0) || [];
+          filteredData = data?.filter((listing) => listing.vacantUnits > 0) || [];
         } else {
-          filteredData = data?.filter((listing) => listing.vacant > 0 && listing.userId.toString() !== user.id) || [];
+          filteredData = data?.filter((listing) => listing.vacantUnits > 0 && listing.userId.toString() !== user.id) || [];
         }
 
         console.log("filteredData fetched:", filteredData);

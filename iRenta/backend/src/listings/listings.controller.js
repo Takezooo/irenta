@@ -2,6 +2,7 @@ import Listing from "./listings.model.js";
 import Reservation from "../reservations/reservations.model.js";
 import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 import driveService from "../../global/utils/Drive.js";
+import { calculateTotalPrice, calculatePeriodPrice } from '../../global/utils/PriceCalculator.js';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
@@ -94,11 +95,12 @@ export const CreateListing = async (req, res) => {
       propertySize,
       address,
       amenities,
-      vacant,
-      rentPeriod,
+      vacantUnits,
       utilitiesIncluded,
       includedUtilities,
-      vacancyStatus
+      vacancyStatus,
+      rentPeriod,
+      priceType
     } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
@@ -175,14 +177,18 @@ export const CreateListing = async (req, res) => {
       visitAvailability, // Include validated visit availability
       images: listingImages, // Associate images with the listing
       amenities,
-      vacant,
-      rentPeriod,
+      vacantUnits,
       utilitiesIncluded,
       includedUtilities,
-      vacancyStatus
+      vacancyStatus,
+      rentPeriod,
+      priceType
     });
 
-    res.status(201).json(newListing);
+    const responseListing = newListing.toObject();
+    responseListing.calculatedPrice = calculatePeriodPrice(newListing.price, newListing.rentPeriod);
+    responseListing.exampleCalculation = calculateTotalPrice(newListing, 1);
+    res.status(201).json(responseListing);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

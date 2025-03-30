@@ -24,7 +24,7 @@ export const ViewListing = () => {
   const [showOcularPopup, setShowOcularPopup] = useState(false);
   const [location, setLocation] = useState("Bacoor");
   const [ownerData, setOwnerData] = useState([]);
-  const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
+  // const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
   const { selectedProperty } = useProperty();
   const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
     useContext(ChatDropdownContext);
@@ -34,13 +34,11 @@ export const ViewListing = () => {
   const authToken = GetToken();
   const [likedListings, setLikedListings] = useState([]);
   const [propertyImages, setProperyImages] = useState([]);
-  console.log(selectedProperty);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Use environment variable for API key
     libraries: LIBRARIES, // Pass static array
   });
-console.log(selectedProperty)
   // Fetch user's liked listings on page load
   useEffect(() => {
     if (user) {
@@ -65,6 +63,7 @@ console.log(selectedProperty)
       }
       try {
         const owner = await fetchOwnerData(selectedProperty?.userId);
+        console.log(owner)
         setOwnerData(owner);
         setProperyImages(selectedProperty?.images);
       } catch (error) {
@@ -80,7 +79,6 @@ console.log(selectedProperty)
       if (selectedProperty?._id && user) {
         try {
           const result = await checkVisitRequest(selectedProperty._id, user.id);
-          setHasRequestedVisit(result.hasRequestedVisit);
         } catch (error) {
           console.error("Error checking visit request status:", error);
         }
@@ -138,7 +136,6 @@ console.log(selectedProperty)
 
     try {
       await scheduleOcularVisit(propertyId, selectedDate, selectedTime);
-      setHasRequestedVisit(true); // This triggers a re-render
       alert("Request visit scheduled!");
     } catch (err) {
       console.error(
@@ -152,9 +149,9 @@ console.log(selectedProperty)
     navigate("/request-reservation");
   };
 
-  useEffect(() => {
-    setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
-  }, [hasRequestedVisit]);
+  // useEffect(() => {
+  //   setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
+  // }, [hasRequestedVisit]);
 
   const handleOpenPopup = () => {
     if (!user) {
@@ -165,6 +162,14 @@ console.log(selectedProperty)
 
   const closePopup = () => {
     setShowOcularPopup(false);
+  };
+
+  const handleViewProfilePage = (profileId) => {
+    if (!profileId) {
+      console.error("User ID is missing!");
+      return;
+    }
+    navigate(`/profile/${profileId}`);  // Navigate to the clicked user's profile
   };
 
   if (!isLoaded) return <LoadingScreen />;
@@ -248,34 +253,26 @@ console.log(selectedProperty)
                     <div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                       <div className="space-x-2">
                         <button
+                          disabled={user && user.userType === "Owner"}
                           onClick={handleOpenPopup}
-                          disabled={hasRequestedVisit} // Disable based on visit request status
                           className={`${
-                            !hasRequestedVisit
-                              ? "bg-blue-500 text-white hover:bg-blue-600"
-                              : `${
-                                  darkMode
-                                    ? "bg-gray-700 text-gray-500"
-                                    : "bg-gray-300 text-gray-600"
-                                } cursor-not-allowed`
-                          } px-4 py-2 rounded-full`}
+                            user && user.userType === "Owner"
+                              ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
+                              : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+                          }`}
                         >
                           Request Visit
                         </button>
                         <button
-                          disabled={!hasRequestedVisit} // Disable based on visit request status
+                          disabled={user && user.userType === "Owner"}
                           onClick={handleReserveListing}
                           className={`${
-                            hasRequestedVisit
-                              ? "bg-blue-500 text-white hover:bg-blue-600"
-                              : `${
-                                  darkMode
-                                    ? "bg-gray-700 text-gray-500"
-                                    : "bg-gray-300 text-gray-600"
-                                } cursor-not-allowed`
-                          } px-4 py-2 rounded-full`}
+                            user && user.userType === "Owner"
+                              ? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
+                              : "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+                          }`}
                         >
-                          Reserve Listing
+                          Book Now
                         </button>
                       </div>
                       <button
@@ -332,7 +329,7 @@ console.log(selectedProperty)
                             >
                               <path d="M5 13l4 4L19 7"></path>
                             </svg>
-                            <span>{amenity}</span>
+                            <span>{amenity.name}: ₱{amenity.fee}.00</span>
                           </div>
                         )
                       )}
@@ -354,6 +351,7 @@ console.log(selectedProperty)
                         <li>Bathroom/s: {selectedProperty?.bathroomNumber}</li>
                         <li>Unit Size: {selectedProperty?.propertySize}</li>
                         <li>Type: {selectedProperty?.type}</li>
+                        <li>Available Space: {selectedProperty?.vacant}</li>
                       </ul>
                     </div>
                   </div>
@@ -401,6 +399,7 @@ console.log(selectedProperty)
                         ownerData?.info?.profile?.link ||
                         "https://via.placeholder.com/150"
                       }
+                      onClick={() => handleViewProfilePage(selectedProperty?.userId)}
                       alt="Profile"
                       className="h-full w-full object-cover"
                     />

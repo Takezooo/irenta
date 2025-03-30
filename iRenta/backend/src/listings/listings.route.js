@@ -6,7 +6,8 @@ import {
     DeleteListing,
     DisplayListings,
     GetListingById,
-    FetchReservedListings
+    FetchReservedListings,
+    GetListingsByUser
 } from './listings.controller.js';
 import authenticate from '../../global/middlewares/RequireAuth.js';
 import upload from '../../global/config/Multer.js'
@@ -26,6 +27,8 @@ router.get("/reserved", authenticate, FetchReservedListings);
 
 // Route to fetch a specific list
 router.get('/:id', GetListingById);
+
+router.get("/users/:id", GetListingsByUser);
 
 // Route to update a listing (only for owners)
 router.put('/:id', authenticate, upload.array("files", 10), UpdateListing);

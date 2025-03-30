@@ -1,7 +1,7 @@
 // src/App.js
 
-import React, {useContext} from "react";
-import { Routes, Route } from 'react-router-dom';
+import React, { useContext } from "react";
+import { Routes, Route } from "react-router-dom";
 
 // Pages
 import LandingPage from "../../pages/LandingPage.js";
@@ -22,6 +22,7 @@ import TenantsDashboard from "../../pages/Tenants/TenantsDashboard.js";
 import ViewProfile from "../../pages/ViewProfile.js";
 import EditProfile from "../../pages/EditProfile.js";
 import LoadingScreen from "../../components/global/Loading.js";
+import ProfilePage from "../../pages/ProfilePage";
 
 // Contexts
 import { AuthContext } from "../../global/contexts/AuthContext.js";
@@ -39,123 +40,123 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-    {/* Public Routes */}
-    <Route
-      path="/login"
-      element={
-        <PublicRoute>
-          <Login />
-        </PublicRoute>
-      }
-    />
-    <Route
-      path="/register"
-      element={
-        <PublicRoute>
-          <Register />
-        </PublicRoute>
-      }
-    />
-    <Route path="/" element={<LandingPage />} />
-    <Route path="/browse-listing" element={<BrowseListing />} />
-    <Route path="/about-us" element={<AboutPage />} />
-    <Route path="/:propertyId" element={<ViewListing />} />
+      {/* Public Routes */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
 
-    {/* Tenant Routes */}
-    <Route
-      path="/tenant-dashboard"
-      element={
-        <PrivateRoute
-          allowedRoles={["Seeker"]}
-          requireTenantBadge={true}
-        >
-          <TenantsDashboard />
-        </PrivateRoute>
-      }
-    />
+      <Route path="/profile/:id" element={<ProfilePage />} />
 
-    {/* Seeker Routes */}
-    <Route
-      path="/request-reservation"
-      element={
-        <PrivateRoute allowedRoles={["Seeker"]}>
-          <ReservationPage />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/view-lease"
-      element={
-        <PrivateRoute allowedRoles={["Seeker"]}>
-          <ViewLease />
-        </PrivateRoute>
-      }
-    />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/browse-listing" element={<BrowseListing />} />
+      <Route path="/about-us" element={<AboutPage />} />
+      <Route path="/:propertyId" element={<ViewListing />} />
 
-    {/* Owner Routes */}
-    <Route
-      path="/owner-dashboard"
-      element={
-        <PrivateRoute allowedRoles={["Owner"]}>
-          <OwnerDashboard />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/create-list"
-      element={
-        <PrivateRoute allowedRoles={["Owner"]}>
-          <AddListing />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/edit-listing/:id"
-      element={
-        <PrivateRoute allowedRoles={["Owner"]}>
-          <EditListing />
-        </PrivateRoute>
-      }
-    />
+      {/* Tenant Routes */}
+      <Route
+        path="/tenant-dashboard"
+        element={
+          <PrivateRoute allowedRoles={["Seeker"]} requireTenantBadge={true}>
+            <TenantsDashboard />
+          </PrivateRoute>
+        }
+      />
 
-    {/* Seeker and Owner Routes */}
-    <Route
-      path="/liked-listing"
-      element={
-        <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-          <LikedListing />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/reservations"
-      element={
-        <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-          <ReserveListing />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/view-profile"
-      element={
-        <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-          <ViewProfile />
-        </PrivateRoute>
-      }
-    />
-    <Route
-      path="/edit-profile"
-      element={
-        <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
-          <EditProfile />
-        </PrivateRoute>
-      }
-    />
+      {/* Seeker Routes */}
+      <Route
+        path="/request-reservation"
+        element={
+          <PrivateRoute allowedRoles={["Seeker"]}>
+            <ReservationPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/view-lease"
+        element={
+          <PrivateRoute allowedRoles={["Seeker"]}>
+            <ViewLease />
+          </PrivateRoute>
+        }
+      />
 
-    {/* Fallback Route */}
-    <Route path="*" element={<NotAuthorized />} />
-    <Route path="/not-authorized" element={<NotAuthorized />} />
-  </Routes>
+      {/* Owner Routes */}
+      <Route
+        path="/owner-dashboard"
+        element={
+          <PrivateRoute allowedRoles={["Owner"]}>
+            <OwnerDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/create-list"
+        element={
+          <PrivateRoute allowedRoles={["Owner"]}>
+            <AddListing />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/edit-listing/:id"
+        element={
+          <PrivateRoute allowedRoles={["Owner"]}>
+            <EditListing />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Seeker and Owner Routes */}
+      <Route
+        path="/liked-listing"
+        element={
+          <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+            <LikedListing />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/reservations"
+        element={
+          <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+            <ReserveListing />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/view-profile"
+        element={
+          <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+            <ViewProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/edit-profile"
+        element={
+          <PrivateRoute allowedRoles={["Seeker", "Owner"]}>
+            <EditProfile />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Fallback Route */}
+      <Route path="*" element={<NotAuthorized />} />
+      <Route path="/not-authorized" element={<NotAuthorized />} />
+    </Routes>
   );
 };
 

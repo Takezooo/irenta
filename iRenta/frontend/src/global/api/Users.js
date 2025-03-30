@@ -2,7 +2,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token";
 
-const API_BASE_URL = "https://irenta-production.up.railway.app/api/users";
+const API_BASE_URL = "http://localhost:5000/api/users";
 
 export const fetchUserData = async (id, auth) => {
   try {

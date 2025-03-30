@@ -154,6 +154,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 src="./assets/images/irenta.png"
                 className="h-8 me-3"
                 alt="iRenta Logo"
+                loading="lazy"
+                decoding="async"
               />
               <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
                 iRenta
@@ -244,6 +246,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       }
                       alt="Profile"
                       className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <FaUserCircle className="h-10 w-10 text-blue-500 text-xl" />
@@ -266,6 +270,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                             }
                             alt="Profile"
                             className="h-full w-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -448,6 +454,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                   src="./assets/images/irenta.png"
                   className="h-8 w-auto me-3"
                   alt="iRenta Logo"
+                  loading="lazy"
+                  decoding="async"
                 />
               </Link>
               <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
@@ -572,6 +580,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       }
                       alt="Profile"
                       className="h-10 w-10 rounded-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <FaUserCircle className="h-10 w-10 text-blue-500 text-lg" />
@@ -595,6 +605,8 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                             }
                             alt="Profile"
                             className="h-full w-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">

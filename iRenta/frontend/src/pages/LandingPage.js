@@ -115,6 +115,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     filterListings();
+    console.log("Listings:", listings);
   }, [searchTerm, minPrice, maxPrice, selectedAmenities]);
 
   useEffect(() => {
@@ -319,6 +320,8 @@ const LandingPage = () => {
                           alt={listing.title}
                           onClick={() => handleViewProperty(listing)}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                         <button
                           onClick={() => handleLikeToggle(listing._id)}
@@ -480,6 +483,8 @@ const LandingPage = () => {
                           alt={listing.title}
                           onClick={() => handleViewProperty(listing)}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                         <button
                           onClick={() => handleLikeToggle(listing._id)}
@@ -546,6 +551,8 @@ const LandingPage = () => {
                 src="./assets/images/irenta.png"
                 className="h-full"
                 alt="iRenta Logo"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div className="w-[40%]">

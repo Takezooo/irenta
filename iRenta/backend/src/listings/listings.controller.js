@@ -95,6 +95,10 @@ export const CreateListing = async (req, res) => {
       address,
       amenities,
       vacant,
+      rentPeriod,
+      utilitiesIncluded,
+      includedUtilities,
+      vacancyStatus
     } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
@@ -172,6 +176,10 @@ export const CreateListing = async (req, res) => {
       images: listingImages, // Associate images with the listing
       amenities,
       vacant,
+      rentPeriod,
+      utilitiesIncluded,
+      includedUtilities,
+      vacancyStatus
     });
 
     res.status(201).json(newListing);

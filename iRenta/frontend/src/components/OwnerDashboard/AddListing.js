@@ -7,7 +7,7 @@ import MapPicker from "../Mapping/MapPicker.js";
 import { GetToken } from "../../global/utils/Token.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
-const API_LINK = "https://irenta-production.up.railway.app/api";
+const API_LINK = "http://localhost:5000/api";
 
 const AddListing = () => {
   const { darkMode } = useContext(ThemeContext);
@@ -22,7 +22,6 @@ const AddListing = () => {
   const [bedroomNumber, setBedroomNumber] = useState("");
   const [bathroomNumber, setBathroomNumber] = useState("");
   const [propertySize, setPropertySize] = useState("");
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [address, setAddress] = useState({
     houseNumber: "",
     street: "",
@@ -35,11 +34,66 @@ const AddListing = () => {
     startTime: "",
     endTime: "",
   });
+  const [amenities, setAmenities] = useState([
+    { name: "Pool", fee: 0, selected: false },
+    { name: "Gym", fee: 0, selected: false },
+    { name: "Parking", fee: 0, selected: false },
+    { name: "Laundry", fee: 0, selected: false },
+  ]);
 
-  const handleAmenityChange = (e) => {
-    const { value, checked } = e.target;
-    setSelectedAmenities((prev) =>
-      checked ? [...prev, value] : prev.filter((amenity) => amenity !== value)
+  const [customAmenity, setCustomAmenity] = useState({
+    name: "",
+    fee: 0,
+  });
+  const [vacant, setVacant] = useState(0);
+
+  const handleAddCustomAmenity = () => {
+    if (customAmenity.name.trim() === "") {
+      alert("Please enter a name for the custom amenity.");
+      return;
+    }
+
+    if (
+      amenities.some((amenity) => amenity.name === customAmenity.name.trim())
+    ) {
+      alert("This amenity already exists.");
+      return;
+    }
+
+    setAmenities((prevAmenities) => [
+      ...prevAmenities,
+      {
+        name: customAmenity.name.trim(),
+        fee: parseFloat(customAmenity.fee) || 0,
+        selected: true,
+      },
+    ]);
+
+    setCustomAmenity({ name: "", fee: 0 });
+  };
+
+  const handleAmenityChange = (amenityName, isSelected) => {
+    setAmenities((prevAmenities) =>
+      prevAmenities.map((amenity) =>
+        amenity.name === amenityName
+          ? { ...amenity, selected: isSelected }
+          : amenity
+      )
+    );
+  };
+
+  const handleAmenityFeeChange = (amenityName, fee) => {
+    const parsedFee = parseFloat(fee);
+    if (isNaN(parsedFee)) {
+      return;
+    }
+
+    setAmenities((prevAmenities) =>
+      prevAmenities.map((amenity) =>
+        amenity.name === amenityName
+          ? { ...amenity, fee: Math.max(0, parsedFee) } // Ensure fee is >= 0
+          : amenity
+      )
     );
   };
 
@@ -137,6 +191,18 @@ const AddListing = () => {
       return;
     }
 
+    if (vacant < 0) {
+      alert("Vacant spaces cannot be negative.");
+      return;
+    }
+
+    const selectedAmenities = amenities
+      .filter((amenity) => amenity.selected)
+      .map((amenity) => ({
+        name: amenity.name,
+        fee: amenity.fee,
+      }));
+
     try {
       const formData = new FormData();
       formData.append(
@@ -152,6 +218,7 @@ const AddListing = () => {
           address,
           visitAvailability,
           amenities: selectedAmenities,
+          vacant: vacant,
         })
       );
 
@@ -371,6 +438,29 @@ const AddListing = () => {
                   </select>
                 </div>
 
+                {/* Number of Vacant Space */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-1 ${
+                      darkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Vacant Spaces
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Enter number of vacant spaces"
+                    value={vacant}
+                    onChange={(e) => setVacant(parseInt(e.target.value) || 0)} // Ensure it's a number
+                    className={`w-full p-3 rounded-lg border ${
+                      darkMode
+                        ? "bg-gray-700 text-gray-300 border-gray-600 focus:ring-blue-500 focus:outline-none"
+                        : "bg-white text-gray-800 border-gray-300 focus:ring-blue-500 focus:outline-none"
+                    }`}
+                  />
+                </div>
+
                 {/* Number of Bedrooms */}
                 <div>
                   <label
@@ -434,45 +524,111 @@ const AddListing = () => {
                   />
                 </div>
 
-                {/* Amenities & Inclusions */}
+                {/* Amenities with Fees */}
                 <div>
                   <label
                     className={`block text-sm font-medium mb-1 ${
                       darkMode ? "text-gray-300" : "text-gray-700"
                     }`}
                   >
-                    Amenities & Inclusions
+                    Amenities
                   </label>
                   <div
                     className={`space-y-2 rounded-lg p-2 border ${
                       darkMode
-                        ? "bg-gray-800 text-gray-300 border-gray-700"
-                        : "bg-white text-gray-700 border-gray-300"
+                        ? "bg-gray-800 border-gray-700"
+                        : "bg-white border-gray-300"
                     }`}
                   >
-                    {[
-                      "Fully Furnished",
-                      "Semi Furnished",
-                      "Aircon",
-                      "WiFi / Internet",
-                      "Electricity Bill",
-                      "Water Bill",
-                    ].map((amenity) => (
-                      <label
-                        key={amenity}
-                        className="flex items-center space-x-2"
+                    {/* Predefined Amenities */}
+                    {amenities.map((amenity) => (
+                      <div
+                        key={amenity.name}
+                        className="flex items-center gap-2"
                       >
                         <input
                           type="checkbox"
-                          value={amenity}
+                          checked={amenity.selected}
+                          onChange={(e) =>
+                            handleAmenityChange(amenity.name, e.target.checked)
+                          }
                           className={`form-checkbox ${
                             darkMode ? "text-blue-400" : "text-blue-500"
                           }`}
-                          onChange={handleAmenityChange}
                         />
-                        <span>{amenity}</span>
-                      </label>
+                        <span className="capitalize">{amenity.name}</span>
+                        <input
+                          type="number"
+                          placeholder="Fee"
+                          min="0"
+                          value={amenity.fee}
+                          onChange={(e) =>
+                            handleAmenityFeeChange(amenity.name, e.target.value)
+                          }
+                          className={`ml-2 p-1 w-20 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                      </div>
                     ))}
+
+                    {/* Add Custom Amenity Section */}
+                    <div className="mt-4">
+                      <label
+                        className={`block text-sm font-medium mb-1 ${
+                          darkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                      >
+                        Add Custom Amenity
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <input
+                          type="text"
+                          placeholder="Amenity Name"
+                          value={customAmenity.name}
+                          onChange={(e) =>
+                            setCustomAmenity({
+                              ...customAmenity,
+                              name: e.target.value,
+                            })
+                          }
+                          className={`flex-grow p-2 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Fee"
+                          min="0"
+                          value={customAmenity.fee}
+                          onChange={(e) =>
+                            setCustomAmenity({
+                              ...customAmenity,
+                              fee: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className={`w-20 p-2 rounded border ${
+                            darkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        <button
+                          onClick={handleAddCustomAmenity}
+                          className={`px-4 py-2 rounded ${
+                            darkMode
+                              ? "bg-blue-600 text-white hover:bg-blue-500"
+                              : "bg-blue-500 text-white hover:bg-blue-600"
+                          }`}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -682,24 +838,25 @@ const AddListing = () => {
               </div>
             </div>
 
-          {/* Fixed Footer */}
-          <div
-            className={`absolute bottom-0 left-0 right-0 p-6 ${
-              darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-            }`}
-          >
-            <button
-              className={`w-full py-3 rounded-lg ${
+            {/* Fixed Footer */}
+            <div
+              className={`absolute bottom-0 left-0 right-0 p-6 ${
                 darkMode
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
+                  ? "border-gray-700 bg-gray-800"
+                  : "border-gray-200 bg-white"
               }`}
-              onClick={handleFormSubmit}
             >
-              Add Listing
-            </button>
-          </div>
-
+              <button
+                className={`w-full py-3 rounded-lg ${
+                  darkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                onClick={handleFormSubmit}
+              >
+                Add Listing
+              </button>
+            </div>
           </div>
         </div>
 
@@ -729,30 +886,44 @@ const AddListing = () => {
                           : "bg-gray-200 text-gray-600"
                       }`}
                     >
-                      <span>Main Image</span>
+                      {selectedImages.length > 0 ? (
+                        <img
+                          src={URL.createObjectURL(selectedImages[0])}
+                          alt="Main Preview"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <span>Main Image</span>
+                      )}
                     </div>
                     {/* Thumbnail Images */}
                     <div className="flex justify-between space-x-2 overflow-x-auto">
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
-                      <div
-                        className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
-                          darkMode ? "bg-gray-600" : "bg-gray-300"
-                        }`}
-                      ></div>
+                      {selectedImages.map((image, index) => (
+                        <div
+                          key={index}
+                          className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md overflow-hidden ${
+                            darkMode ? "bg-gray-600" : "bg-gray-300"
+                          }`}
+                        >
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Thumbnail ${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                      {/* Empty placeholders if less than 4 images */}
+                      {selectedImages.length < 4 &&
+                        Array.from({ length: 4 - selectedImages.length }).map(
+                          (_, index) => (
+                            <div
+                              key={`empty-${index}`}
+                              className={`h-16 w-20 sm:h-20 sm:w-24 rounded-md ${
+                                darkMode ? "bg-gray-600" : "bg-gray-300"
+                              }`}
+                            ></div>
+                          )
+                        )}
                     </div>
                   </div>
                 </div>
@@ -769,7 +940,6 @@ const AddListing = () => {
                         darkMode ? "text-blue-400" : "text-blue-600"
                       }`}
                     >
-                      
                       {title || "Placeholder Title"}
                     </h2>
                     <p
@@ -843,13 +1013,16 @@ const AddListing = () => {
                           darkMode ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                          {selectedAmenities.length > 0 ? (
-                            selectedAmenities.map((amenity, index) => (
-                              <li key={index}>{amenity}</li>
-                            ))
-                          ) : (
-                            <li>No amenities selected</li>
-                          )}
+                        {amenities
+                          .filter((amenity) => amenity.selected) // Only show selected amenities
+                          .map((amenity, index) => (
+                            <li key={index}>
+                              {amenity.name}{" "}
+                              {amenity.fee > 0 ? `(₱${amenity.fee})` : ""}
+                            </li>
+                          ))}
+                        {amenities.filter((amenity) => amenity.selected)
+                          .length === 0 && <li>No amenities selected</li>}
                       </ul>
                     </div>
                     <div>
@@ -869,6 +1042,7 @@ const AddListing = () => {
                         <li>Bathroom/s: {bathroomNumber}</li>
                         <li>Unit Size: {propertySize}</li>
                         <li>Type: {type}</li>
+                        <li>Vacant Spaces: {vacant}</li>
                       </ul>
                     </div>
                   </div>

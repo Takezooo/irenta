@@ -3,6 +3,7 @@ import Reservation from "../reservations/reservations.model.js";
 import moment from "moment"; // Use moment.js for time comparison (you can also use plain JS)
 import driveService from "../../global/utils/Drive.js";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config(); // Load environment variables
 
@@ -38,6 +39,28 @@ export const GetListingById = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const GetListingsByUser = async (req, res) => {
+  try {
+    const userId = req.params.id; // Get user ID from URL params
+    console.log("Fetching listings for user:", userId); // Debugging log
+
+    // Fix: Query using `userId` instead of `owner`
+    const listings = await Listing.find({ userId: new mongoose.Types.ObjectId(userId) });
+
+    if (!listings.length) {
+      console.warn("No listings found for user:", userId);
+      return res.status(404).json({ message: "No listings found for this user" });
+    }
+
+    res.status(200).json(listings);
+  } catch (err) {
+    console.error("Error fetching user listings:", err.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
 export const DisplayListings = async (req, res) => {
   try {
     // Fetch all listings (no authentication required)
@@ -71,6 +94,11 @@ export const CreateListing = async (req, res) => {
       propertySize,
       address,
       amenities,
+      vacant,
+      rentPeriod,
+      utilitiesIncluded,
+      includedUtilities,
+      vacancyStatus
     } = JSON.parse(body.data);
 
     // Check if the address object is present and has required fields
@@ -79,6 +107,21 @@ export const CreateListing = async (req, res) => {
         message:
           "Address is incomplete. Ensure houseNumber, street, and city are provided.",
       });
+    }
+
+    if (amenities) {
+      for (const amenity of amenities) {
+        if (!amenity.name || typeof amenity.name !== "string") {
+          return res
+            .status(400)
+            .json({ message: "Each amenity must have a name." });
+        }
+        if (amenity.fee === undefined || typeof amenity.fee !== "number") {
+          return res
+            .status(400)
+            .json({ message: "Each amenity must have a valid fee." });
+        }
+      }
     }
 
     // Validate visitAvailability
@@ -132,6 +175,11 @@ export const CreateListing = async (req, res) => {
       visitAvailability, // Include validated visit availability
       images: listingImages, // Associate images with the listing
       amenities,
+      vacant,
+      rentPeriod,
+      utilitiesIncluded,
+      includedUtilities,
+      vacancyStatus
     });
 
     res.status(201).json(newListing);
@@ -147,7 +195,9 @@ export const UpdateListing = async (req, res) => {
     const ID = req.user.userId;
     // Check if the logged-in user is an "owner"
     if (req.user.userType !== "Owner") {
-      return res.status(403).json({ message: "Only owners can update listings." });
+      return res
+        .status(403)
+        .json({ message: "Only owners can update listings." });
     }
 
     // Destructure necessary fields from the request body
@@ -168,7 +218,8 @@ export const UpdateListing = async (req, res) => {
     // Check if the address object is present and has required fields
     if (!address || !address.houseNumber || !address.street || !address.city) {
       return res.status(400).json({
-        message: "Address is incomplete. Ensure houseNumber, street, and city are provided.",
+        message:
+          "Address is incomplete. Ensure houseNumber, street, and city are provided.",
       });
     }
 
@@ -185,7 +236,9 @@ export const UpdateListing = async (req, res) => {
 
       // Ensure startTime is earlier than endTime
       if (moment(startTime, "HH:mm").isSameOrAfter(moment(endTime, "HH:mm"))) {
-        return res.status(400).json({ message: "Start time must be earlier than end time." });
+        return res
+          .status(400)
+          .json({ message: "Start time must be earlier than end time." });
       }
     }
 
@@ -239,9 +292,8 @@ export const UpdateListing = async (req, res) => {
         images: updatedImages, // Combine existing and new images
       },
       { new: true, runValidators: true } // Return the updated document and validate updates
-
     );
-    
+
     // Handle image deletions (if any images are to be removed)
     if (removedImages && removedImages.length > 0) {
       // Delete the removed images from storage (Google Drive)
@@ -253,12 +305,14 @@ export const UpdateListing = async (req, res) => {
         }
         return Promise.resolve();
       });
-    
+
       // Wait for all images to be deleted from storage
       await Promise.all(deletePromises);
-    
+
       // Check for any inconsistencies between the id fields
-      const removedImageIds = removedImages.map((image) => image._id || image._id);  // Adjust based on logging
+      const removedImageIds = removedImages.map(
+        (image) => image._id || image._id
+      ); // Adjust based on logging
 
       await Listing.updateOne(
         { _id: listingId }, // Filter to match the document
@@ -272,7 +326,6 @@ export const UpdateListing = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 export const DeleteListing = async (req, res) => {
   try {
@@ -320,10 +373,11 @@ export const FetchReservedListings = async (req, res) => {
     const userType = req.user.userType;
 
     const seekerSelectFields =
-    "info.firstName info.lastName info.email info.phoneNumber";
+      "info.firstName info.lastName info.email info.phoneNumber";
 
     // Determine the filter based on user type
-    const filter = userType === "Seeker" ? { seekerId: userId } : { ownerId: userId };
+    const filter =
+      userType === "Seeker" ? { seekerId: userId } : { ownerId: userId };
 
     // Fetch reservations
     const reservations = await Reservation.find(filter)
@@ -336,9 +390,9 @@ export const FetchReservedListings = async (req, res) => {
       })
       .exec();
 
-      if (!reservations || reservations.length === 0) {
-        return res.status(404).json({ message: "No reservations found." });
-      }
+    if (!reservations || reservations.length === 0) {
+      return res.status(404).json({ message: "No reservations found." });
+    }
 
     res.status(200).json(reservations);
   } catch (error) {

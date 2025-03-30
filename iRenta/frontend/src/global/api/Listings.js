@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetToken } from "../utils/Token.js";
 
-const API_BASE_URL = "https://irenta-production.up.railway.app/api/listings"; // Update with your backend API endpoint
+const API_BASE_URL = "http://localhost:5000/api/listings"; // Update with your backend API endpoint
 
 export const fetchListings = async () => {
   try {
@@ -9,6 +9,16 @@ export const fetchListings = async () => {
     return data; // Listings with images included
   } catch (err) {
     console.error("Failed to fetch listings:", err);
+  }
+};
+
+export const fetchSpecificUserListings = async (id) => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/users/${id}`); // Use the correct API route
+    return data; // Listings with images included
+  } catch (err) {
+    console.error("Failed to fetch listings:", err.response?.data?.message || err);
+    return null;
   }
 };
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-//change the listing model
+
 const listingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
@@ -10,7 +10,7 @@ const listingSchema = new mongoose.Schema({
   propertySize: { type: String, required: true },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference the User model
+    ref: "User",
     required: true,
   },
   images: [
@@ -29,29 +29,48 @@ const listingSchema = new mongoose.Schema({
     lat: { type: Number },
   },
   visitAvailability: {
-    startTime: { type: String }, // e.g., "09:00"
-    endTime: { type: String }, // e.g., "18:00"
+    startTime: { type: String },
+    endTime: { type: String },
   },
-  amenities: [{ type: String }],
+  amenities: [
+    {
+      name: { type: String, required: true },
+      fee: { type: Number, default: 0 },
+    },
+  ],
   termsAndConditionsId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "TermsAndConditions", // Reference to the Terms schema
+    ref: "TermsAndConditions",
     required: false,
   },
   customTermsAndConditions: {
     type: String,
     required: false,
   },
-  onHold: { type: Boolean, default: false }, // set to true someone reserved
+  onHold: { type: Boolean, default: false },
   askForValidId: {
     type: Boolean,
     default: false,
     required: false,
   },
+  vacant: { type: Number, default: 0, required: true },
   createdAt: { type: Date, default: Date.now },
+  // New fields added below
+  rentPeriod: {
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'yearly'],
+  },
+  utilitiesIncluded: { 
+    type: Boolean,
+    default: false 
+  },
+  includedUtilities: { 
+    type: [String] 
+  },
+  vacancyStatus: { 
+    type: String 
+  }
 });
 
-// export default mongoose.model('Listing', ListingSchema);
 const Listing = mongoose.model("Listing", listingSchema);
-
 export default Listing;

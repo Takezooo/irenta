@@ -218,6 +218,12 @@ export const UpdateListing = async (req, res) => {
       propertySize,
       address,
       amenities,
+      vacantUnits,
+      utilitiesIncluded,
+      includedUtilities,
+      vacancyStatus,
+      rentPeriod,
+      priceType,
       removedImages, // Receive removed images
     } = JSON.parse(body.data);
 
@@ -291,10 +297,16 @@ export const UpdateListing = async (req, res) => {
         type,
         bedroomNumber,
         bathroomNumber,
+        visitAvailability,
         propertySize,
         address,
-        visitAvailability,
         amenities,
+        vacantUnits,
+        utilitiesIncluded,
+        includedUtilities,
+        vacancyStatus,
+        rentPeriod,
+        priceType,
         images: updatedImages, // Combine existing and new images
       },
       { new: true, runValidators: true } // Return the updated document and validate updates
@@ -326,7 +338,11 @@ export const UpdateListing = async (req, res) => {
       );
     }
 
-    res.status(200).json(updatedListing); // Return the updated listing
+    const responseListing = updatedListing.toObject();
+    responseListing.calculatedPrice = calculatePeriodPrice(updatedListing.price, updatedListing.rentPeriod);
+    responseListing.exampleCalculation = calculateTotalPrice(updatedListing, 1);
+
+    res.status(200).json(responseListing); // Return the updated listing
   } catch (err) {
     console.error("Error updating listing:", err);
     res.status(500).json({ message: err.message });

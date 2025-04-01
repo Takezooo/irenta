@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { fetchUserData } from "../global/api/Users.js"; // Adjust path if needed
 import { fetchSpecificUserListings } from "../global/api/Listings.js";
 import { GetToken } from "../global/utils/Token";
@@ -7,6 +7,7 @@ import Topbar from "../components/global/Topbar.js";
 import { ThemeContext } from "../contexts/ThemeContext";
 // import React from "react";
 import { Footer } from "../components/global/Footer.js";
+import { useProperty } from "../global/contexts/PropertyContext";
 
 const ProfilePage = () => {
   const { darkMode } = useContext(ThemeContext);
@@ -16,6 +17,9 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedListings, setExpandedListings] = useState({});
+  const { setSelectedProperty } = useProperty();
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const authToken = GetToken();
@@ -42,6 +46,11 @@ const ProfilePage = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleViewProperty = (listing) => {
+    setSelectedProperty(listing);
+    navigate(`/${listing._id}`);
   };
 
   console.log(id);
@@ -219,6 +228,7 @@ const ProfilePage = () => {
               {listings.map((listing) => (
                 <div
                   key={listing._id}
+                  onClick={() => handleViewProperty(listing)}
                   className={`mb-8 flex justify-center items-center ${
                     darkMode ? "bg-gray-900" : "bg-gray-200"
                   }`}

@@ -11,6 +11,12 @@ const leaseSchema = new mongoose.Schema(
       name: { type: String, required: false }, // Optional placeholder for tenant name
       email: { type: String, required: false }, // Optional placeholder for tenant email
       phoneNumber: { type: String, required: false }, // Optional placeholder for tenant phone number
+      emergencyContact: {
+        name: { type: String, required: false },
+        relationship: { type: String, required: false },
+        phoneNumber: { type: String, required: false },
+      },
+      additionalDetails: { type: String, required: false } // For any additional tenant information
     },
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
@@ -52,6 +58,30 @@ const leaseSchema = new mongoose.Schema(
         required: false,
       },
       rulesAndRegulations: { type: String, required: false },
+      // New financial details
+      rentBreakdown: {
+        baseRent: { type: Number, required: false },
+        utilities: { type: Number, required: false },
+        parking: { type: Number, required: false },
+        amenities: { type: Number, required: false },
+        otherFees: [
+          {
+            name: { type: String },
+            amount: { type: Number }
+          }
+        ]
+      },
+      // New payment policy fields
+      gracePeriod: { type: Number, required: false }, // Days allowed after due date without penalty
+      latePaymentPolicy: { type: String, required: false }, // Description of late payment penalties
+      // New legal fields
+      noticePeriod: { type: Number, required: false }, // Days required for move-out notice
+      renewalTerms: { 
+        type: String, 
+        enum: ["Automatic", "Manual", "No Renewal"],
+        required: false 
+      },
+      renewalNotificationPeriod: { type: Number, required: false } // Days before lease end to notify about renewal
     },
     moveInDate: { type: Date, required: false }, // Optional field
     moveOutDate: { type: Date, required: false }, // Optional field

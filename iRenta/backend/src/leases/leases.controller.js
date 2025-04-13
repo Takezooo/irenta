@@ -24,59 +24,14 @@ export const CreateLease = async (req, res) => {
   try {
     const {
       property,
-      contractDetails,
-      landlordName,
       tenant,
       tenantPlaceholder,
+      contractDetails,
+      landlordName,
+      action,
       termsTemplateId,
-      action, // "saveAsDraft" or "saveAndSend"
     } = req.body;
-    
-    // Validation for "saveAndSend" only
-    if (action === "saveAndSend") {
-      // Landlord validation remains the same
-      if (!landlordName) {
-        return res.status(400).json({ message: "Landlord name is required" });
-      }
-      
-      // Property validation remains the same
-      if (
-        !property?.name ||
-        !property?.address?.houseNumber ||
-        !property?.address?.street ||
-        !property?.address?.city ||
-        !property?.address?.zip
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Property details are incomplete" });
-      }
-      
-      // Updated contract details validation to include new fields
-      if (
-        !contractDetails?.startDate ||
-        !contractDetails?.endDate ||
-        !contractDetails?.rentAmount ||
-        !contractDetails?.paymentFrequency ||
-        !contractDetails?.depositAmount
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Basic lease details are incomplete" });
-      }
-      
-      // Validate that either tenant or tenantPlaceholder is provided
-      if (
-        !tenant && 
-        (!tenantPlaceholder || !tenantPlaceholder.name || !tenantPlaceholder.email)
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Either tenant ID or tenant information (name and email) is required" });
-      }
-    }
-    
-    // Handle terms template - same as before
+
     let termsContent = "";
     if (termsTemplateId) {
       const termsTemplate = await Terms.findById(termsTemplateId);
@@ -84,28 +39,45 @@ export const CreateLease = async (req, res) => {
         return res.status(404).json({ message: "Terms template not found" });
       }
       termsContent = termsTemplate.content;
-      
-      // Update to store terms in the correct field
       req.body.contractDetails = {
         ...req.body.contractDetails,
         termsAndConditionsId: termsTemplateId,
       };
     }
-    
+
+    if (action === "saveAndSend") {
+      const { startDate, endDate, rentAmount, paymentFrequency, depositAmount } = contractDetails || {};
+      if (!startDate || !endDate || !rentAmount || !paymentFrequency || !depositAmount) {
+        return res.status(400).json({ message: "Basic lease details are incomplete" });
+      }
+    }
+
     const leaseData = {
-      ...req.body,
-      tenant: tenant || undefined,
-      landlord: req.user._id, // Assuming you have user info in req.user
-      status: action === "saveAndSend" ? "Ready" : "Draft", // Set status based on action
+      property,
+      landlord: req.user._id, // Assume middleware sets req.user
+      landlordName,
+      tenant,
+      tenantPlaceholder,
+      contractDetails: {
+        ...contractDetails,
+        customTermsAndConditions: termsContent,
+      },
+      status: action === "saveAsDraft" ? "Draft" : "Pending",
     };
-    
-    const lease = await Lease.create(leaseData);
-    res.status(201).json(lease);
+
+    const lease = new Lease(leaseData);
+    await lease.save();
+
+    return res.status(201).json({ message: "Lease created successfully", lease });
   } catch (error) {
     console.error("Error creating lease:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
+    }
     res.status(500).json({ message: "Failed to create lease", error: error.message });
   }
 };
+
 
 // Fetch all leases created by the landlord
 export const GetCreatedLeases = async (req, res) => {

@@ -17,7 +17,11 @@ import { createReservation } from "../global/api/Reservations";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
 // import RenderPanorama from "../components/Panorama/Panorama"
 import RenderImage from "../components/Panorama/RenderImage";
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { Icon } from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
@@ -176,6 +180,12 @@ export const ViewListing = () => {
   const capitalizeFirstLetter = (item) => {
     return item.charAt(0).toUpperCase() + item.slice(1)
   }
+
+  const customIcon = new Icon ({
+	iconRetinaUrl: markerIcon2x,
+	iconUrl: markerIcon,
+	shadowUrl: markerShadow,
+  })
 
 	if (!isLoaded) return <LoadingScreen />;
 
@@ -487,12 +497,22 @@ export const ViewListing = () => {
 								zoomControl={false}
 								doubleClickZoom={false} 
 								scrollWheelZoom={false}
+								dragging={false}
 								className="w-full h-full z-0" // ✅ ensure it fills the container
 								>
 								<TileLayer
 									attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 									url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 								/>
+
+								<Marker 
+									position={{
+										lat: 14.582815,
+										lng: 120.983952
+									}}
+									icon={customIcon}
+									>
+								</Marker>
 								</MapContainer>
 							)}
 						</div>

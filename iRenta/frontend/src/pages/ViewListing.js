@@ -17,6 +17,7 @@ import { createReservation } from "../global/api/Reservations";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
 // import RenderPanorama from "../components/Panorama/Panorama"
 import RenderImage from "../components/Panorama/RenderImage";
+import { MapContainer, TileLayer } from 'react-leaflet';
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
@@ -476,45 +477,24 @@ export const ViewListing = () => {
 					>
 						<h2 className="text-lg font-semibold mb-4">Pinned Location</h2>
 						<div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
-							{selectedProperty?.address?.lng &&
-								selectedProperty?.address?.lat && (
-									<GoogleMap
-										center={{
-											lat: selectedProperty.address.lat,
-											lng: selectedProperty.address.lng,
-										}}
-										zoom={17}
-										mapContainerStyle={{ width: "100%", height: "100%" }} // The map container uses the full parent div dimensions
-										options={{
-											mapId: "7faff3f15533dffa",
-											fullscreenControl: false,
-											streetViewControl: false,
-											mapTypeControl: false,
-											gestureHandling: "none",
-											zoomControl: false,
-											styles: [
-												{
-													featureType: "poi",
-													stylers: [{ visibility: "off" }],
-												},
-												{
-													featureType: "road",
-													elementType: "labels.icon",
-													stylers: [{ visibility: "off" }],
-												},
-												{
-													featureType: "transit",
-													elementType: "labels.icon",
-													stylers: [{ visibility: "off" }],
-												},
-											],
-										}}
-									>
-										{selectedProperty.address && (
-											<MarkerF position={selectedProperty.address} />
-										)}
-									</GoogleMap>
-								)}
+							{selectedProperty?.address?.lng && selectedProperty?.address?.lat && (
+								<MapContainer
+								center={{
+									lat: 14.582815,
+									lng: 120.983952,
+								}}
+								zoom={16}
+								zoomControl={false}
+								doubleClickZoom={false} 
+								scrollWheelZoom={false}
+								className="w-full h-full z-0" // ✅ ensure it fills the container
+								>
+								<TileLayer
+									attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+									url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+								/>
+								</MapContainer>
+							)}
 						</div>
 					</div>
 

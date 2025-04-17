@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer } from 'react-leaflet';
 
 const PHILIPPINES_BOUNDS = {
   north: 21.120031, // Northernmost point
@@ -198,5 +200,12 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
         />
       ))}
     </GoogleMap>
+    // <MapContainer>
+    //   <TileLayer
+    //     attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        
+    //   />
+    // </MapContainer>
+
   );
 };

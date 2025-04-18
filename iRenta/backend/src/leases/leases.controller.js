@@ -172,6 +172,15 @@ export const UpdateLease = async (req, res) => {
       updatedData.isAgreed = req.body.isAgreed === "true";
     }
 
+    // Ensure amenities and utilities are properly handled
+    if (req.body.amenities) {
+      updatedData.amenities = req.body.amenities;
+    }
+
+    if (req.body.utilities) {
+      updatedData.utilities = req.body.utilities;
+    }
+
     const lease = await Lease.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,

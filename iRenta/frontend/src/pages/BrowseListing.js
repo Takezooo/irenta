@@ -136,6 +136,7 @@ const BrowseListing = () => {
   const totalPages = Math.ceil(listings.length / listingsPerPage);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  
   const handleViewProperty = (listing) => {
     setSelectedProperty(listing);
     navigate(`/${listing._id}`);

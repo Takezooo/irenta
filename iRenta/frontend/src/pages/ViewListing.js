@@ -489,30 +489,29 @@ export const ViewListing = () => {
 						<div className="w-full h-64 sm:h-80 lg:h-96 rounded overflow-hidden">
 							{selectedProperty?.address?.lng && selectedProperty?.address?.lat && (
 								<MapContainer
-								center={{
-									lat: 14.582815,
-									lng: 120.983952,
-								}}
-								zoom={16}
-								zoomControl={false}
-								doubleClickZoom={false} 
-								scrollWheelZoom={false}
-								dragging={false}
-								className="w-full h-full z-0" // ✅ ensure it fills the container
-								>
-								<TileLayer
-									attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-									url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-								/>
-
-								<Marker 
-									position={{
+									center={{
 										lat: 14.582815,
-										lng: 120.983952
+										lng: 120.983952,
 									}}
-									icon={customIcon}
-									>
-								</Marker>
+									zoom={17}
+									zoomControl={false}
+									doubleClickZoom={false} 
+									scrollWheelZoom={false}
+									dragging={false}
+									className="w-full h-full z-0" // ✅ ensure it fills the container
+								>
+									<TileLayer
+										attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+										url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+									/>
+
+									<Marker 
+										position={{
+											lat: 14.582815,
+											lng: 120.983952
+										}}
+										icon={customIcon}>
+									</Marker>
 								</MapContainer>
 							)}
 						</div>

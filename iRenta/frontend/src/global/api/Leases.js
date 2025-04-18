@@ -18,16 +18,30 @@ export const createLease = async (leaseData) => {
 };
 
 export const downloadPdf = async (leaseId) => {
+  const authToken = GetToken();
   try {
+    // First, fetch the lease details to get property name for better file naming
+    const leaseDetails = await fetchLeaseById(leaseId);
+    
     const response = await axios.get(`${API_BASE_URL}/${leaseId}/pdf`, {
       responseType: "blob", // Treat the response as a binary file
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
 
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `lease_${leaseId}.pdf`; // Default file name
+    
+    // Create a more descriptive filename
+    const propertyName = leaseDetails?.property?.name 
+      ? leaseDetails.property.name.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') 
+      : 'property';
+    const today = new Date().toISOString().split('T')[0];
+    
+    link.download = `Lease_Agreement_${propertyName}_${today}.pdf`;
     link.click();
     window.URL.revokeObjectURL(url); // Clean up the object URL
   } catch (error) {
@@ -73,14 +87,19 @@ export const updateLease = async (leaseId, updatedData) => {
   const authToken = GetToken();
 
   try {
+    // Determine if updatedData is FormData or a regular object
+    const isFormData = updatedData instanceof FormData;
+    
+    // Set headers based on data type
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+      ...(!isFormData && { 'Content-Type': 'application/json' })
+    };
+
     const response = await axios.put(
       `${API_BASE_URL}/${leaseId}`,
       updatedData,
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
+      { headers }
     );
     return response.data;
   } catch (error) {

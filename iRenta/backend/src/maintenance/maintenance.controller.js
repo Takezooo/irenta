@@ -46,33 +46,49 @@ export const getTenantMaintenanceRequests = async (req, res) => {
 export const getLandlordMaintenanceRequests = async (req, res) => {
   try {
     const { landlordId } = req.params;
+    
+    // Check if landlordId is valid
+    if (!landlordId || landlordId === 'undefined') {
+      return res.status(400).json({ 
+        message: "Invalid landlord ID provided",
+        error: "A valid landlord ID is required"
+      });
+    }
 
     // Get tenants for this landlord
     const tenants = await Tenant.find({ landlordId })
       .populate('seekerId', 'info.firstName info.lastName')
       .populate('propertyId', 'title');
-      const userIds = tenants.map(tenant => tenant.seekerId._id);
+    
+    if (!tenants || tenants.length === 0) {
+      return res.status(200).json([]); // Return empty array if no tenants found
+    }
+    
+    const userIds = tenants.map(tenant => tenant.seekerId._id);
 
-      const requests = await Maintenance.find({
-        tenantId: { $in: userIds }
-      })
-      .sort({ createdAt: -1 })
-      .populate('tenantId', 'info.firstName info.lastName');
+    const requests = await Maintenance.find({
+      tenantId: { $in: userIds }
+    })
+    .sort({ createdAt: -1 })
+    .populate('tenantId', 'info.firstName info.lastName');
   
-      // Combine the data
-      const enrichedRequests = requests.map(request => {
-        const tenant = tenants.find(t => t.seekerId._id.toString() === request.tenantId._id.toString());
-        return {
-          ...request.toObject(),
-          tenantId: tenant?.seekerId,
-          propertyId: tenant?.propertyId
-        };
-      });
+    // Combine the data
+    const enrichedRequests = requests.map(request => {
+      const tenant = tenants.find(t => t.seekerId._id.toString() === request.tenantId._id.toString());
+      return {
+        ...request.toObject(),
+        tenantId: tenant?.seekerId,
+        propertyId: tenant?.propertyId
+      };
+    });
 
     res.status(200).json(enrichedRequests);
   } catch (error) {
     console.error("Error fetching maintenance requests:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      message: "Error fetching maintenance requests",
+      error: error.message
+    });
   }
 };
 

@@ -16,8 +16,16 @@ const MaintenanceRequests = () => {
     const loadRequests = async () => {
       setIsLoading(true);
       setError(null);
+      
+      // Ensure user and user.id are available before making the API call
+      if (!user || !user.id) {
+        setError('User information is not available');
+        setIsLoading(false);
+        return;
+      }
+      
       try {
-        const data = await fetchLandlordMaintenanceRequests(user?._id);
+        const data = await fetchLandlordMaintenanceRequests(user.id);
         if (!data) {
           throw new Error('No maintenance requests data received');
         }
@@ -32,7 +40,7 @@ const MaintenanceRequests = () => {
         setProperties(uniqueProperties);
       } catch (error) {
         console.error('Error loading maintenance requests:', error);
-        setError(error.message);
+        setError(error.message || 'Failed to load maintenance requests');
       } finally {
         setIsLoading(false);
       }
@@ -40,7 +48,7 @@ const MaintenanceRequests = () => {
 
     loadRequests();
     
-  }, []);
+  }, [user]);
 
   // Show loading state
   if (isLoading) {
@@ -80,7 +88,7 @@ const MaintenanceRequests = () => {
   // Filter requests based on selected property
   const filteredRequests = selectedProperty === 'all'
     ? requests
-    : requests.filter(request => request.propertyId.title === selectedProperty);
+    : requests.filter(request => request.propertyId && request.propertyId.title === selectedProperty);
 
   return (
     <div className={`pt-20 pb-4 p-6 ${darkMode ? 'text-white' : 'text-black'}`}>
@@ -137,10 +145,10 @@ const MaintenanceRequests = () => {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-bold">
-                  {request.tenantId.info.firstName} {request.tenantId.info.lastName}
+                  {request.tenantId?.info?.firstName || 'Unknown'} {request.tenantId?.info?.lastName || ''}
                 </h3>
                 <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                  {request.propertyId.title}
+                  {request.propertyId?.title || 'Unknown Property'}
                 </p>
                 <p className="mt-2">{request.description}</p>
                 <p className={`mt-2 text-sm ${

@@ -102,9 +102,21 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 					setOriginalLease(JSON.parse(JSON.stringify(fetchedLease)));
 					setFormData(fetchedLease);
 					
-					// Initialize amenities and utilities from the lease
-					setAmenities(fetchedLease.amenities || []);
-					setUtilities(fetchedLease.utilities || []);
+					// Initialize amenities, utilities and otherFees from the lease
+					// Make sure amenities have the selected property for UI
+					const formattedAmenities = (fetchedLease.amenities || []).map(amenity => ({
+						...amenity,
+						selected: true,
+					}));
+					
+					// Make sure utilities have the selected property for UI
+					const formattedUtilities = (fetchedLease.utilities || []).map(utility => ({
+						...utility,
+						selected: true,
+					}));
+					
+					setAmenities(formattedAmenities);
+					setUtilities(formattedUtilities);
 					setOtherFees(
 						fetchedLease.contractDetails?.rentBreakdown?.otherFees || []
 					);
@@ -146,7 +158,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	useEffect(() => {
 		const totalAmenitiesCost = amenities
 			.filter((amenity) => amenity.selected)
-			.reduce((sum, amenity) => sum + (amenity.fee || 0), 0);
+			.reduce((sum, amenity) => sum + (amenity.amount || 0), 0);
 		setFormData((prev) => ({
 			...prev,
 			contractDetails: {
@@ -162,7 +174,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	useEffect(() => {
 		const totalUtilitiesCost = utilities
 			.filter((util) => util.selected)
-			.reduce((sum, util) => sum + (util.fee || 0), 0);
+			.reduce((sum, util) => sum + (util.amount || 0), 0);
 		setFormData((prev) => ({
 			...prev,
 			contractDetails: {
@@ -296,7 +308,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 				? selectedListing.includedUtilities.map((name) => ({
 						name: capitalizeFirstLetter(name),
 						selected: true,
-						fee: 0,
+						amount: 0,
 				  }))
 				: [];
 
@@ -374,10 +386,29 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 			(term) => term._id === formData.contractDetails.termsAndConditionsId
 		);
 
+		// Prepare amenities for submission - keep only selected ones
+		const amenitiesForSubmission = amenities
+			.filter(amenity => amenity.selected)
+			.map(amenity => ({
+				name: amenity.name || "",
+				amount: parseFloat(amenity.amount || 0)
+			}));
+
+		// Prepare utilities for submission - keep only selected ones
+		const utilitiesForSubmission = utilities
+			.filter(utility => utility.selected)
+			.map(utility => ({
+				name: utility.name || "",
+				amount: parseFloat(utility.amount || 0)
+			}));
+
+		// Handle tenant field properly: if using placeholder, set tenant to null
+		const tenantValue = usePlaceholderTenant ? null : formData.tenant;
+
 		const payload = {
 			...formData,
 			landlord: user.id,
-			tenant: usePlaceholderTenant ? null : formData.tenant || null,
+			tenant: tenantValue,
 			landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
 			contractDetails: {
 				...formData.contractDetails,
@@ -387,27 +418,39 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 					otherFees: otherFees,
 				},
 			},
-			amenities,
-			utilities,
+			amenities: amenitiesForSubmission,
+			utilities: utilitiesForSubmission,
 		};
 
 		try {
-			const updatedLease = await updateLease(leaseId, payload);
-			toast.success("Lease updated successfully!");
-			if (onLeaseUpdated) onLeaseUpdated();
-			// Update original lease to new state
-			setOriginalLease(JSON.parse(JSON.stringify({
-				...payload,
-				amenities,
-				utilities,
-			})));
+			// Convert payload to FormData
+			const formDataObj = new FormData();
+			
+			// Handle nested objects, converting them to JSON strings
+			Object.keys(payload).forEach(key => {
+				if (key === 'tenant' && payload[key] === null) {
+					// Explicitly set null as a string for proper handling on server
+					formDataObj.append(key, 'null');
+				} else if (key === 'amenities' || key === 'utilities' || typeof payload[key] === 'object') {
+					// Convert arrays and objects to JSON strings
+					if (payload[key] !== null) {
+						formDataObj.append(key, JSON.stringify(payload[key]));
+					} else {
+						formDataObj.append(key, 'null');
+					}
+				} else {
+					formDataObj.append(key, payload[key]);
+				}
+			});
+
+			await updateLease(leaseId, formDataObj);
+			toast.success("Lease updated successfully.");
+			if (onLeaseUpdated) {
+				onLeaseUpdated();
+			}
 		} catch (err) {
-			console.error("Error updating lease:", err.response?.data || err.message);
-			toast.error(
-				`Failed to update lease: ${
-					err.response?.data?.message || "Unknown error"
-				}`
-			);
+			console.error("Failed to update lease:", err);
+			toast.error("Failed to update lease. Please try again.");
 		}
 	};
 
@@ -558,7 +601,9 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 										<input
 											type="text"
 											name="tenantPlaceholder.phoneNumber"
-											value={formData.tenantPlaceholder.phoneNumber}
+											value={
+												formData.tenantPlaceholder.phoneNumber
+											}
 											onChange={handleChange}
 											className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
 												darkMode
@@ -843,10 +888,10 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 										{util.selected && (
 											<input
 												type="number"
-												value={util.fee}
+												value={util.amount}
 												onChange={(e) => {
 													const newUtilities = [...utilities];
-													newUtilities[index].fee =
+													newUtilities[index].amount =
 														parseFloat(e.target.value) || 0;
 													setUtilities(newUtilities);
 												}}
@@ -872,7 +917,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 									onClick={() =>
 										setUtilities([
 											...utilities,
-											{ name: "", fee: 0, selected: true },
+											{ name: "", amount: 0, selected: true },
 										])
 									}
 									className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -918,10 +963,10 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 										{amenity.selected && (
 											<input
 												type="number"
-												value={amenity.fee}
+												value={amenity.amount}
 												onChange={(e) => {
 													const newAmenities = [...amenities];
-													newAmenities[index].fee =
+													newAmenities[index].amount =
 														parseFloat(e.target.value) || 0;
 													setAmenities(newAmenities);
 												}}
@@ -947,7 +992,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 									onClick={() =>
 										setAmenities([
 											...amenities,
-											{ name: "", fee: 0, selected: true },
+											{ name: "", amount: 0, selected: true },
 										])
 									}
 									className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

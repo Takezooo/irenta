@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { createLease } from "../../../global/api/Leases.js";
+import { createLease, sendLeaseToSeeker } from "../../../global/api/Leases.js";
 import { fetchUserData } from "../../../global/api/Users.js";
 import { fetchOwnerListings } from "../../../global/api/Listings.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
@@ -7,6 +7,7 @@ import { AuthContext } from "../../../global/contexts/AuthContext.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js";
 import { GetToken } from "../../../global/utils/Token.js";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const CreateLease = ({ seekerId }) => {
   const passedSeekerId = seekerId || "";
@@ -112,7 +113,7 @@ const CreateLease = ({ seekerId }) => {
   useEffect(() => {
     const totalAmenitiesCost = amenities
       .filter((amenity) => amenity.selected)
-      .reduce((sum, amenity) => sum + (amenity.fee || 0), 0);
+      .reduce((sum, amenity) => sum + (amenity.amount || 0), 0);
     setFormData((prev) => ({
       ...prev,
       contractDetails: {
@@ -128,7 +129,7 @@ const CreateLease = ({ seekerId }) => {
   useEffect(() => {
     const totalUtilitiesCost = utilities
       .filter((util) => util.selected)
-      .reduce((sum, util) => sum + (util.fee || 0), 0);
+      .reduce((sum, util) => sum + (util.amount || 0), 0);
     setFormData((prev) => ({
       ...prev,
       contractDetails: {
@@ -268,7 +269,7 @@ const CreateLease = ({ seekerId }) => {
         ? selectedListing.includedUtilities.map(name => ({
             name: capitalizeFirstLetter(name),
             selected: true,
-            fee: 0
+            amount: 0
           }))
         : [];
       setFormData((prev) => ({
@@ -298,51 +299,71 @@ const CreateLease = ({ seekerId }) => {
   const handleSubmit = async (action, event) => {
     event.preventDefault();
 
-    let validationErrors = {};
+    // Validation based on action
+    let errors = {};
     if (action === "saveAndSend") {
-      validationErrors = validateIfSaveAndSend();
+      errors = validateIfSaveAndSend();
+      if (!validateDates()) return;
     } else if (action === "saveAsDraft") {
-      validationErrors = validateIfSaveAsDraft();
+      errors = validateIfSaveAsDraft();
     }
 
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      toast.error("Please fix the errors in the form.");
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
       return;
     }
 
-    if (action === "saveAndSend" && !validateDates()) {
-      return;
-    }
+    // Prepare amenities and utilities for submission
+    const amenitiesForSubmission = amenities
+      .filter(amenity => amenity.selected)
+      .map(amenity => ({
+        name: amenity.name || "",
+        amount: parseFloat(amenity.amount || 0),
+        selected: true
+      }));
 
-    setErrors({});
+    const utilitiesForSubmission = utilities
+      .filter(utility => utility.selected)
+      .map(utility => ({
+        name: utility.name || "",
+        amount: parseFloat(utility.amount || 0),
+        selected: true
+      }));
 
-    const selectedTerms = preloadedTerms.find((term) => term._id === formData.contractDetails.termsAndConditionsId);
-
-    const payload = {
-      ...formData,
-      landlord: user.id,
-      tenant: usePlaceholderTenant ? null : (formData.tenant || null),
-      landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
-      contractDetails: {
-        ...formData.contractDetails,
-        customTermsAndConditions: selectedTerms ? selectedTerms.content : "",
-      },
-      action,
-    };
+    const selectedTerms = preloadedTerms.find(
+      (term) => term._id === formData.contractDetails.termsAndConditionsId
+    );
 
     try {
-      const lease = await createLease(payload);
-      toast.success(action === "saveAndSend" ? "Lease marked ready to send!" : "Lease saved as draft!");
-      handleClearForm();
-    } catch (err) {
-      console.error("Error creating lease:", err.response?.data || err.message);
-      if (err.response?.data?.errors) {
-        const errorMessages = Object.values(err.response.data.errors).map((e) => e.message).join(", ");
-        toast.error(`Validation errors: ${errorMessages}`);
-      } else {
-        toast.error(`Failed to create lease: ${err.response?.data?.message || "Unknown error"}`);
+      const leaseData = {
+        ...formData,
+        contractDetails: {
+          ...formData.contractDetails,
+          customTermsAndConditions: selectedTerms ? selectedTerms.content : "",
+        },
+        landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
+        action,
+        termsTemplateId: formData.contractDetails.termsAndConditionsId,
+        amenities: amenitiesForSubmission,
+        utilities: utilitiesForSubmission
+      };
+
+      // If a seeker was pre-selected, use that; otherwise use the selected tenant
+      if (seekerId) {
+        leaseData.tenant = seekerId;
       }
+
+      const response = await createLease(leaseData);
+      toast.success(`Lease ${action === "saveAsDraft" ? "drafted" : "created and sent"} successfully!`);
+      
+      if (action === "saveAndSend") {
+        await sendLeaseToSeeker(response.lease._id);
+      }
+      
+      handleClearForm();
+    } catch (error) {
+      console.error("Error creating lease:", error);
+      toast.error("Failed to create lease. Please try again.");
     }
   };
 
@@ -623,10 +644,10 @@ const CreateLease = ({ seekerId }) => {
                     {util.selected && (
                       <input
                         type="number"
-                        value={util.fee}
+                        value={util.amount}
                         onChange={(e) => {
                           const newUtilities = [...utilities];
-                          newUtilities[index].fee = parseFloat(e.target.value) || 0;
+                          newUtilities[index].amount = parseFloat(e.target.value) || 0;
                           setUtilities(newUtilities);
                         }}
                         min="0"
@@ -637,7 +658,7 @@ const CreateLease = ({ seekerId }) => {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setUtilities([...utilities, { name: "", fee: 0, selected: true }])}
+                  onClick={() => setUtilities([...utilities, { name: "", amount: 0, selected: true }])}
                   className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   Add More Utilities
@@ -671,10 +692,10 @@ const CreateLease = ({ seekerId }) => {
                     {amenity.selected && (
                       <input
                         type="number"
-                        value={amenity.fee}
+                        value={amenity.amount}
                         onChange={(e) => {
                           const newAmenities = [...amenities];
-                          newAmenities[index].fee = parseFloat(e.target.value) || 0;
+                          newAmenities[index].amount = parseFloat(e.target.value) || 0;
                           setAmenities(newAmenities);
                         }}
                         min="0"
@@ -685,7 +706,7 @@ const CreateLease = ({ seekerId }) => {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setAmenities([...amenities, { name: "", fee: 0, selected: true }])}
+                  onClick={() => setAmenities([...amenities, { name: "", amount: 0, selected: true }])}
                   className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                   Add More Amenities

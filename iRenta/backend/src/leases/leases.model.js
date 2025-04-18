@@ -42,6 +42,20 @@ const LeaseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    amenities: [
+      {
+        name: { type: String, required: true },
+        amount: { type: Number, required: true, default: 0 },
+        selected: { type: Boolean, default: true }
+      }
+    ],
+    utilities: [
+      {
+        name: { type: String, required: true },
+        amount: { type: Number, required: true, default: 0 },
+        selected: { type: Boolean, default: true }
+      }
+    ],
     contractDetails: {
       startDate: { type: Date },
       endDate: { type: Date },

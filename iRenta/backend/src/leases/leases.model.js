@@ -1,141 +1,117 @@
 import mongoose from "mongoose";
 
-const leaseSchema = new mongoose.Schema(
+const LeaseSchema = new mongoose.Schema(
   {
-    tenant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: false, // Not required since tenantPlaceholder can be used
-    },
-    tenantPlaceholder: {
-      name: { type: String, required: false }, // Optional placeholder for tenant name
-      email: { type: String, required: false }, // Optional placeholder for tenant email
-      phoneNumber: { type: String, required: false }, // Optional placeholder for tenant phone number
-      emergencyContact: {
-        name: { type: String, required: false },
-        relationship: { type: String, required: false },
-        phoneNumber: { type: String, required: false },
-      },
-      additionalDetails: { type: String, required: false } // For any additional tenant information
-    },
-    landlord: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    landlordName: { type: String, required: true },
     property: {
       propertyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Listing",
         required: true,
       },
-      name: { type: String, required: true },
-      address: {
-        houseNumber: { type: String, required: true },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        zip: { type: String, required: true },
-      },
-    },
-    contractDetails: {
-      startDate: { type: Date, required: false },
-      endDate: { type: Date, required: false },
-      rentAmount: { type: Number, required: false },
-      paymentFrequency: {
+      name: {
         type: String,
-        enum: ["Monthly", "Quarterly", "Yearly"],
         required: true,
       },
-      depositAmount: { type: Number, required: false },
+      address: {
+        houseNumber: { type: String, default: "" },
+        street: { type: String, default: "" },
+        city: { type: String, default: "" },
+        zip: { type: String, default: "" },
+      },
+    },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    tenantPlaceholder: {
+      name: { type: String, default: "" },
+      email: { type: String, default: "" },
+      phoneNumber: { type: String, default: "" },
+      emergencyContact: {
+        name: { type: String, default: "" },
+        phoneNumber: { type: String, default: "" },
+      },
+    },
+    landlord: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    landlordName: {
+      type: String,
+      required: true,
+    },
+    contractDetails: {
+      startDate: { type: Date },
+      endDate: { type: Date },
+      moveInDate: { type: Date },
+      moveOutDate: { type: Date },
+      paymentFrequency: {
+        type: String,
+        enum: ["Monthly", "Quarterly", "Yearly", ""],
+        default: "",
+      },
+      depositAmount: { type: Number, default: 0 },
       termsAndConditionsId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "TermsAndConditions",
-        required: false,
+        ref: "Terms",
+        default: null, // Allow null for drafts
       },
-      customTermsAndConditions: {
-        type: String,
-        required: false,
-      },
-      rulesAndRegulations: { type: String, required: false },
-      // New financial details
+      customTermsAndConditions: { type: String, default: "" },
+      rulesAndRegulations: { type: String, default: "" },
       rentBreakdown: {
-        baseRent: { type: Number, required: false },
-        utilities: { type: Number, required: false },
-        parking: { type: Number, required: false },
-        amenities: { type: Number, required: false },
+        baseRent: { type: Number, default: 0 },
+        utilities: { type: Number, default: 0 },
+        amenities: { type: Number, default: 0 },
         otherFees: [
           {
-            name: { type: String },
-            amount: { type: Number }
-          }
-        ]
+            name: { type: String, required: true },
+            amount: { type: Number, required: true },
+          },
+        ],
       },
-      // New payment policy fields
-      gracePeriod: { type: Number, required: false }, // Days allowed after due date without penalty
-      latePaymentPolicy: { type: String, required: false }, // Description of late payment penalties
-      // New legal fields
-      noticePeriod: { type: Number, required: false }, // Days required for move-out notice
-      renewalTerms: { 
-        type: String, 
-        enum: ["Automatic", "Manual", "No Renewal"],
-        required: false 
+      gracePeriod: { type: Number, default: 0 },
+      latePaymentPolicy: { type: String, default: "" },
+      noticePeriod: { type: Number, default: 0 },
+      renewalTerms: {
+        type: String,
+        enum: ["Automatic", "Manual", "No Renewal", ""],
+        default: "",
       },
-      renewalNotificationPeriod: { type: Number, required: false } // Days before lease end to notify about renewal
     },
-    moveInDate: { type: Date, required: false }, // Optional field
-    moveOutDate: { type: Date, required: false }, // Optional field
     leaseType: {
       type: String,
-      enum: ["Month-to-Month", "Fixed-Term"],
-      required: false, // Optional, default behavior can be managed in app logic
+      enum: ["Fixed-Term", "Month-to-Month"],
+      default: "Fixed-Term",
     },
     status: {
       type: String,
-      enum: [
-        "Draft",
-        "Ready",
-        "Sent",
-        "Signed",
-        "Declined",
-        "Active",
-        "Completed",
-        "Terminated",
-        "Renewed",
-        "Modified", // if sent na tapos binago pa,
-      ],
+      enum: ["Draft", "Pending", "Sent", "Active", "Expired", "Terminated"],
       default: "Draft",
     },
-    pdfPath: { type: String },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-    isSignedByLandlord: { type: Boolean, default: false },
-    uploadedOwnerSignature: { data: Buffer, contentType: String },
-    isAgreed: { type: Boolean, default: false },
-    isSignedBySeeker: { type: Boolean, default: false },
-    uploadedSignature: { data: Buffer, contentType: String },
-    uploadedAgreementPath: { type: String },
+    uploadedSignature: {
+      data: Buffer,
+      contentType: String,
+    },
+    uploadedOwnerSignature: {
+      data: Buffer,
+      contentType: String,
+    },
+    isSignedBySeeker: {
+      type: Boolean,
+      default: false,
+    },
+    isSignedByLandlord: {
+      type: Boolean,
+      default: false,
+    },
+    isAgreed: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
-// Custom validation to ensure at least one of `tenant` or `tenantPlaceholder` is provided
-leaseSchema.pre("save", function (next) {
-  if (
-    !this.tenant &&
-    (!this.tenantPlaceholder ||
-      !this.tenantPlaceholder.name ||
-      !this.tenantPlaceholder.email)
-  ) {
-    return next(
-      new Error(
-        "Either tenant (User reference) or tenantPlaceholder (name and email) must be provided."
-      )
-    );
-  }
-  next();
-});
-
-const Lease = mongoose.model("Lease", leaseSchema);
-
-export default Lease;
+export default mongoose.model("Lease", LeaseSchema);

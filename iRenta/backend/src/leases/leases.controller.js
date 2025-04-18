@@ -19,6 +19,7 @@ export const uploadMiddleware = upload.fields([
   { name: "uploadedSignature", maxCount: 1 }, // Seeker's signature
   { name: "uploadedOwnerSignature", maxCount: 1 }, // Owner's signature
 ]);
+
 // Create a new lease
 export const CreateLease = async (req, res) => {
   try {
@@ -32,6 +33,11 @@ export const CreateLease = async (req, res) => {
       termsTemplateId,
     } = req.body;
 
+    if (!req.user?.id) {
+      console.error("Authentication failed: No user ID found in request");
+      return res.status(401).json({ message: "User authentication required" });
+    }
+
     let termsContent = "";
     if (termsTemplateId) {
       const termsTemplate = await Terms.findById(termsTemplateId);
@@ -43,24 +49,58 @@ export const CreateLease = async (req, res) => {
         ...req.body.contractDetails,
         termsAndConditionsId: termsTemplateId,
       };
+    } else {
+      // Ensure termsAndConditionsId is null if no template is provided
+      req.body.contractDetails = {
+        ...req.body.contractDetails,
+        termsAndConditionsId: null,
+      };
     }
 
     if (action === "saveAndSend") {
-      const { startDate, endDate, rentAmount, paymentFrequency, depositAmount } = contractDetails || {};
-      if (!startDate || !endDate || !rentAmount || !paymentFrequency || !depositAmount) {
-        return res.status(400).json({ message: "Basic lease details are incomplete" });
+      const { startDate, endDate, paymentFrequency, depositAmount, termsAndConditionsId } = contractDetails || {};
+      if (!property?.propertyId || !landlordName || (!tenant && !tenantPlaceholder?.name && !tenantPlaceholder?.email && !tenantPlaceholder?.phoneNumber)) {
+        return res.status(400).json({ message: "Required fields are missing for saving and sending" });
+      }
+      if (!startDate || !endDate || !paymentFrequency || !depositAmount || !termsAndConditionsId) {
+        return res.status(400).json({ message: "Basic lease details are incomplete for sending" });
+      }
+      if (!property.address.zip) {
+        return res.status(400).json({ message: "ZIP code is required for sending" });
+      }
+    } else if (action === "saveAsDraft") {
+      if (!property?.propertyId || !landlordName) {
+        return res.status(400).json({ message: "Property and landlord are required for drafts" });
+      }
+      if (!tenant && !tenantPlaceholder?.name && !tenantPlaceholder?.email && !tenantPlaceholder?.phoneNumber) {
+        return res.status(400).json({ message: "Either a tenant or at least one placeholder detail is required for drafts" });
       }
     }
 
     const leaseData = {
-      property,
-      landlord: req.user._id, // Assume middleware sets req.user
+      property: {
+        ...property,
+        address: {
+          houseNumber: property.address?.houseNumber || "",
+          street: property.address?.street || "",
+          city: property.address?.city || "",
+          zip: property.address?.zip || "",
+        },
+      },
+      landlord: req.user.id,
       landlordName,
-      tenant,
-      tenantPlaceholder,
+      tenant: tenant || null,
+      tenantPlaceholder: tenantPlaceholder || {},
       contractDetails: {
         ...contractDetails,
         customTermsAndConditions: termsContent,
+        termsAndConditionsId: termsTemplateId || null, // Explicitly set to null if not provided
+        rentBreakdown: {
+          ...contractDetails.rentBreakdown,
+          otherFees: Array.isArray(contractDetails.rentBreakdown.otherFees)
+            ? contractDetails.rentBreakdown.otherFees
+            : [],
+        },
       },
       status: action === "saveAsDraft" ? "Draft" : "Pending",
     };
@@ -78,47 +118,42 @@ export const CreateLease = async (req, res) => {
   }
 };
 
-
-// Fetch all leases created by the landlord
 export const GetCreatedLeases = async (req, res) => {
   try {
-    const ownerId = req.user.id; // Get the landlord's ID from the decoded token
+    const ownerId = req.user.id;
     const leases = await Lease.find({ landlord: ownerId })
-      .populate("tenant") // Populate tenant details if needed
-      .populate("landlord"); // Populate landlord details if needed
+      .populate("tenant")
+      .populate("landlord");
     res.status(200).json(leases);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Fetch a lease by its ID
 export const GetLeaseById = async (req, res) => {
   try {
-    const { id } = req.params; // Extract the lease ID from the URL
+    const { id } = req.params;
 
-    const lease = await Lease.findById(id) // Fetch the lease by ID
-    .populate('tenant')
-    .populate('landlord', 'info.firstName info.lastName credentials.email info.phoneNumber');
+    const lease = await Lease.findById(id)
+      .populate("tenant")
+      .populate("landlord", "info.firstName info.lastName credentials.email info.phoneNumber");
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
-    res.status(200).json(lease); // Return the lease data
+    res.status(200).json(lease);
   } catch (error) {
     console.error("Error fetching lease by ID:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Update an existing lease
 export const UpdateLease = async (req, res) => {
   try {
-    const { id } = req.params; // Get the lease ID from the URL
-    const updatedData = req.body; // Get the updated data from the request body
+    const { id } = req.params;
+    const updatedData = req.body;
 
-    // Handle Seeker's signature
     if (req.files?.uploadedSignature?.length > 0) {
       updatedData.uploadedSignature = {
         data: req.files.uploadedSignature[0].buffer,
@@ -126,7 +161,6 @@ export const UpdateLease = async (req, res) => {
       };
     }
 
-    // Handle Owner's signature
     if (req.files?.uploadedOwnerSignature?.length > 0) {
       updatedData.uploadedOwnerSignature = {
         data: req.files.uploadedOwnerSignature[0].buffer,
@@ -134,21 +168,19 @@ export const UpdateLease = async (req, res) => {
       };
     }
 
-    // Handle other fields from the form
     if (req.body.isAgreed) {
-      updatedData.isAgreed = req.body.isAgreed === "true"; // Convert to boolean
+      updatedData.isAgreed = req.body.isAgreed === "true";
     }
 
     const lease = await Lease.findByIdAndUpdate(id, updatedData, {
-      new: true, // Return the updated lease
-      runValidators: true, // Validate the update against the schema
+      new: true,
+      runValidators: true,
     });
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
-    // Check if both parties have signed and today is move-in date
     if (
       lease.isSignedByLandlord &&
       lease.isSignedBySeeker &&
@@ -157,9 +189,7 @@ export const UpdateLease = async (req, res) => {
       const today = new Date();
       const moveInDate = new Date(lease.moveInDate);
 
-      // Compare dates (ignoring time)
       if (today.toDateString() === moveInDate.toDateString()) {
-        // Create tenant record
         const tenantData = {
           seekerId: lease.tenant,
           propertyId: lease.property.propertyId,
@@ -167,14 +197,12 @@ export const UpdateLease = async (req, res) => {
           landlordId: lease.landlord,
           movedInDate: lease.moveInDate,
           active: true,
-          isWaitListed: false
+          isWaitListed: false,
         };
 
-        // Import and create Tenant record
         const Tenant = mongoose.model("Tenant");
         await Tenant.create(tenantData);
 
-        // Update lease status to Active
         lease.status = "Active";
         await lease.save();
       }

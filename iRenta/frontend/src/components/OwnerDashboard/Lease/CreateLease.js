@@ -199,25 +199,30 @@ const CreateLease = ({ seekerId }) => {
     const moveEnd = new Date(moveOutDate);
     const todayDate = new Date();
 
-    if (start < todayDate) {
+    if (startDate && start < todayDate) {
       toast.error("The start date cannot be in the past.");
       return false;
     }
 
-    if (moveStart < todayDate) {
+    if (moveInDate && moveStart < todayDate) {
       toast.error("The move-in date cannot be in the past.");
       return false;
     }
 
-    const durationInDays = (end - start) / (1000 * 60 * 60 * 24);
-    const moveDurationInDays = (moveEnd - moveStart) / (1000 * 60 * 60 * 24);
-    if (durationInDays < 30) {
-      toast.error("Lease terms must be at least 1 month.");
-      return false;
+    if (startDate && endDate) {
+      const durationInDays = (end - start) / (1000 * 60 * 60 * 24);
+      if (durationInDays < 30) {
+        toast.error("Lease terms must be at least 1 month.");
+        return false;
+      }
     }
-    if (moveDurationInDays < 30) {
-      toast.error("Move-in to move-out period should be at least 1 month.");
-      return false;
+
+    if (moveInDate && moveOutDate) {
+      const moveDurationInDays = (moveEnd - moveStart) / (1000 * 60 * 60 * 24);
+      if (moveDurationInDays < 30) {
+        toast.error("Move-in to move-out period should be at least 1 month.");
+        return false;
+      }
     }
 
     return true;
@@ -228,7 +233,7 @@ const CreateLease = ({ seekerId }) => {
     if (!formData.property.propertyId) newErrors.property = "Property is required.";
     if (!formData.property.address.zip) newErrors.zip = "ZIP code is required.";
     if (!formData.landlord) newErrors.landlord = "Landlord is required.";
-    if (!formData.tenant && !formData.tenantPlaceholder.name && !formData.tenantPlaceholder.email && !formData.tenantPlaceholder.phoneNumber) {
+    if (!formData.tenant && (!formData.tenantPlaceholder.name || !formData.tenantPlaceholder.email || !formData.tenantPlaceholder.phoneNumber)) {
       newErrors.tenant = "Please provide either a tenant or complete placeholder tenant details.";
     }
     if (!formData.contractDetails.startDate) newErrors.startDate = "Start date is required.";
@@ -247,10 +252,9 @@ const CreateLease = ({ seekerId }) => {
   const validateIfSaveAsDraft = () => {
     const newErrors = {};
     if (!formData.property.propertyId) newErrors.property = "Property is required.";
-    if (formData.property.propertyId && !formData.property.address.zip) newErrors.zip = "ZIP code is required for the selected property.";
     if (!formData.landlord) newErrors.landlord = "Landlord is required.";
     if (!formData.tenant && !formData.tenantPlaceholder.name && !formData.tenantPlaceholder.email && !formData.tenantPlaceholder.phoneNumber) {
-      newErrors.tenant = "Please provide either a tenant or complete placeholder tenant details.";
+      newErrors.tenant = "Please provide either a tenant or at least one placeholder tenant detail (name, email, or phone).";
     }
     return newErrors;
   };
@@ -297,12 +301,13 @@ const CreateLease = ({ seekerId }) => {
     let validationErrors = {};
     if (action === "saveAndSend") {
       validationErrors = validateIfSaveAndSend();
-    } else {
+    } else if (action === "saveAsDraft") {
       validationErrors = validateIfSaveAsDraft();
     }
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      toast.error("Please fix the errors in the form.");
       return;
     }
 
@@ -316,7 +321,7 @@ const CreateLease = ({ seekerId }) => {
 
     const payload = {
       ...formData,
-      landlord: user.id, // Ensure landlord is always set
+      landlord: user.id,
       tenant: usePlaceholderTenant ? null : (formData.tenant || null),
       landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
       contractDetails: {
@@ -407,7 +412,6 @@ const CreateLease = ({ seekerId }) => {
                 ))}
               </select>
               {errors.property && <p className="text-red-500 text-sm mt-1">{errors.property}</p>}
-              {errors.zip && <p className="text-red-500 text-sm mt-1">{errors.zip}</p>}
             </div>
           </div>
 

@@ -49,7 +49,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
   const navigate = useNavigate();
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = (e) => {
+    // Stop propagation to prevent dropdown closing
+    if (e) e.stopPropagation();
     setDarkMode((prev) => !prev);
   };
 
@@ -95,41 +97,35 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Desktop notification dropdown
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
+      // Skip handling if this is a click inside a dropdown menu
+      const isInsideDropdownMenu = event.target.closest('.dropdown-menu');
+      if (isInsideDropdownMenu) {
+        return;
+      }
+      
+      // If this is a click on a toggle button, let the button's click handler manage it
+      if (event.target.closest('[data-dropdown-toggle]') || event.target.closest('.dropdown-toggle')) {
+        return;
+      }
+      
+      // Desktop notification dropdown - only close if click is outside
+      if (notifOpen && notifRef.current && !notifRef.current.contains(event.target)) {
         setNotifOpen(false);
       }
       
-      // Desktop profile dropdown
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+      // Desktop profile dropdown - only close if click is outside
+      if (dropdownOpen && profileRef.current && !profileRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
       
-      // Mobile notification panel
-      if (mobileNotifRef.current && !mobileNotifRef.current.contains(event.target)) {
+      // Mobile notification panel - only close if click is outside
+      if (notifOpen && mobileNotifRef.current && !mobileNotifRef.current.contains(event.target)) {
         setNotifOpen(false);
       }
       
-      // Mobile profile panel
-      if (mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
+      // Mobile profile panel - only close if click is outside
+      if (dropdownOpen && mobileProfileRef.current && !mobileProfileRef.current.contains(event.target)) {
         setDropdownOpen(false);
-      }
-      
-      // Check if click is outside any dropdown area
-      const isOutsideAllDropdowns = 
-        (!notifRef.current || !notifRef.current.contains(event.target)) &&
-        (!profileRef.current || !profileRef.current.contains(event.target)) &&
-        (!mobileNotifRef.current || !mobileNotifRef.current.contains(event.target)) &&
-        (!mobileProfileRef.current || !mobileProfileRef.current.contains(event.target));
-        
-      // If the event.target has data-dropdown-toggle attribute, don't close dropdowns
-      // This prevents dropdowns from closing when clicking chat toggle buttons
-      if (isOutsideAllDropdowns && !event.target.closest('[data-dropdown-toggle]')) {
-        // Only close dropdowns if click is outside dropdown toggle buttons
-        if (!event.target.closest('.dropdown-toggle')) {
-          setNotifOpen(false);
-          setDropdownOpen(false);
-        }
       }
     };
 
@@ -137,19 +133,23 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [notifOpen, dropdownOpen]);
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = (e) => {
+    // Stop propagation to prevent dropdown closing
+    if (e) e.stopPropagation();
     setShowConfirmation(true); // Show confirmation modal
   };
 
-  const handleConfirmLogout = () => {
+  const handleCancelLogout = (e) => {
+    if (e) e.stopPropagation();
     setShowConfirmation(false); // Close the modal
-    logout(); // Call the logout function
   };
 
-  const handleCancelLogout = () => {
+  const handleConfirmLogout = (e) => {
+    if (e) e.stopPropagation();
     setShowConfirmation(false); // Close the modal
+    logout(); // Call the logout function
   };
 
   useEffect(() => {
@@ -238,14 +238,24 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
     }
   };
 
-  const handleManageListings = () => {
-    navigate("/owner-dashboard");
-    setDropdownOpen(false);
+  const handleReservations = (e) => {
+    // Stop propagation to prevent dropdown closing immediately
+    if (e) e.stopPropagation();
+    navigate("/reservations");
+    // Close dropdown after a small delay to ensure click is processed
+    setTimeout(() => {
+      setDropdownOpen(false);
+    }, 100);
   };
 
-  const handleReservations = () => {
-    navigate("/reservations");
-    setDropdownOpen(false);
+  const handleManageListings = (e) => {
+    // Stop propagation to prevent dropdown closing immediately
+    if (e) e.stopPropagation();
+    navigate("/owner-dashboard");
+    // Close dropdown after a small delay to ensure click is processed
+    setTimeout(() => {
+      setDropdownOpen(false);
+    }, 100);
   };
 
   // Format date for notifications
@@ -265,7 +275,9 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
   const isOwnerDashboard = location.pathname === "/owner-dashboard";
 
   // Add clear all notifications function
-  const handleClearAllNotifications = async () => {
+  const handleClearAllNotifications = async (e) => {
+    if (e) e.stopPropagation();
+    
     try {
       // First mark all as read
       for (const notification of notifications) {
@@ -360,7 +372,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Notification
               </h5>
               {notifOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50">
+                <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50 dropdown-menu">
                   <div className="sticky top-0 flex justify-between items-center px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <h3 className="font-semibold text-gray-700 dark:text-gray-300">Notifications</h3>
                     <div className="flex gap-2">
@@ -474,7 +486,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                 Your Profile
               </h5>
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-md dropdown-menu">
                   {user ? (
                     <ul className="py-2">
                       <li className="flex justify-evenly items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 cursor-default">
@@ -498,7 +510,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
                           className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
-                          onClick={() => navigate("/view-profile")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate("/view-profile");
+                            setTimeout(() => setDropdownOpen(false), 100);
+                          }}
                         >
                           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                             Your Profile
@@ -509,7 +525,11 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                           <button
                             className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
-                            onClick={()=> navigate("/tenant-dashboard")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate("/tenant-dashboard");
+                              setTimeout(() => setDropdownOpen(false), 100);
+                            }}
                           >
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                               Tenant Dashboard
@@ -520,7 +540,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                         <button
                           className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
-                          onClick={handleReservations}
+                          onClick={(e) => handleReservations(e)}
                         >
                           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                             Reservations
@@ -531,7 +551,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <li className="flex w-full hover:bg-gray-100 dark:hover:bg-gray-600">
                           <button
                             className="flex items-center w-fit text-left px-4 py-3 text-sm text-gray-900 dark:text-gray-300"
-                            onClick={handleManageListings}
+                            onClick={(e) => handleManageListings(e)}
                           >
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 px-4">
                               Manage Listings
@@ -541,7 +561,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       )}
                       <li
                         className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
-                        onClick={toggleDarkMode} // Move the onClick here
+                        onClick={(e) => toggleDarkMode(e)}
                       >
                         <span className="px-4 text-sm font-medium dark:text-gray-100">
                           {darkMode ? "Dark Mode" : "Light Mode"}
@@ -561,7 +581,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <hr className="my-2"></hr>
                       <li className="flex w-full justify-center">
                         <button
-                          onClick={handleLogoutClick}
+                          onClick={(e) => handleLogoutClick(e)}
                           className="flex items-center w-fit text-left px-4 py-3 text-sm rounded-full bg-blue-500 text-gray-100 hover:bg-blue-600"
                         >
                           <FaPowerOff className="h-5 w-5" />
@@ -575,19 +595,20 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                           <div
                             className={`w-full max-w-sm p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md`}
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
                               Are you sure you want to log out?
                             </h2>
                             <div className="flex justify-end space-x-4">
                               <button
-                                onClick={handleCancelLogout}
+                                onClick={(e) => handleCancelLogout(e)}
                                 className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition"
                               >
                                 Cancel
                               </button>
                               <button
-                                onClick={handleConfirmLogout}
+                                onClick={(e) => handleConfirmLogout(e)}
                                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                               >
                                 Log out
@@ -601,7 +622,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                     <ul className="py-3">
                       <li
                         className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
-                        onClick={toggleDarkMode} // Move the onClick here
+                        onClick={(e) => toggleDarkMode(e)}
                       >
                         <span className="px-4 text-sm font-medium dark:text-gray-100">
                           {darkMode ? "Dark Mode" : "Light Mode"}
@@ -752,7 +773,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               {notifOpen && (
                 <div 
                   ref={mobileNotifRef}
-                  className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden"
+                  className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden dropdown-menu"
                 >
                   <div className="sticky top-0 flex justify-between items-center p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-lg font-bold text-gray-800 dark:text-white">Notifications</h2>
@@ -882,7 +903,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
               {dropdownOpen && (
                 <div 
                   ref={mobileProfileRef}
-                  className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden"
+                  className="fixed mt-28 inset-0 bg-white dark:bg-gray-800 mx-1 z-50 flex flex-col transition-all duration-300 lg:hidden dropdown-menu"
                 >
                   <div className="sticky top-0 flex justify-between items-center p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-lg font-bold text-gray-800 dark:text-white">Your Profile</h2>
@@ -920,9 +941,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         
                         <div className="space-y-2 px-4">
                           <button 
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               navigate("/view-profile");
-                              setDropdownOpen(false);
+                              setTimeout(() => setDropdownOpen(false), 100);
                             }}
                             className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
                           >
@@ -932,9 +954,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           
                           {user.tenantBadge === true && (
                             <button 
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 navigate("/tenant-dashboard");
-                                setDropdownOpen(false);
+                                setTimeout(() => setDropdownOpen(false), 100);
                               }}
                               className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
                             >
@@ -944,10 +967,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           )}
                           
                           <button 
-                            onClick={() => {
-                              handleReservations();
-                              setDropdownOpen(false);
-                            }}
+                            onClick={(e) => handleReservations(e)}
                             className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
                           >
                             <FaBuilding />
@@ -956,10 +976,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           
                           {user.userType === "Owner" && (
                             <button 
-                              onClick={() => {
-                                handleManageListings();
-                                setDropdownOpen(false);
-                              }}
+                              onClick={(e) => handleManageListings(e)}
                               className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
                             >
                               <FaBuilding />
@@ -969,7 +986,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           
                           <div 
                             className="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-700"
-                            onClick={toggleDarkMode}
+                            onClick={(e) => toggleDarkMode(e)}
                           >
                             <span className="text-gray-800 dark:text-gray-200">
                               {darkMode ? "Dark Mode" : "Light Mode"}
@@ -990,7 +1007,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         
                         <div className="mt-auto px-4 py-6">
                           <button
-                            onClick={handleLogoutClick}
+                            onClick={(e) => handleLogoutClick(e)}
                             className="w-full flex items-center justify-center gap-2 p-3 rounded-full bg-red-500 text-white hover:bg-red-600"
                           >
                             <FaPowerOff />
@@ -1003,7 +1020,7 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                       <div className="py-4 flex flex-col h-full">
                         <div 
                           className="flex items-center justify-between p-4 rounded-lg bg-gray-100 dark:bg-gray-700 mx-4 mb-6"
-                          onClick={toggleDarkMode}
+                          onClick={(e) => toggleDarkMode(e)}
                         >
                           <span className="text-gray-800 dark:text-gray-200">
                             {darkMode ? "Dark Mode" : "Light Mode"}
@@ -1024,7 +1041,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                         <div className="space-y-4 px-4 mt-auto">
                           <Link
                             to="/login"
-                            onClick={() => setDropdownOpen(false)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDropdownOpen(false);
+                            }}
                             className="w-full flex items-center justify-center gap-2 p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600"
                           >
                             <span>Log in</span>
@@ -1032,7 +1052,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
                           
                           <Link
                             to="/register"
-                            onClick={() => setDropdownOpen(false)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDropdownOpen(false);
+                            }}
                             className="w-full flex items-center justify-center p-4 rounded-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
                             <span>Register</span>
@@ -1051,7 +1074,10 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
       {/* Clear Notifications Confirmation Modal */}
       {showClearConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="w-full max-w-sm p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <div 
+            className="w-full max-w-sm p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
               Clear all notifications?
             </h2>
@@ -1060,13 +1086,16 @@ const Topbar = ({ toggleSidebar, isOpen, setActiveContent }) => {
             </p>
             <div className="flex justify-end space-x-4">
               <button
-                onClick={() => setShowClearConfirmation(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowClearConfirmation(false);
+                }}
                 className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition"
               >
                 Cancel
               </button>
               <button
-                onClick={handleClearAllNotifications}
+                onClick={(e) => handleClearAllNotifications(e)}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
               >
                 Clear All

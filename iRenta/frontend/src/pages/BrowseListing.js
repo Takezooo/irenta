@@ -80,7 +80,9 @@ const BrowseListing = () => {
     setRadius(Number(event.target.value)); // Update the radius dynamically
   };
 
-  const handleLikeToggle = async (listingId) => {
+  const handleLikeToggle = async (e, listingId) => {
+    e.stopPropagation(); // Prevent click from reaching parent
+    
     if (!user) {
       navigate("/login");
       return;
@@ -217,58 +219,62 @@ const BrowseListing = () => {
               {filteredNearbyListings.map((listing) => (
                 <div
                   key={listing._id}
-                  className={`flex flex-col rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all ${
+                  onClick={() => handleViewProperty(listing)}
+                  className={`h-96 rounded-xl shadow-md border overflow-hidden transition-transform hover:scale-[1.02] cursor-pointer ${
                     darkMode
-                      ? "bg-gray-800 border-gray-700"
-                      : "bg-white border-gray-300"
-                  }`}
+                      ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-700"
+                      : "bg-white border-gray-200 hover:shadow-lg"
+                  } w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)]`}
                 >
-                  <div className="relative flex-shrink-0 h-2/3">
+                  {/* Image Section */}
+                  <div className="relative h-3/5 overflow-hidden">
                     <img
-                      src={
-                        listing.images?.[0]?.link || "/placeholder-image.jpg"
-                      }
+                      src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
                       alt={listing.title}
-                      onClick={() => handleViewProperty(listing)}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <button
-                      onClick={() => handleLikeToggle(listing._id)}
-                      className={`absolute top-2 right-2 rounded-full p-2 shadow-md ${
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLikeToggle(e, listing._id);
+                      }}
+                      className={`absolute top-3 right-3 rounded-full p-2 shadow-md transition-colors ${
                         darkMode
-                          ? "bg-gray-700 text-gray-300 hover:text-red-500"
-                          : "bg-white text-gray-600 hover:text-red-500"
+                          ? "bg-gray-800/70 hover:bg-gray-800"
+                          : "bg-white/70 hover:bg-white"
                       }`}
                     >
                       {likedListings?.includes(listing._id) ? (
-                        <AiFillHeart size={20} className="text-red-500" />
+                        <AiFillHeart size={22} className="text-red-500" />
                       ) : (
-                        <AiOutlineHeart size={20} />
+                        <AiOutlineHeart size={22} className={darkMode ? "text-gray-300" : "text-gray-600"} />
                       )}
                     </button>
+                    {/* Price tag */}
+                    <div className={`absolute bottom-3 left-3 rounded-md py-1 px-2 text-sm font-semibold ${
+                      darkMode
+                        ? "bg-gray-900/80 text-gray-200"
+                        : "bg-white/80 text-gray-800"
+                    }`}>
+                      ${listing.price}<span className="text-xs font-normal"> / night</span>
+                    </div>
                   </div>
 
-                  <div
-                    className="p-4 flex-grow flex flex-col justify-between"
-                    onClick={() => handleViewProperty(listing)}
-                  >
+                  {/* Details Section */}
+                  <div className={`p-4 h-2/5 flex flex-col ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     <h3 className="text-lg font-semibold truncate">
                       {listing.title}
                     </h3>
-                    <p
-                      className={`text-sm line-clamp-2 ${
-                        darkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
+                    <p className={`text-sm line-clamp-2 mt-1 flex-grow ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                       {listing.description}
                     </p>
-                    <p
-                      className={`font-bold mt-2 ${
-                        darkMode ? "text-gray-200" : "text-gray-700"
-                      }`}
-                    >
-                      {listing.price} / night
-                    </p>
+                    <div className="flex items-center mt-2 text-xs">
+                      <span className={`inline-block px-2 py-1 rounded-md ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
+                        {listing.vacant} unit{listing.vacant !== 1 && 's'} available
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}

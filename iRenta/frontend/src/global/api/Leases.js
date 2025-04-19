@@ -30,8 +30,15 @@ export const downloadPdf = async (leaseId) => {
       },
     });
 
+    // Ensure response has data before proceeding
+    if (!response.data) {
+      throw new Error("Received empty PDF data");
+    }
+
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
+    
+    // Create and click a link to download the file
     const link = document.createElement("a");
     link.href = url;
     
@@ -42,10 +49,20 @@ export const downloadPdf = async (leaseId) => {
     const today = new Date().toISOString().split('T')[0];
     
     link.download = `Lease_Agreement_${propertyName}_${today}.pdf`;
+    document.body.appendChild(link); // Temporarily add to document
     link.click();
-    window.URL.revokeObjectURL(url); // Clean up the object URL
+    document.body.removeChild(link); // Clean up
+    
+    // Clean up the object URL after a delay to ensure download starts
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 1000);
+    
+    return true;
   } catch (error) {
     console.error("Error downloading PDF:", error);
+    alert("There was a problem downloading the PDF. Please try again.");
+    throw error;
   }
 };
 

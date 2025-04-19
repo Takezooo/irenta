@@ -345,9 +345,12 @@ export const GetPdf = async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
     const filename = `Lease_Agreement_${propertyName}_${today}.pdf`;
 
-    // Set appropriate headers
+    // Set appropriate headers for file download
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     
     // Handle stream errors
     pdfStream.on('error', (err) => {
@@ -358,14 +361,14 @@ export const GetPdf = async (req, res) => {
       }
     });
     
-    // Stream the PDF to the client
+    // Pipe the PDF stream to the response
     pdfStream.pipe(res);
     
   } catch (error) {
     console.error("Error in GetPdf:", error);
     // Only send error response if headers haven't been sent yet
     if (!res.headersSent) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: "Failed to generate PDF", error: error.message });
     }
   }
 };

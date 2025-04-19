@@ -92,7 +92,11 @@ const ViewLease = () => {
 
   const handleDownloadPdf = () => {
     if (leaseId) {
-      downloadPdf(leaseId);
+      try {
+        downloadPdf(leaseId);
+      } catch (error) {
+        console.error("Error downloading PDF:", error);
+      }
     } else {
       console.error("Lease ID is not available.");
     }
@@ -243,13 +247,13 @@ const ViewLease = () => {
         {label}
       </label>
       <p
-        className={`mt-1 block w-full border rounded-md px-4 py-2 ${
+        className={`mt-1 block w-full border rounded-md px-4 py-2 h-10 flex items-center ${
           darkMode
             ? "bg-gray-700 text-white border-gray-600"
             : "bg-gray-50 text-black border-gray-300"
         }`}
       >
-        {value || ""}
+        {value || "\u00A0"}
       </p>
     </div>
   );
@@ -413,15 +417,15 @@ const ViewLease = () => {
               />
               <InfoItem
                 label="Deposit Amount"
-                value={leaseDetails?.contractDetails?.depositAmount ? `₱${leaseDetails.contractDetails.depositAmount}` : "N/A"}
+                value={leaseDetails?.contractDetails?.depositAmount ? `₱${leaseDetails.contractDetails.depositAmount}` : ""}
               />
               <InfoItem
                 label="Grace Period"
-                value={leaseDetails?.contractDetails?.gracePeriod ? `${leaseDetails.contractDetails.gracePeriod} days` : "N/A"}
+                value={leaseDetails?.contractDetails?.gracePeriod ? `${leaseDetails.contractDetails.gracePeriod} days` : ""}
               />
               <InfoItem
                 label="Notice Period"
-                value={leaseDetails?.contractDetails?.noticePeriod ? `${leaseDetails.contractDetails.noticePeriod} days` : "N/A"}
+                value={leaseDetails?.contractDetails?.noticePeriod ? `${leaseDetails.contractDetails.noticePeriod} days` : ""}
               />
               <InfoItem
                 label="Renewal Terms"
@@ -436,15 +440,15 @@ const ViewLease = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InfoItem
                 label="Base Rent"
-                value={leaseDetails?.contractDetails?.rentBreakdown?.baseRent ? `₱${leaseDetails.contractDetails.rentBreakdown.baseRent}` : "N/A"}
+                value={leaseDetails?.contractDetails?.rentBreakdown?.baseRent ? `₱${leaseDetails.contractDetails.rentBreakdown.baseRent}` : ""}
               />
               <InfoItem
                 label="Utilities Cost"
-                value={leaseDetails?.contractDetails?.rentBreakdown?.utilities ? `₱${leaseDetails.contractDetails.rentBreakdown.utilities}` : "N/A"}
+                value={leaseDetails?.contractDetails?.rentBreakdown?.utilities ? `₱${leaseDetails.contractDetails.rentBreakdown.utilities}` : ""}
               />
               <InfoItem
                 label="Amenities Cost"
-                value={leaseDetails?.contractDetails?.rentBreakdown?.amenities ? `₱${leaseDetails.contractDetails.rentBreakdown.amenities}` : "N/A"}
+                value={leaseDetails?.contractDetails?.rentBreakdown?.amenities ? `₱${leaseDetails.contractDetails.rentBreakdown.amenities}` : ""}
               />
             </div>
 

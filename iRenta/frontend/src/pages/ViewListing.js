@@ -13,10 +13,11 @@ import { GetToken } from "../global/utils/Token";
 import { getOrCreateChat } from "../global/api/Chats";
 import { scheduleOcularVisit, checkVisitRequest } from "../global/api/Ocular";
 import { fetchUserData, fetchOwnerData, toggleLike } from "../global/api/Users";
-import { createReservation } from "../global/api/Reservations";
+import { createReservation, checkUserReservation } from "../global/api/Reservations";
 import { GoogleMap, MarkerF, useLoadScript } from "@react-google-maps/api";
 // import RenderPanorama from "../components/Panorama/Panorama"
 import RenderImage from "../components/Panorama/RenderImage";
+import { toast } from "react-toastify";
 
 const LIBRARIES = ["places"]; // Static array for libraries
 
@@ -24,7 +25,8 @@ export const ViewListing = () => {
 	const [showOcularPopup, setShowOcularPopup] = useState(false);
 	const [location, setLocation] = useState("Bacoor");
 	const [ownerData, setOwnerData] = useState([]);
-	// const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
+	const [hasRequestedVisit, setHasRequestedVisit] = useState(false);
+	const [hasReservation, setHasReservation] = useState(false);
 	const { selectedProperty } = useProperty();
 	const { setChatRoomOpen, setSelectedChatId, setSelectedUserId } =
 		useContext(ChatDropdownContext);
@@ -73,18 +75,11 @@ export const ViewListing = () => {
 		fetchPropOwnerData();
 	}, [selectedProperty]);
 
-	// Check if the seeker has requested a visit for this listing
 	useEffect(() => {
-		const checkSeekerVisitRequest = async () => {
-			if (selectedProperty?._id && user) {
-				try {
-					const result = await checkVisitRequest(selectedProperty._id, user.id);
-				} catch (error) {
-					console.error("Error checking visit request status:", error);
-				}
-			}
-		};
-		checkSeekerVisitRequest();
+		if (selectedProperty?._id && user?.id) {
+			checkSeekerVisitRequest();
+			checkSeekerReservation();
+		}
 	}, [selectedProperty, user]);
 
 	const handleLikeToggle = async (listings) => {
@@ -130,28 +125,35 @@ export const ViewListing = () => {
 		const propertyId = selectedProperty?._id;
 
 		if (!propertyId || !selectedDate || !selectedTime) {
-			alert("Please select a date and time for the visit.");
+			toast.error("Please select a date and time for the visit.");
 			return;
 		}
 
 		try {
 			await scheduleOcularVisit(propertyId, selectedDate, selectedTime);
-			alert("Request visit scheduled!");
+			
+			// Update UI state immediately
+			setHasRequestedVisit(true);
+			
+			// Show success notification
+			toast.success("Visit request scheduled successfully!");
+			
+			// Close the popup
+			setShowOcularPopup(false);
 		} catch (err) {
 			console.error(
 				"Failed to request visit:",
 				err.response?.data?.message || err.message
 			);
+			
+			// Show error toast
+			toast.error(err.response?.data?.message || "Failed to schedule visit. Please try again.");
 		}
 	};
 
 	const handleReserveListing = async () => {
 		navigate("/request-reservation");
 	};
-
-	// useEffect(() => {
-	//   setHasRequestedVisit(hasRequestedVisit); // Rebind state directly to force evaluation
-	// }, [hasRequestedVisit]);
 
 	const handleOpenPopup = () => {
 		if (!user) {
@@ -170,6 +172,28 @@ export const ViewListing = () => {
 			return;
 		}
 		navigate(`/profile/${profileId}`); // Navigate to the clicked user's profile
+	};
+
+	const checkSeekerVisitRequest = async () => {
+		try {
+			if (user && selectedProperty && user.userType === "Seeker") {
+				const response = await checkVisitRequest(selectedProperty._id, user.id);
+				setHasRequestedVisit(response.hasRequestedVisit);
+			}
+		} catch (error) {
+			console.error("Error checking visit request:", error);
+		}
+	};
+
+	const checkSeekerReservation = async () => {
+		try {
+			if (user && selectedProperty && user.userType === "Seeker") {
+				const response = await checkUserReservation(selectedProperty._id);
+				setHasReservation(response.hasReservation);
+			}
+		} catch (error) {
+			console.error("Error checking reservations:", error);
+		}
 	};
 
   const capitalizeFirstLetter = (item) => {
@@ -257,26 +281,26 @@ export const ViewListing = () => {
 										<div className="w-full flex justify-between flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
 											<div className="space-x-2">
 												<button
-													disabled={user && user.userType === "Owner"}
+													disabled={user && (user.userType === "Owner" || hasRequestedVisit)}
 													onClick={handleOpenPopup}
 													className={`${
-														user && user.userType === "Owner"
+														user && (user.userType === "Owner" || hasRequestedVisit)
 															? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
-															: "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+															: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-full"
 													}`}
 												>
-													Request Visit
+													{hasRequestedVisit ? "Visit Requested" : "Request Visit"}
 												</button>
 												<button
-													disabled={user && user.userType === "Owner"}
+													disabled={user && (user.userType === "Owner" || hasReservation)}
 													onClick={handleReserveListing}
 													className={`${
-														user && user.userType === "Owner"
+														user && (user.userType === "Owner" || hasReservation)
 															? "bg-gray-300 px-4 py-2 rounded-full cursor-not-allowed opacity-50"
-															: "bg-blue-500 text-white   hover:bg-blue-600 px-4 py-2 rounded-full"
+															: "bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-full"
 													}`}
 												>
-													Book Now
+													{hasReservation ? "Reserved" : "Book Now"}
 												</button>
 											</div>
 											<button
@@ -533,8 +557,8 @@ export const ViewListing = () => {
 								darkMode ? "text-gray-400" : "text-gray-600"
 							}`}
 						>
-							“Love this website! User-friendly interface and detailed listings
-							made my dorm search stress-free.”
+							"Love this website! User-friendly interface and detailed listings
+							made my dorm search stress-free."
 						</blockquote>
 					</div>
 				</div>

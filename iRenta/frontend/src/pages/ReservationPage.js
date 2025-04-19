@@ -121,6 +121,12 @@ const ReservationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Add an explicit check for file before validation
+    if (!uploadedFile) {
+      setErrors({...errors, file: "Valid ID is required"});
+      return;
+    }
+    
     if (!validateForm()) {
       return;
     }
@@ -134,6 +140,7 @@ const ReservationPage = () => {
       formData.append("ownerId", selectedProperty.userId);
       formData.append("moveInDate", moveInDate);
       formData.append("shortMessage", message);
+      formData.append("agreedToTerms", agreed);
 
       await createReservation(formData);
 
@@ -273,20 +280,27 @@ const ReservationPage = () => {
                           />
                         </div>
                         <div className="flex justify-center">
-                          <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium ${
-                            darkMode
-                              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                          }`}>
-                            Change File
+                          <div className="relative">
                             <input
+                              id="file-upload-change"
                               type="file"
+                              name="validIdFile"
                               accept=".jpg,.jpeg,.png"
                               onChange={handleFileUpload}
-                              className="hidden"
-                              required
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                              aria-label="Upload a valid ID"
                             />
-                          </label>
+                            <label 
+                              htmlFor="file-upload-change"
+                              className={`cursor-pointer block px-4 py-2 rounded-lg text-sm font-medium ${
+                                darkMode
+                                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                              }`}
+                            >
+                              Change File
+                            </label>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -295,20 +309,27 @@ const ReservationPage = () => {
                         <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                           Drag and drop your ID here, or
                         </p>
-                        <label className={`cursor-pointer inline-block px-4 py-2 rounded-lg text-sm font-medium ${
-                          darkMode
-                            ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}>
-                          Browse Files
+                        <div className="relative">
                           <input
+                            id="file-upload"
                             type="file"
+                            name="validIdFile"
                             accept=".jpg,.jpeg,.png"
                             onChange={handleFileUpload}
-                            className="hidden"
-                            required
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            aria-label="Upload a valid ID"
                           />
-                        </label>
+                          <label 
+                            htmlFor="file-upload"
+                            className={`cursor-pointer inline-block px-4 py-2 rounded-lg text-sm font-medium ${
+                              darkMode
+                                ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            }`}
+                          >
+                            Browse Files
+                          </label>
+                        </div>
                         <p className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
                           Supported formats: JPG, JPEG, PNG
                         </p>

@@ -8,6 +8,7 @@ import {
   scheduleOcularVisit,
 } from "../../global/api/Ocular.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
+import { toast } from "react-toastify";
 
 const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
   const { darkMode } = useContext(ThemeContext); // Access dark mode state
@@ -15,6 +16,7 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
   const [reservedDates, setReservedDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Fetch reserved dates from the backend
   useEffect(() => {
@@ -61,31 +63,33 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
     setSelectedTime(time);
   };
 
-  const handleSubmit = async () => {
-    if (!selectedDate) {
-      alert("Please select a date.");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (!selectedDate || !selectedTime) {
+      toast.error("Please select both date and time for your visit");
       return;
     }
-
-    if (!selectedTime) {
-      alert("Please select a time.");
-      return;
-    }
-
-    if (!isTimeWithinAvailability(selectedTime)) {
-      alert("Selected time is outside the available hours.");
-      return;
-    }
-
+    
+    // Disable button immediately
+    setSubmitting(true);
+    
     try {
+      // Call the parent component's function to submit the request
       await onRequestVisit(selectedDate, selectedTime);
+      
+      // Show success toast instead of alert
+      toast.success("Visit request scheduled successfully!");
+      
+      // Close the popup
       onClose();
-    } catch (err) {
-      alert(
-        `Failed to schedule ocular visit: ${
-          err.response?.data?.message || err.message
-        }`
-      );
+    } catch (error) {
+      // Show error toast
+      toast.error(error.message || "Failed to schedule visit. Please try again.");
+      
+      // Re-enable the button on error
+      setSubmitting(false);
     }
   };
 
@@ -112,61 +116,65 @@ const RequestOcularVisit = ({ onClose, onRequestVisit }) => {
         } rounded-lg shadow-lg p-6 w-96`}
       >
         <h2 className="text-xl font-bold mb-4">Schedule Ocular Visit</h2>
-        <Calendar
-          onChange={setSelectedDate}
-          tileDisabled={isDateDisabled}
-          value={selectedDate}
-          className={
-            darkMode
-              ? "text-black react-calendar react-calendar-dark"
-              : "react-calendar"
-          }
-        />
-        <div className="mt-4">
-          <label
-            htmlFor="time"
-            className={`block font-medium ${
-              darkMode ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            Select Time (Available:{" "}
-            {selectedProperty.visitAvailability.startTime} -{" "}
-            {selectedProperty.visitAvailability.endTime})
-          </label>
-          <input
-            type="time"
-            id="time"
-            value={selectedTime}
-            onChange={handleTimeChange}
-            className={`w-full mt-2 p-2 border rounded ${
+        <form onSubmit={handleSubmit}>
+          <Calendar
+            onChange={setSelectedDate}
+            tileDisabled={isDateDisabled}
+            value={selectedDate}
+            className={
               darkMode
-                ? "bg-gray-700 text-white border-gray-600"
-                : "bg-white text-black border-gray-300"
-            }`}
+                ? "text-black react-calendar react-calendar-dark"
+                : "react-calendar"
+            }
           />
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
-              darkMode
-                ? "bg-gray-700 text-white hover:bg-gray-600"
-                : "bg-gray-300 hover:bg-gray-400"
-            }`}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className={`px-4 py-2 rounded hover:bg-opacity-80 ${
-              darkMode
-                ? "bg-blue-600 text-white hover:bg-blue-500"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            Confirm
-          </button>
-        </div>
+          <div className="mt-4">
+            <label
+              htmlFor="time"
+              className={`block font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Select Time (Available:{" "}
+              {selectedProperty.visitAvailability.startTime} -{" "}
+              {selectedProperty.visitAvailability.endTime})
+            </label>
+            <input
+              type="time"
+              id="time"
+              value={selectedTime}
+              onChange={handleTimeChange}
+              className={`w-full mt-2 p-2 border rounded ${
+                darkMode
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-black border-gray-300"
+              }`}
+            />
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className={`px-4 py-2 rounded hover:bg-opacity-80 ${
+                darkMode
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
+                  : "bg-gray-300 hover:bg-gray-400"
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className={`${
+                submitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white font-bold py-2 px-4 rounded-full transition-colors`}
+            >
+              {submitting ? "Submitting..." : "Submit Request"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -129,3 +129,32 @@ export const getReservationById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Check if user has reservation for a property
+export const CheckUserReservation = async (req, res) => {
+  try {
+    // Get propertyId from query params, but use the authenticated user ID
+    const propertyId = req.query.propertyId;
+    const userId = req.user.id; // Get the user ID from the authenticated token
+
+    if (!propertyId) {
+      return res.status(400).json({ message: 'Missing required parameter propertyId' });
+    }
+
+    // Find reservations with matching userId and propertyId
+    const existingReservation = await Reservation.findOne({
+      seekerId: userId,
+      listingId: propertyId,
+      // Optional: only check active reservations
+      status: { $nin: ['Cancelled', 'Rejected'] }
+    });
+
+    return res.status(200).json({
+      hasReservation: !!existingReservation,
+      reservation: existingReservation
+    });
+  } catch (error) {
+    console.error('Error checking reservation status:', error);
+    return res.status(500).json({ message: 'Server error while checking reservation status' });
+  }
+};

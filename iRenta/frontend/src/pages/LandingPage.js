@@ -275,12 +275,12 @@ const LandingPage = () => {
                   )}
                   </div>
                 </div>
-                {/* <button
+                <button
                   onClick={handleBrowseListing}
                   className="inline-block bg-blue-500 hover:bg-blue-600 rounded-full py-2 px-4 text-gray-200 hover:text-gray-300"
                 >
                   See more
-                </button> */}
+                </button>
               </div>
 
               {/* Listings */}

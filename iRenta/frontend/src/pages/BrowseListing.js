@@ -226,173 +226,209 @@ const BrowseListing = () => {
       <div className="flex-grow flex pt-[70px] h-screen">
         {!isMapFullScreen ? (
           <>
-            <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-4">
-              <div className="flex justify-between items-center mb-4">
-                <button
-                  onClick={handleBackClick}
-                  className={`w-fit flex rounded-full items-center py-2 px-4 ${
-                    darkMode
-                      ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                      : "bg-gray-500 text-gray-100 hover:bg-gray-700"
-                  }`}
-                >
-                  <FaChevronLeft className="text-lg" />
-                </button>
-
-                <button
-                  onClick={toggleMapFullscreen}
-                  className={`lg:hidden px-4 py-2 rounded ${
-                    darkMode
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                >
-                  {isMapFullScreen ? "Hide Map" : "Show Map"}
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-4 mb-4">
-                <div className="w-full sm:w-1/2">
-                  <label htmlFor="radius" className="block mb-2 font-medium">
-                    Select Radius (km)
-                  </label>
-                  <select
-                    id="radius"
-                    value={radius}
-                    onChange={handleRadiusChange}
-                    className={`w-full px-4 py-2 border rounded ${
+            <div className="flex flex-col flex-grow overflow-y-auto scrollbar-hide p-6 relative z-20 bg-inherit">
+              {/* Header Section */}
+              <div className="flex flex-col space-y-6 mb-8 relative">
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={handleBackClick}
+                    className={`flex items-center space-x-2 py-2 px-4 rounded-full transition-all duration-200 relative z-30 ${
                       darkMode
-                        ? "bg-gray-800 text-white border-gray-700"
-                        : "bg-white text-black border-gray-300"
+                        ? "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
-                    <option value={1}>1 km</option>
-                    <option value={3}>3 km</option>
-                    <option value={5}>5 km</option>
-                    <option value={10}>10 km</option>
-                    <option value={20}>20 km</option>
-                  </select>
-                </div>
+                    <FaChevronLeft className="text-lg" />
+                    <span>Back</span>
+                  </button>
 
-                <div className="w-full sm:w-1/2">
-                  <label htmlFor="center" className="block mb-2 font-medium">
-                    Select Center
-                  </label>
-                  <select
-                    id="center"
-                    value={selectedCenter}
-                    onChange={handleCenterChange}
-                    className={`w-full px-4 py-2 border rounded ${
+                  <button
+                    onClick={toggleMapFullscreen}
+                    className={`lg:hidden px-6 py-2 rounded-full transition-all duration-200 relative z-30 ${
                       darkMode
-                        ? "bg-gray-800 text-white border-gray-700"
-                        : "bg-white text-black border-gray-300"
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
                     }`}
                   >
-                    <option value="PNU">PNU</option>
-                    <option value="ADAMSON">Adamson</option>
-                    <option value="TUP">TUP</option>
-                    <option value="My Location">My Location</option>
-                  </select>
+                    {isMapFullScreen ? "Hide Map" : "Show Map"}
+                  </button>
                 </div>
-              </div>
 
-              {/* Display a loading state while data is being fetched */}
-              {!isLoaded ? (
-                <div className="w-full p-6 text-center">
-                  <p className="text-lg">Loading properties...</p>
-                </div>
-              ) : filteredNearbyListings.length === 0 ? (
-                <div className="w-full p-6 text-center">
-                  <p className="text-lg">No properties found within {radius}km of the selected location.</p>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-4">
-                  {currentListings.map((listing) => {
-                    console.log('Rendering listing card:', listing._id);
-                    return (
-                      <div
-                        key={listing._id}
-                        className={`flex flex-col rounded-lg shadow-md overflow-hidden border h-96 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1rem)] hover:shadow-lg transition-all ${
+                {/* Filters Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-30">
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="radius" className="text-lg font-medium">
+                      Search Radius
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="radius"
+                        value={radius}
+                        onChange={handleRadiusChange}
+                        className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 appearance-none ${
                           darkMode
-                            ? "bg-gray-800 border-gray-700"
-                            : "bg-white border-gray-300"
+                            ? "bg-gray-800 text-white border-gray-700 focus:border-blue-500"
+                            : "bg-white text-gray-900 border-gray-300 focus:border-blue-500"
                         }`}
                       >
-                        <div className="relative flex-shrink-0 h-2/3">
-                          <img
-                            src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
-                            alt={listing.title}
-                            onClick={() => handleViewProperty(listing)}
-                            className="w-full h-full object-cover cursor-pointer"
-                          />
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLikeToggle(listing._id);
-                            }}
-                            className={`absolute top-2 right-2 rounded-full p-2 shadow-md ${
-                              darkMode
-                                ? "bg-gray-700 text-gray-300 hover:text-red-500"
-                                : "bg-white text-gray-600 hover:text-red-500"
-                            }`}
-                          >
-                            {likedListings?.includes(listing._id) ? (
-                              <AiFillHeart size={20} className="text-red-500" />
-                            ) : (
-                              <AiOutlineHeart size={20} />
-                            )}
-                          </button>
-                        </div>
-
-                        <div className="p-4 flex-grow flex flex-col justify-between">
-                          <h3 className="text-lg font-semibold truncate">
-                            {listing.title}
-                          </h3>
-                          <p
-                            className={`text-sm line-clamp-2 ${
-                              darkMode ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {listing.description}
-                          </p>
-                          <p
-                            className={`font-bold mt-2 ${
-                              darkMode ? "text-gray-200" : "text-gray-700"
-                            }`}
-                          >
-                            {listing.price} / night
-                          </p>
-                        </div>
+                        <option value={.5}>500 meters</option>
+                        <option value={1}>1 kilometer</option>
+                        <option value={3}>3 kilometers</option>
+                        <option value={5}>5 kilometers</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    </div>
+                  </div>
 
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handlePageChange(index + 1)}
-                      className={`px-4 py-2 mx-1 border rounded ${
-                        currentPage === index + 1
-                          ? darkMode
-                            ? "bg-blue-600 text-white"
-                            : "bg-blue-500 text-white"
-                          : darkMode
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-200 text-black"
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
+                  <div className="flex flex-col space-y-2">
+                    <label htmlFor="center" className="text-lg font-medium">
+                      Location Center
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="center"
+                        value={selectedCenter}
+                        onChange={handleCenterChange}
+                        className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 appearance-none ${
+                          darkMode
+                            ? "bg-gray-800 text-white border-gray-700 focus:border-blue-500"
+                            : "bg-white text-gray-900 border-gray-300 focus:border-blue-500"
+                        }`}
+                      >
+                        <option value="My Location">My Location</option>
+                        <option value="PNU">PNU</option>
+                        <option value="ADAMSON">Adamson University</option>
+                        <option value="TUP">TUP Manila</option>
+                      </select>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* Content Section with proper z-index */}
+              <div className="relative z-20">
+                {!isLoaded ? (
+                  <div className="flex items-center justify-center h-64">
+                    <div className="animate-pulse text-lg">Loading properties...</div>
+                  </div>
+                ) : filteredNearbyListings.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                    <p className="text-xl font-medium">No Properties Found</p>
+                    <p className="text-gray-500 text-center">
+                      We couldn't find any properties within {radius}km of the selected location.<br />
+                      Try adjusting your search radius or choosing a different location.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {currentListings.map((listing) => (
+                        <div
+                          key={listing._id}
+                          className={`flex flex-col rounded-xl overflow-hidden transition-all duration-200 hover:transform hover:scale-[1.02] ${
+                            darkMode
+                              ? "bg-gray-800 shadow-lg hover:shadow-xl"
+                              : "bg-white shadow-md hover:shadow-xl"
+                          }`}
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden">
+                            <img
+                              src={listing.images?.[0]?.link || "/placeholder-image.jpg"}
+                              alt={listing.title}
+                              onClick={() => handleViewProperty(listing)}
+                              className="w-full h-full object-cover cursor-pointer transition-transform duration-300 hover:scale-110"
+                            />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLikeToggle(listing._id);
+                              }}
+                              className={`absolute top-3 right-3 p-2.5 rounded-full shadow-lg transition-all duration-200 ${
+                                darkMode
+                                  ? "bg-gray-900/80 text-white hover:bg-gray-900"
+                                  : "bg-white/80 hover:bg-white"
+                              }`}
+                            >
+                              {likedListings?.includes(listing._id) ? (
+                                <AiFillHeart size={24} className="text-red-500" />
+                              ) : (
+                                <AiOutlineHeart size={24} className="text-gray-600" />
+                              )}
+                            </button>
+                          </div>
+
+                          <div 
+                            className="p-5 flex flex-col space-y-3 flex-grow cursor-pointer"
+                            onClick={() => handleViewProperty(listing)}
+                          >
+                            <h3 className="text-xl font-semibold line-clamp-1">
+                              {listing.title}
+                            </h3>
+                            <p className={`text-sm line-clamp-2 ${
+                              darkMode ? "text-gray-400" : "text-gray-600"
+                            }`}>
+                              {listing.description}
+                            </p>
+                            <div className="flex items-center justify-between mt-auto pt-2">
+                              <p className={`text-lg font-bold ${
+                                darkMode ? "text-blue-400" : "text-blue-600"
+                              }`}>
+                                ₱{listing.price} <span className="text-sm font-normal">/night</span>
+                              </p>
+                              <span className={`text-sm px-3 py-1 rounded-full ${
+                                listing.vacantUnits > 0
+                                  ? darkMode
+                                    ? "bg-green-900/30 text-green-400"
+                                    : "bg-green-100 text-green-700"
+                                  : darkMode
+                                    ? "bg-red-900/30 text-red-400"
+                                    : "bg-red-100 text-red-700"
+                              }`}>
+                                {listing.vacantUnits > 0 ? `${listing.vacantUnits} Available` : 'Fully Booked'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="flex justify-center mt-8 space-x-2">
+                        {Array.from({ length: totalPages }, (_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handlePageChange(index + 1)}
+                            className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                              currentPage === index + 1
+                                ? darkMode
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-blue-500 text-white"
+                                : darkMode
+                                ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {index + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="hidden lg:flex lg:flex-shrink-0 lg:w-1/3 h-full relative">
+            <div className="hidden lg:block lg:w-1/3 h-full relative z-10">
               {isLoaded && (
                 <MapListings
                   isLoaded={isLoaded}
@@ -408,23 +444,25 @@ const BrowseListing = () => {
           <div className="w-full h-full relative">
             <button
               onClick={toggleMapFullscreen}
-              className={`absolute top-4 left-4 z-10 px-4 py-2 rounded ${
+              className={`absolute top-4 left-4 z-50 px-6 py-2 rounded-full shadow-lg transition-all duration-200 ${
                 darkMode
-                  ? "bg-gray-700 text-white hover:bg-gray-600"
-                  : "bg-white text-black hover:bg-gray-100"
+                  ? "bg-gray-800 text-white hover:bg-gray-700"
+                  : "bg-white text-gray-900 hover:bg-gray-100"
               }`}
             >
               Back to Listings
             </button>
-            {isLoaded && (
-              <MapListings
-                isLoaded={isLoaded}
-                mapCenter={mapCenter}
-                nearbyListings={filteredNearbyListings}
-                handleViewProperty={handleViewProperty}
-                radius={radius}
-              />
-            )}
+            <div className="relative z-10">
+              {isLoaded && (
+                <MapListings
+                  isLoaded={isLoaded}
+                  mapCenter={mapCenter}
+                  nearbyListings={filteredNearbyListings}
+                  handleViewProperty={handleViewProperty}
+                  radius={radius}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>

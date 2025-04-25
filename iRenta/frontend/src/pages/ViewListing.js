@@ -69,6 +69,7 @@ export const ViewListing = () => {
 			try {
 				const owner = await fetchOwnerData(selectedProperty?.userId);
 				console.log(owner);
+				console.log(selectedProperty);
 				setOwnerData(owner);
 				setProperyImages(selectedProperty?.images);
 			} catch (error) {
@@ -251,7 +252,7 @@ export const ViewListing = () => {
 												darkMode ? "text-gray-400" : "text-gray-600"
 											}`}
 										>
-											{selectedProperty?.address?.houseNumber}{" "}
+											{selectedProperty?.address?.houseNumber === "N/A" ? "" : selectedProperty?.address?.houseNumber}{" "}
 											{selectedProperty?.address?.street}{" "}
 											{selectedProperty?.address?.city}
 										</p>
@@ -490,8 +491,8 @@ export const ViewListing = () => {
 							{selectedProperty?.address?.lng && selectedProperty?.address?.lat && (
 								<MapContainer
 									center={{
-										lat: 14.582815,
-										lng: 120.983952,
+										lat: selectedProperty.address.lat,
+										lng: selectedProperty.address.lng,
 									}}
 									zoom={17}
 									zoomControl={false}
@@ -507,8 +508,8 @@ export const ViewListing = () => {
 
 									<Marker 
 										position={{
-											lat: 14.582815,
-											lng: 120.983952
+											lat: selectedProperty.address.lat,
+											lng: selectedProperty.address.lng,
 										}}
 										icon={customIcon}>
 									</Marker>

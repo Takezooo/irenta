@@ -8,6 +8,7 @@ import { ThemeContext } from "../../../contexts/ThemeContext.js";
 import { GetToken } from "../../../global/utils/Token.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { fetchSeekersWithReservations } from '../../../global/api/Reservations.js';
 
 const CreateLease = ({ seekerId }) => {
   const passedSeekerId = seekerId || "";
@@ -28,6 +29,7 @@ const CreateLease = ({ seekerId }) => {
   const [amenities, setAmenities] = useState([]);
   const [utilities, setUtilities] = useState([]);
   const today = new Date().toISOString().split("T")[0];
+  const [seekers, setSeekers] = useState([]);
 
   const capitalizeFirstLetter = (string) => {
     if (!string) return "";
@@ -106,8 +108,18 @@ const CreateLease = ({ seekerId }) => {
       }
     };
 
+    const fetchSeekers = async () => {
+      try {
+        const data = await fetchSeekersWithReservations();
+        setSeekers(data);
+      } catch (err) {
+        console.error('Failed to fetch seekers with reservations:', err);
+      }
+    };
+
     fetchUser();
     fetchPreloadedTerms();
+    fetchSeekers();
   }, [user, storedToken]);
 
   useEffect(() => {
@@ -208,22 +220,6 @@ const CreateLease = ({ seekerId }) => {
     if (moveInDate && moveStart < todayDate) {
       toast.error("The move-in date cannot be in the past.");
       return false;
-    }
-
-    if (startDate && endDate) {
-      const durationInDays = (end - start) / (1000 * 60 * 60 * 24);
-      if (durationInDays < 30) {
-        toast.error("Lease terms must be at least 1 month.");
-        return false;
-      }
-    }
-
-    if (moveInDate && moveOutDate) {
-      const moveDurationInDays = (moveEnd - moveStart) / (1000 * 60 * 60 * 24);
-      if (moveDurationInDays < 30) {
-        toast.error("Move-in to move-out period should be at least 1 month.");
-        return false;
-      }
     }
 
     return true;
@@ -507,14 +503,20 @@ const CreateLease = ({ seekerId }) => {
                 </div>
               ) : (
                 <div>
-                  <input
-                    type="text"
+                  <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Select Tenant</label>
+                  <select
                     name="tenant"
-                    value={formData.tenant || ""}
+                    value={formData.tenant || ''}
                     onChange={handleChange}
-                    placeholder={passedSeekerId?._id || "Enter Tenant ID or use placeholder"}
-                    className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${darkMode ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500" : "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"}`}
-                  />
+                    className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' : 'bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500'}`}
+                  >
+                    <option value="">Select a tenant</option>
+                    {seekers.map(seeker => (
+                      <option key={seeker._id} value={seeker._id}>
+                        {seeker.firstName} {seeker.lastName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
               {errors.tenant && <p className="text-red-500 text-sm mt-1">{errors.tenant}</p>}

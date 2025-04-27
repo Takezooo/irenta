@@ -101,7 +101,7 @@ const LeaseSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Draft", "Pending", "Sent", "Active", "Expired", "Terminated"],
+      enum: ["Draft", "Ready", "Pending", "Sent", "Active", "Expired", "Terminated"],
       default: "Draft",
     },
     uploadedSignature: {

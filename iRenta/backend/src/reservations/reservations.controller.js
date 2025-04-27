@@ -158,3 +158,31 @@ export const CheckUserReservation = async (req, res) => {
     return res.status(500).json({ message: 'Server error while checking reservation status' });
   }
 };
+
+// Fetch all unique seekers with reservations
+export const getSeekersWithReservations = async (req, res) => {
+  try {
+    // Find all reservations and populate seeker info
+    const reservations = await Reservation.find().populate({
+      path: 'seekerId',
+      select: 'info.firstName info.lastName',
+    });
+    // Extract unique seekers
+    const uniqueSeekersMap = new Map();
+    reservations.forEach((reservation) => {
+      const seeker = reservation.seekerId;
+      if (seeker && !uniqueSeekersMap.has(seeker._id.toString())) {
+        uniqueSeekersMap.set(seeker._id.toString(), {
+          _id: seeker._id,
+          firstName: seeker.info.firstName,
+          lastName: seeker.info.lastName,
+        });
+      }
+    });
+    const uniqueSeekers = Array.from(uniqueSeekersMap.values());
+    res.status(200).json(uniqueSeekers);
+  } catch (error) {
+    console.error('Error fetching seekers with reservations:', error);
+    res.status(500).json({ message: 'Server error while fetching seekers with reservations' });
+  }
+};

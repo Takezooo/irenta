@@ -1,5 +1,6 @@
 import axios from "axios";
 import { GetToken } from "../../global/utils/Token.js";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = "http://localhost:5000/api/leases";
 
@@ -138,8 +139,9 @@ export const sendLeaseToSeeker = async (leaseId) => {
         headers: { Authorization: `Bearer ${authToken}` },
       }
     );
-    alert("Lease sent to Seeker successfully!");
+    toast.success("Lease sent to Seeker successfully!");
   } catch (error) {
     console.error("Error sending lease:", error);
+    toast.error("Error sending lease. Please try again.");
   }
 };

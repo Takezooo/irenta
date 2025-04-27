@@ -127,12 +127,12 @@ const ReservePopout = ({
       
       // Short delay before navigation for toast to be visible
       setTimeout(() => {
-        navigate("/owner-dashboard", {
-          state: {
-            contentActive: "content6",
-            seekerId: displayRequestDetails.seekerId,
-          },
-        });
+      navigate("/owner-dashboard", {
+        state: {
+          contentActive: "content6",
+          seekerId: displayRequestDetails.seekerId,
+        },
+      });
       }, 1500);
     } catch (error) {
       console.error("Error approving reservation:", error);
@@ -334,14 +334,14 @@ const ReservePopout = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
           
           {/* Close button */}
-          <button
-            onClick={onClose}
+        <button
+          onClick={onClose}
             className="absolute top-4 right-4 rounded-full p-2 bg-black/40 text-white hover:bg-black/60 transition-colors"
             aria-label="Close"
           >
             <AiOutlineClose size={20} />
-          </button>
-          
+        </button>
+
           {/* Property title overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <h2 className="text-2xl font-bold text-white drop-shadow-lg">{displayProperty.title}</h2>
@@ -493,14 +493,14 @@ const ReservePopout = ({
             <button
               onClick={onClose}
               className={`py-2.5 px-6 rounded-lg font-medium transition-all ${
-                darkMode
-                  ? "bg-blue-600 hover:bg-blue-500 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
-            >
-              Close
-            </button>
-          )}
+              darkMode
+                ? "bg-blue-600 hover:bg-blue-500 text-white"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+          >
+            Close
+          </button>
+        )}
         </div>
       </div>
     </div>

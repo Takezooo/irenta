@@ -384,7 +384,7 @@ export const SendLeaseToSeeker = async (req, res) => {
     }
 
     // Mark lease as sent to the tenant
-    lease.status = "Sent";
+    lease.status = "Ready";
     await lease.save();
     console.log("Tenant ID:", lease.tenant);
     // Notify Tenant

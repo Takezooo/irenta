@@ -7,6 +7,7 @@ import { AuthContext } from "../../../global/contexts/AuthContext.js";
 import { ThemeContext } from "../../../contexts/ThemeContext.js";
 import { GetToken } from "../../../global/utils/Token.js";
 import { toast } from "react-toastify";
+import { fetchSeekersWithReservations } from '../../../global/api/Reservations.js';
 
 const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	const passedSeekerId = seekerId || "";
@@ -28,6 +29,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	});
 	const [originalLease, setOriginalLease] = useState(null);
 	const today = new Date().toISOString().split("T")[0];
+	const [seekers, setSeekers] = useState([]);
 
 	const [formData, setFormData] = useState({
 		property: {
@@ -150,9 +152,19 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 			}
 		};
 
+		const fetchSeekers = async () => {
+			try {
+				const data = await fetchSeekersWithReservations();
+				setSeekers(data);
+			} catch (err) {
+				console.error('Failed to fetch seekers with reservations:', err);
+			}
+		};
+
 		fetchLease();
 		fetchUser();
 		fetchPreloadedTerms();
+		fetchSeekers();
 	}, [leaseId, user, storedToken]);
 
 	useEffect(() => {
@@ -374,6 +386,22 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 		return JSON.stringify(currentLease) !== JSON.stringify(originalLease);
 	};
 
+	const validateIfReady = (formData) => {
+		// Use the same required fields as CreateLease
+		if (!formData.property?.propertyId) return false;
+		if (!formData.property?.address?.zip) return false;
+		if (!formData.landlord) return false;
+		if (!formData.tenant && (!formData.tenantPlaceholder?.name || !formData.tenantPlaceholder?.email || !formData.tenantPlaceholder?.phoneNumber)) return false;
+		if (!formData.contractDetails?.startDate) return false;
+		if (!formData.contractDetails?.endDate) return false;
+		if (!formData.contractDetails?.paymentFrequency) return false;
+		if (!formData.contractDetails?.termsAndConditionsId) return false;
+		if (!formData.contractDetails?.rulesAndRegulations) return false;
+		if (formData.leaseType === "Fixed-Term" && !formData.contractDetails?.moveOutDate) return false;
+		if (!formData.contractDetails?.renewalTerms) return false;
+		return true;
+	};
+
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
@@ -405,6 +433,12 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 		// Handle tenant field properly: if using placeholder, set tenant to null
 		const tenantValue = usePlaceholderTenant ? null : formData.tenant;
 
+		// If all required fields are filled, set status to 'Ready'
+		let status = formData.status;
+		if (validateIfReady(formData)) {
+			status = 'Ready';
+		}
+
 		const payload = {
 			...formData,
 			landlord: user.id,
@@ -420,6 +454,7 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 			},
 			amenities: amenitiesForSubmission,
 			utilities: utilitiesForSubmission,
+			status, // set status
 		};
 
 		try {
@@ -657,21 +692,20 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 								</div>
 							) : (
 								<div>
-									<input
-										type="text"
+									<label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Select Tenant</label>
+									<select
 										name="tenant"
-										value={formData.tenant || ""}
+										value={formData.tenant || ''}
 										onChange={handleChange}
-										placeholder={
-											passedSeekerId?._id ||
-											"Enter Tenant ID or use placeholder"
-										}
-										className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${
-											darkMode
-												? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
-												: "bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500"
-										}`}
-									/>
+										className={`mt-1 block w-full border rounded-md shadow-sm sm:text-sm px-4 py-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500' : 'bg-white border-gray-300 text-black focus:ring-blue-500 focus:border-blue-500'}`}
+									>
+										<option value="">Select a tenant</option>
+										{seekers.map(seeker => (
+											<option key={seeker._id} value={seeker._id}>
+												{seeker.firstName} {seeker.lastName}
+											</option>
+										))}
+									</select>
 								</div>
 							)}
 						</div>

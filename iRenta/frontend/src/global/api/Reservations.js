@@ -70,3 +70,19 @@ export const checkUserReservation = async (propertyId) => {
     return { hasReservation: false };
   }
 };
+
+export const fetchSeekersWithReservations = async () => {
+  const authToken = GetToken();
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/reservations/seekers`,
+      {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching seekers with reservations:", error.response?.data || error.message);
+    throw error;
+  }
+};

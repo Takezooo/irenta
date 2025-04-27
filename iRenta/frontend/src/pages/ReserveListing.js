@@ -142,32 +142,32 @@ const ReserveListing = () => {
 
   // Render Grid View
   const renderGridView = () => {
-    return (
+  return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {reservations.map((reservation) => {
-          const listing = reservation.listingId || {};
-          const seeker = reservation.seekerId || {};
+                const listing = reservation.listingId || {};
+                const seeker = reservation.seekerId || {};
           const statusDisplay = getStatusDisplay(reservation.status);
 
-          return (
-            <div
-              key={reservation._id}
+                return (
+                  <div
+                    key={reservation._id}
               className={`h-96 rounded-xl shadow-md border overflow-hidden transition-transform hover:scale-[1.02] ${
-                darkMode
+                      darkMode
                   ? "bg-gray-800 border-gray-700 hover:shadow-lg hover:shadow-gray-700"
                   : "bg-white border-gray-200 hover:shadow-lg"
-              }`}
-            >
-              {/* Image Section */}
+                    }`}
+                  >
+                    {/* Image Section */}
               <div className="relative h-3/5 overflow-hidden">
-                <img
-                  src={
-                    listing.images?.[0]?.link || "/placeholder-image.jpg"
-                  }
-                  alt={listing.title || "No Title"}
+                      <img
+                        src={
+                          listing.images?.[0]?.link || "/placeholder-image.jpg"
+                        }
+                        alt={listing.title || "No Title"}
                   className="w-full h-full object-cover transition-transform hover:scale-105 cursor-pointer"
-                  onClick={() => handleViewProperty(listing, reservation.ownerId)}
-                />
+                        onClick={() => handleViewProperty(listing, reservation.ownerId)}
+                      />
                 <button
                   onClick={() => handlePopoutOpen(listing, seeker, reservation)}
                   className={`absolute top-3 right-3 rounded-full py-1 px-3 shadow-md transition-colors flex items-center gap-1 ${statusDisplay.bgColor} ${statusDisplay.textColor}`}
@@ -177,29 +177,29 @@ const ReserveListing = () => {
                 </button>
                 {/* Price tag */}
                 <div className={`absolute bottom-3 left-3 rounded-md py-1 px-2 text-sm font-semibold ${
-                  darkMode
+                          darkMode
                     ? "bg-gray-900/80 text-gray-200"
                     : "bg-white/80 text-gray-800"
                 }`}>
                   ${listing.price || 0}<span className="text-xs font-normal"> / night</span>
-                </div>
-              </div>
+                      </div>
+                    </div>
 
-              {/* Details Section */}
-              <div 
+                    {/* Details Section */}
+                    <div
                 className={`p-4 h-2/5 flex flex-col ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                 onClick={() => handlePopoutOpen(listing, seeker, reservation)}
               >
                 <h3 className="text-lg font-semibold truncate cursor-pointer">
-                  {listing.title || "No Title"}
-                </h3>
+                        {listing.title || "No Title"}
+                      </h3>
                 <p className={`text-sm line-clamp-2 mt-1 flex-grow ${
-                  darkMode ? "text-gray-400" : "text-gray-500"
+                          darkMode ? "text-gray-400" : "text-gray-500"
                 }`}>
-                  {user.userType === "Owner"
+                        {user.userType === "Owner"
                     ? `Reserved by: ${seeker.info?.firstName || "Unknown"} ${seeker.info?.lastName || ""}`
-                    : listing.description || "No description available"}
-                </p>
+                          : listing.description || "No description available"}
+                      </p>
                 <div className="flex items-center justify-between mt-2">
                   <span className={`text-xs px-2 py-1 rounded-md ${
                     darkMode ? "bg-gray-700" : "bg-gray-100"
@@ -388,9 +388,9 @@ const ReserveListing = () => {
           >
             {user.userType === "Seeker" ? "Browse Properties" : "Back to Dashboard"}
           </Link>
-        </div>
-      </div>
-    );
+                    </div>
+                  </div>
+                );
   };
 
   return (

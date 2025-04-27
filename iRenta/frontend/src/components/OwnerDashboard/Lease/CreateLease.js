@@ -408,6 +408,15 @@ const CreateLease = ({ seekerId }) => {
   return (
     <div className={`flex-grow ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
       <div className={`shadow-md rounded-lg p-8 max-w-full mx-auto ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
+        <div className="mb-4">
+          <button
+            type="button"
+            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+            onClick={() => window.history.back()}
+          >
+            ← Back
+          </button>
+        </div>
         <h1 className={`text-3xl font-bold text-center mb-6 ${darkMode ? "text-blue-400" : "text-blue-600"}`}>Create Lease</h1>
         <form onSubmit={(e) => handleSubmit("saveAndSend", e)} className="space-y-6">
           {/* Property Details Section */}

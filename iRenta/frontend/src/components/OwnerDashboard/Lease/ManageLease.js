@@ -385,14 +385,17 @@ const ManageLease = ({ seekerId }) => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           className={`px-4 py-2 text-lg font-bold rounded ${
-                            darkMode
-                              ? "bg-blue-600 text-white hover:bg-blue-500"
-                              : "bg-blue-500 text-white hover:bg-blue-600"
+                            lease?.status === "Active"
+                              ? "bg-gray-400 text-white cursor-not-allowed"
+                              : darkMode
+                                ? "bg-blue-600 text-white hover:bg-blue-500"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
                           }`}
                           onClick={() => {
                             setSelectedLeaseId(lease?._id);
                             setView("EditLease");
                           }}
+                          disabled={lease?.status === "Active"}
                         >
                           <AiFillEdit />
                         </button>
@@ -409,29 +412,19 @@ const ManageLease = ({ seekerId }) => {
                         >
                           <IoDocumentText />
                         </button>
-                        {lease?.status === "Draft" ? (
-                          <button
-                            className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
-                              darkMode
-                                ? "bg-red-600 text-white hover:bg-red-500"
-                                : "bg-red-500 text-white hover:bg-red-600"
-                            }`}
-                            onClick={() => handleSend(lease)}
-                          >
-                            <MdDelete />
-                          </button>
-                        ) : (
-                          <button
-                            className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
-                              darkMode
+                        <button
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
+                            lease?.status === "Active"
+                              ? "bg-gray-400 text-white cursor-not-allowed"
+                              : darkMode
                                 ? "bg-orange-600 text-white hover:bg-orange-500"
                                 : "bg-orange-500 text-white hover:bg-orange-600"
-                            }`}
-                            onClick={() => handleSend(lease._id)}
-                          >
-                            <IoSend />
-                          </button>
-                        )}
+                          }`}
+                          onClick={() => handleSend(lease._id)}
+                          disabled={lease?.status === "Active"}
+                        >
+                          <IoSend />
+                        </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button

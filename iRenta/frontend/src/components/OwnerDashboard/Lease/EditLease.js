@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { fetchLeaseById, updateLease } from "../../../global/api/Leases.js";
+import { fetchLeaseById, updateLease, sendLeaseToSeeker } from "../../../global/api/Leases.js";
 import { fetchTermsTemplates } from "../../../global/api/Terms.js";
 import { fetchUserData } from "../../../global/api/Users.js";
 import { fetchOwnerListings } from "../../../global/api/Listings.js";
@@ -9,7 +9,7 @@ import { GetToken } from "../../../global/utils/Token.js";
 import { toast } from "react-toastify";
 import { fetchSeekersWithReservations } from '../../../global/api/Reservations.js';
 
-const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
+const EditLease = ({ leaseId, onLeaseUpdated, seekerId, onBack }) => {
 	const passedSeekerId = seekerId || "";
 	const { user } = useContext(AuthContext);
 	const { darkMode } = useContext(ThemeContext);
@@ -387,105 +387,69 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	};
 
 	const validateIfReady = (formData) => {
-		// Use the same required fields as CreateLease
-		if (!formData.property?.propertyId) return false;
-		if (!formData.property?.address?.zip) return false;
-		if (!formData.landlord) return false;
-		if (!formData.tenant && (!formData.tenantPlaceholder?.name || !formData.tenantPlaceholder?.email || !formData.tenantPlaceholder?.phoneNumber)) return false;
-		if (!formData.contractDetails?.startDate) return false;
-		if (!formData.contractDetails?.endDate) return false;
-		if (!formData.contractDetails?.paymentFrequency) return false;
-		if (!formData.contractDetails?.termsAndConditionsId) return false;
-		if (!formData.contractDetails?.rulesAndRegulations) return false;
-		if (formData.leaseType === "Fixed-Term" && !formData.contractDetails?.moveOutDate) return false;
-		if (!formData.contractDetails?.renewalTerms) return false;
-		return true;
+		// Check if all required fields are filled
+		const requiredFields = [
+			formData.property?.propertyId,
+			formData.contractDetails?.startDate,
+			formData.contractDetails?.endDate,
+			formData.contractDetails?.moveInDate,
+			formData.contractDetails?.moveOutDate,
+			formData.contractDetails?.depositAmount,
+			formData.contractDetails?.rentBreakdown?.baseRent,
+			formData.contractDetails?.gracePeriod,
+			formData.contractDetails?.latePaymentPolicy,
+			formData.contractDetails?.noticePeriod,
+			formData.contractDetails?.renewalTerms
+		];
+
+		// Check if either tenant or tenantPlaceholder is filled
+		const hasTenant = formData.tenant || (formData.tenantPlaceholder?.name && formData.tenantPlaceholder?.email);
+
+		return requiredFields.every(field => field) && hasTenant;
 	};
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-
-		if (!hasChanges()) {
-			toast.info("No changes detected. Lease not updated.");
-			return;
-		}
-
-		const selectedTerms = preloadedTerms.find(
-			(term) => term._id === formData.contractDetails.termsAndConditionsId
-		);
-
-		// Prepare amenities for submission - keep only selected ones
-		const amenitiesForSubmission = amenities
-			.filter(amenity => amenity.selected)
-			.map(amenity => ({
-				name: amenity.name || "",
-				amount: parseFloat(amenity.amount || 0)
-			}));
-
-		// Prepare utilities for submission - keep only selected ones
-		const utilitiesForSubmission = utilities
-			.filter(utility => utility.selected)
-			.map(utility => ({
-				name: utility.name || "",
-				amount: parseFloat(utility.amount || 0)
-			}));
-
-		// Handle tenant field properly: if using placeholder, set tenant to null
-		const tenantValue = usePlaceholderTenant ? null : formData.tenant;
-
-		// If all required fields are filled, set status to 'Ready'
-		let status = formData.status;
-		if (validateIfReady(formData)) {
-			status = 'Ready';
-		}
-
-		const payload = {
-			...formData,
-			landlord: user.id,
-			tenant: tenantValue,
-			landlordName: `${userProfile.info.firstName} ${userProfile.info.lastName}`,
-			contractDetails: {
-				...formData.contractDetails,
-				customTermsAndConditions: selectedTerms ? selectedTerms.content : "",
-				rentBreakdown: {
-					...formData.contractDetails.rentBreakdown,
-					otherFees: otherFees,
-				},
-			},
-			amenities: amenitiesForSubmission,
-			utilities: utilitiesForSubmission,
-			status, // set status
-		};
-
+		
 		try {
-			// Convert payload to FormData
-			const formDataObj = new FormData();
+			// Check if all required fields are filled
+			const isReady = validateIfReady(formData);
 			
-			// Handle nested objects, converting them to JSON strings
-			Object.keys(payload).forEach(key => {
-				if (key === 'tenant' && payload[key] === null) {
-					// Explicitly set null as a string for proper handling on server
-					formDataObj.append(key, 'null');
-				} else if (key === 'amenities' || key === 'utilities' || typeof payload[key] === 'object') {
-					// Convert arrays and objects to JSON strings
-					if (payload[key] !== null) {
-						formDataObj.append(key, JSON.stringify(payload[key]));
-					} else {
-						formDataObj.append(key, 'null');
-					}
-				} else {
-					formDataObj.append(key, payload[key]);
-				}
-			});
+			// Update the lease with the new status
+			const updatedLeaseData = {
+				...formData,
+				status: isReady ? "Ready" : "Draft"
+			};
 
-			await updateLease(leaseId, formDataObj);
-			toast.success("Lease updated successfully.");
-			if (onLeaseUpdated) {
-				onLeaseUpdated();
+			const updatedLease = await updateLease(leaseId, updatedLeaseData);
+			
+			if (updatedLease) {
+				toast.success("Lease updated successfully!");
+				if (onLeaseUpdated) {
+					onLeaseUpdated(updatedLease);
+				}
 			}
-		} catch (err) {
-			console.error("Failed to update lease:", err);
+		} catch (error) {
+			console.error("Error updating lease:", error);
 			toast.error("Failed to update lease. Please try again.");
+		}
+	};
+
+	const handleSendToSeeker = async () => {
+		try {
+			await sendLeaseToSeeker(leaseId);
+			// Update the lease status to "Sent"
+			const updatedLeaseData = {
+				...formData,
+				status: "Sent"
+			};
+			await updateLease(leaseId, updatedLeaseData);
+			if (onLeaseUpdated) {
+				onLeaseUpdated(updatedLeaseData);
+			}
+		} catch (error) {
+			console.error("Error sending lease to seeker:", error);
+			toast.error("Failed to send lease to seeker. Please try again.");
 		}
 	};
 
@@ -498,16 +462,17 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 	}
 
 	return (
-		<div
-			className={`flex-grow ${
-				darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-			}`}
-		>
-			<div
-				className={`shadow-md rounded-lg p-8 max-w-full mx-auto ${
-					darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-				}`}
-			>
+		<div className={`flex-grow ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+			<div className={`shadow-md rounded-lg p-8 max-w-full mx-auto ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
+				<div className="mb-4">
+					<button
+						type="button"
+						className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+						onClick={onBack ? onBack : () => window.history.back()}
+					>
+						← Back
+					</button>
+				</div>
 				<h1
 					className={`text-3xl font-bold text-center mb-6 ${
 						darkMode ? "text-blue-400" : "text-blue-600"
@@ -1320,17 +1285,23 @@ const EditLease = ({ leaseId, onLeaseUpdated, seekerId }) => {
 					</div>
 
 					{/* Submit Button */}
-					<div className="mt-6">
+					<div className="mt-6 flex justify-end space-x-4">
 						<button
 							type="submit"
-							className={`w-full px-4 py-2 rounded text-sm font-medium ${
-								darkMode
-									? "bg-blue-600 text-white hover:bg-blue-500"
-									: "bg-blue-500 text-white hover:bg-blue-600"
-							}`}
+							className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600`}
 						>
 							Update Lease
 						</button>
+						
+						{formData.status === "Ready" && (
+							<button
+								type="button"
+								onClick={handleSendToSeeker}
+								className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600`}
+							>
+								Send to Seeker
+							</button>
+						)}
 					</div>
 				</form>
 			</div>

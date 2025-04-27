@@ -92,18 +92,20 @@ const TenantsList = () => {
           <h3 className="text-sm opacity-75">Properties Occupied</h3>
           <p className="text-2xl font-bold mt-2">{properties.length}</p>
         </div>
-        <div className="p-6 mb-2">
-          <Waitlist />
-        </div>
+      </div>
+
+      {/* Waitlist Section - full width */}
+      <div className="mb-8">
+        <Waitlist />
       </div>
 
       {/* Filter and Controls */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-6 gap-2 sm:gap-0">
+        <div className="flex-1 max-w-xs w-full">
           <select
             value={selectedProperty}
             onChange={(e) => setSelectedProperty(e.target.value)}
-            className={`p-2 rounded ${
+            className={`w-full p-2 rounded border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-150 ${
               darkMode
                 ? "bg-gray-700 text-white border-gray-600"
                 : "bg-white text-gray-900 border-gray-300"
@@ -157,7 +159,8 @@ const TenantsList = () => {
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
-          <table className="min-w-full">
+          {/* Desktop Table */}
+          <table className="min-w-full hidden md:table">
             <thead
               className={darkMode ? "bg-gray-700" : "bg-blue-900 text-white"}
             >
@@ -200,6 +203,43 @@ const TenantsList = () => {
               ))}
             </tbody>
           </table>
+          {/* Mobile Card Layout */}
+          <div className="md:hidden flex flex-col gap-4 p-2">
+            {filteredTenants.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">No tenants found.</div>
+            ) : (
+              filteredTenants.map((tenant) => (
+                <div
+                  key={tenant._id}
+                  className={`rounded-lg shadow border ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} p-4"}`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-lg break-words">
+                      {tenant.seekerId.info.firstName} {tenant.seekerId.info.lastName}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        tenant.active
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {tenant.active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="text-sm mb-1 break-words">
+                    <span className="font-semibold">Property:</span> {tenant.propertyId.title}
+                  </div>
+                  <div className="text-sm mb-1">
+                    <span className="font-semibold">Move In:</span> {new Date(tenant.movedInDate).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm mb-1">
+                    <span className="font-semibold">Lease End:</span> {new Date(tenant.leaseId.contractDetails.endDate).toLocaleDateString()}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 
@@ -210,7 +250,8 @@ const TenantsList = () => {
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
-          <table className="min-w-full">
+          {/* Desktop Table */}
+          <table className="min-w-full hidden md:table">
             <thead
               className={darkMode ? "bg-gray-700" : "bg-blue-900 text-white"}
             >
@@ -248,6 +289,36 @@ const TenantsList = () => {
               ))}
             </tbody>
           </table>
+          {/* Mobile Card Layout */}
+          <div className="md:hidden space-y-4 p-2">
+            {payments.map((payment) => (
+              <div
+                key={payment._id}
+                className={`rounded-lg shadow p-4 ${darkMode ? "bg-gray-800" : "bg-white"}`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-lg">
+                    {payment.tenantId?.info.firstName} {payment.tenantId?.info.lastName}
+                  </span>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      payment.status === "Confirmed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {payment.status}
+                  </span>
+                </div>
+                <div className="text-sm mb-1">
+                  <span className="font-semibold">Payment Date:</span> {new Date(payment.paymentDate).toLocaleDateString()}
+                </div>
+                <div className="text-sm mb-1">
+                  <span className="font-semibold">Amount:</span> ${payment.paidAmount}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

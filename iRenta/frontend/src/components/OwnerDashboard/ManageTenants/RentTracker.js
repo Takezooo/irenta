@@ -245,10 +245,11 @@ const RentTracker = () => {
 
       {/* Rent Tracking Table */}
       <div className="overflow-x-auto">
+        {/* Responsive Table/Card Layout */}
         <table
           className={`min-w-full rounded-md shadow overflow-hidden ${
             darkMode ? "bg-gray-800" : "bg-white"
-          }`}
+          } hidden md:table`}
         >
           <thead
             className={darkMode ? "bg-gray-700" : "bg-blue-900 text-white"}
@@ -313,6 +314,54 @@ const RentTracker = () => {
             })}
           </tbody>
         </table>
+        {/* Mobile Card Layout */}
+        <div className="md:hidden space-y-4">
+          {filteredTenants.map((tenant) => {
+            const nextDueDate = getNextDueDate(tenant);
+            return (
+              <div
+                key={tenant._id}
+                className={`rounded-lg shadow p-4 ${darkMode ? "bg-gray-800" : "bg-white"}`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-lg">
+                    {tenant.seekerId.info.firstName} {tenant.seekerId.info.lastName}
+                  </span>
+                  {nextDueDate && <PaymentStatus status={nextDueDate.status} />}
+                </div>
+                <div className="text-sm mb-1">
+                  <span className="font-semibold">Property:</span> {tenant.propertyId.title}
+                </div>
+                <div className="text-sm mb-1">
+                  <span className="font-semibold">Next Due Date:</span> {nextDueDate ? new Date(nextDueDate.dueDate).toLocaleDateString() : "N/A"}
+                </div>
+                <div className="text-sm mb-1">
+                  <span className="font-semibold">Amount:</span> ₱{nextDueDate ? nextDueDate.baseAmount.toFixed(2) : "N/A"}
+                </div>
+                <div className="flex flex-col gap-2 mt-3">
+                  <button
+                    onClick={() => {
+                      setSelectedTenant(tenant);
+                      setShowPaymentModal(true);
+                    }}
+                    className="w-full px-3 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600"
+                  >
+                    Record Payment
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedTenant(tenant);
+                      setShowPaymentHistoryModal(true);
+                    }}
+                    className="w-full px-3 py-2 rounded bg-gray-500 text-white text-sm hover:bg-gray-600"
+                  >
+                    View Payments
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {filteredTenants.length === 0 && (
@@ -377,11 +426,11 @@ const PaymentHistoryModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-2">
       <div
-        className={`${
+        className={`$${
           darkMode ? "bg-gray-800" : "bg-white"
-        } p-6 rounded-lg w-[800px]`}
+        } p-4 md:p-6 rounded-lg w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto`}
       >
         <h3 className="text-lg font-semibold mb-4">
           Payment History - {selectedTenant?.seekerId?.info?.firstName}
@@ -531,11 +580,11 @@ const PaymentModal = ({
     ) || [];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-2">
       <div
-        className={`${
+        className={`$${
           darkMode ? "bg-gray-800" : "bg-white"
-        } p-6 rounded-lg w-96`}
+        } p-4 md:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto`}
       >
         <h3 className="text-lg font-semibold mb-4">
           Record Payment for {selectedTenant?.seekerId.info.firstName}

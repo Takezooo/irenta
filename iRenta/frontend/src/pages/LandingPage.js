@@ -336,33 +336,12 @@ const LandingPage = () => {
                     </div>
                   </div>
                 </div>
-                
-                {/* Active Filters display */}
-                {(minPrice || maxPrice || selectedAmenities.length > 0) && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {minPrice && (
-                      <span className={`text-xs py-1 px-2 rounded-full ${
-                        darkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-800"
-                      }`}>
-                        Min: ${minPrice}
-                      </span>
-                    )}
-                    {maxPrice && (
-                      <span className={`text-xs py-1 px-2 rounded-full ${
-                        darkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-800"
-                      }`}>
-                        Max: ${maxPrice}
-                      </span>
-                    )}
-                    {selectedAmenities.map(amenity => (
-                      <span key={amenity} className={`text-xs py-1 px-2 rounded-full ${
-                        darkMode ? "bg-blue-900 text-blue-100" : "bg-blue-100 text-blue-800"
-                      }`}>
-                        {amenity}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <button
+                  onClick={handleBrowseListing}
+                  className="inline-block bg-blue-500 hover:bg-blue-600 rounded-full py-2 px-4 text-gray-200 hover:text-gray-300"
+                >
+                  See more
+                </button>
               </div>
 
               {/* No results message */}

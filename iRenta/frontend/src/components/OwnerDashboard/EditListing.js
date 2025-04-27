@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
-import MapPicker from "../Mapping/MapPicker.js";
+import MapPickerV2 from "../Mapping/MapPickerV2.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { GetToken } from "../../global/utils/Token.js";
 
@@ -11,7 +11,7 @@ const API_LINK = "http://localhost:5000/api";
 
 const EditListing = () => {
 	const { darkMode } = useContext(ThemeContext);
-	const { id } = useParams(); // Extract the listing ID from the URL
+	const { id } = useParams();
 	const navigate = useNavigate();
 	const storedToken = GetToken();
 	const [fileName] = useState("No file chosen");
@@ -19,7 +19,6 @@ const EditListing = () => {
 	const [selectedImages, setSelectedImages] = useState([]);
 	const [existingImages, setExistingImages] = useState([]);
 	const [removedImages, setRemovedImages] = useState([]);
-	// const [combinedImages, setCombinedImages] = useState([]);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
@@ -46,15 +45,14 @@ const EditListing = () => {
 		zip: "",
 		lng: 0,
 		lat: 0,
+		formattedAddress: ""
 	});
 	const [visitAvailability, setVisitAvailability] = useState({
 		startTime: "",
 		endTime: "",
 	});
-	const [lat, setLat] = useState(0);
-	const [lng, setLng] = useState(0);
 	const [vacant, setVacant] = useState(0);
-	console.log(lat, lng);
+
 	// Fetch the data for the specific listing
 	useEffect(() => {
 		const fetchListing = async () => {
@@ -68,8 +66,15 @@ const EditListing = () => {
 				if (response.status === 200) {
 					const listing = response.data;
 					console.log(listing);
-					setLat(parseFloat(listing.address.lat) || 0);
-					setLng(parseFloat(listing.address.lng) || 0);
+					setAddress({
+						houseNumber: listing.address.houseNumber || "",
+						street: listing.address.street || "",
+						city: listing.address.city || "",
+						zip: listing.address.zip || "",
+						lng: parseFloat(listing.address.lng) || 0,
+						lat: parseFloat(listing.address.lat) || 0,
+						formattedAddress: listing.address.formattedAddress || ""
+					});
 					// Populate state with fetched data
 					setTitle(listing.title || "");
 					setDescription(listing.description || "");
@@ -79,14 +84,6 @@ const EditListing = () => {
 					setBathroomNumber(listing.bathroomNumber || "");
 					setPropertySize(listing.propertySize || "");
 					setSelectedAmenities(listing.amenities || []);
-					setAddress({
-						houseNumber: listing.address.houseNumber || "",
-						street: listing.address.street || "",
-						city: listing.address.city || "",
-						zip: listing.address.zip || "",
-						lng: listing.address.lng || 0,
-						lat: listing.address.lat || 0,
-					});
 					setVisitAvailability(
 						listing.visitAvailability || {
 							startTime: "",
@@ -119,8 +116,7 @@ const EditListing = () => {
 		// Automatically set vacancyStatus based on vacant count
 		setVacancyStatus(vacant > 0 ? "Vacant" : "Occupied");
 	}, [vacant]);
-	console.log(selectedImages);
-	console.log(existingImages);
+
 	// Handlers
 	const handleFileChange = (event) => {
 		const files = Array.from(event.target.files);
@@ -206,132 +202,87 @@ const EditListing = () => {
 		);
 	};
 
-	const handleLocationChange = async (location) => {
-		try {
-			const response = await axios.get(
-				`/api/map/geocode?lat=${location.lat}&lng=${location.lng}`
-			);
-			const results = response.data.results;
-
-			if (results && results.length > 0) {
-				const addressComponents = results[0].address_components;
-
-				let addressData = {
-					houseNumber: "",
-					street: "",
-					city: "",
-					zip: "",
-				};
-
-				let requiredFieldsFound = {
-					houseNumber: false,
-					street: false,
-					city: false,
-				};
-
-				addressComponents.forEach((component) => {
-					const types = component.types;
-
-					if (types.includes("street_number")) {
-						addressData.houseNumber = component.long_name;
-						requiredFieldsFound.houseNumber = true;
-					}
-					if (types.includes("route")) {
-						addressData.street = component.long_name;
-						requiredFieldsFound.street = true;
-					}
-					if (types.includes("locality")) {
-						addressData.city = component.long_name;
-						requiredFieldsFound.city = true;
-					}
-					if (types.includes("postal_code")) {
-						addressData.zip = component.long_name;
-					}
-				});
-
-				if (!requiredFieldsFound.houseNumber) {
-					addressData.houseNumber = "Please Input Manually";
-				}
-				if (!requiredFieldsFound.street) {
-					addressData.street = "Please Input Manually";
-				}
-				if (!requiredFieldsFound.city) {
-					addressData.city = "Please Input Manually";
-				}
-
-				setAddress({
-					...addressData,
-					lng: location.lng,
-					lat: location.lat,
-				});
-			} else {
-				console.error("No address components found.");
-			}
-		} catch (error) {
-			console.error("Error fetching address details:", error);
-		}
-	};
-
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
 
-		if (
-			address.houseNumber === "Please Input Manually" ||
-			address.street === "Please Input Manually" ||
-			address.city === "Please Input Manually"
-		) {
-			alert("Please fill out all address fields manually.");
-			return;
-		}
-
 		// Validate required fields
-		if (!title || !address.houseNumber || !address.street || !address.city) {
-			alert("Please fill out all required fields.");
+		if (!title || !description || !pricePerUnit || !type || !address.lat || !address.lng) {
+			setErrorMessage("Please fill in all required fields and select a location on the map.");
 			return;
 		}
 
 		try {
 			const formData = new FormData();
 
-			// Append non-file data as a JSON string
-			formData.append(
-				"data",
-				JSON.stringify({
-					title,
-					description,
-					type,
-					bedroomNumber,
-					bathroomNumber,
-					propertySize,
-					address,
-					visitAvailability,
-					amenities: selectedAmenities,
-					vacant,
-					removedImages: removedImages,
-					utilitiesIncluded,
-					includedUtilities,
-					vacancyStatus,
-					price: pricePerUnit,
-					priceType,
-					rentPeriod: priceType === "per_head" ? rentPeriod : undefined,
-				})
-			);
-
-			const newImageFiles = selectedImages.filter(
-				(image) => image instanceof File
-			); // Newly added files
-			// Append new image files to the FormData
-			newImageFiles.forEach((file) => {
-				formData.append("files", file); // Use "newImages" key for new files
-			});
-
-			// Make the API request
-			const response = await axios.put(`${API_LINK}/listings/${id}`, formData, {
-				headers: {
-					Authorization: `Bearer ${storedToken}`,
-					"Content-Type": "multipart/form-data",
+			// Create the data object that will be stringified
+			const listingData = {
+				title: title || "",
+				description: description || "",
+				type: type || "",
+				bedroomNumber: Number(bedroomNumber) || 0,
+				bathroomNumber: Number(bathroomNumber) || 0,
+				propertySize: propertySize || "0",
+				priceType: priceType || "total",
+				rentPeriod: rentPeriod || "month",
+				price: Number(pricePerUnit) || 0,
+				vacancyStatus: vacancyStatus || "Vacant",
+				vacantUnits: Number(vacant) || 0,
+				utilitiesIncluded: Boolean(utilitiesIncluded),
+				amenities: Array.isArray(selectedAmenities) ? selectedAmenities : [],
+				includedUtilities: Array.isArray(includedUtilities) ? includedUtilities : [],
+				visitAvailability: {
+					startTime: visitAvailability?.startTime || "",
+					endTime: visitAvailability?.endTime || ""
 				},
-			});
+				address: {
+					houseNumber: address?.houseNumber || "N/A",
+					street: address?.street || "",
+					city: address?.city || "",
+					zip: address?.zip || "",
+					lat: parseFloat(address?.lat) || 0,
+					lng: parseFloat(address?.lng) || 0
+				},
+				removedImages: Array.isArray(removedImages) ? removedImages : []
+			};
+
+			// Append the stringified data
+			formData.append("data", JSON.stringify(listingData));
+
+			// Handle image files
+			if (selectedImages && selectedImages.length > 0) {
+				selectedImages.forEach((image) => {
+					if (image instanceof File) {
+						formData.append("files", image);
+					}
+				});
+			}
+
+			// Log the form data for debugging
+			console.log("Form Data Contents:");
+			for (let [key, value] of formData.entries()) {
+				if (value instanceof File) {
+					console.log(key, ':', 'File', ':', value.name);
+				} else {
+					try {
+						// Try to parse as JSON to check if it's properly formatted
+						const parsed = JSON.parse(value);
+						console.log(key, ':', 'JSON', ':', JSON.stringify(parsed, null, 2));
+					} catch (e) {
+						console.log(key, ':', typeof value, ':', value);
+					}
+				}
+			}
+
+			const response = await axios.put(
+				`${API_LINK}/listings/${id}`,
+				formData,
+				{
+					headers: {
+						Authorization: `Bearer ${storedToken}`,
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			);
 
 			if (response.status === 200) {
 				alert("Listing updated successfully!");
@@ -339,14 +290,62 @@ const EditListing = () => {
 			}
 		} catch (error) {
 			console.error("Error updating listing:", error);
-			alert("An error occurred while updating the listing.");
+			if (error.response?.data) {
+				console.error("Server response:", error.response.data);
+			}
+			
+			let errorMsg = "Failed to update listing. ";
+			if (error.response?.data?.message) {
+				errorMsg += error.response.data.message;
+			} else if (error.response?.data?.error) {
+				errorMsg += error.response.data.error;
+			} else {
+				errorMsg += "Please check all fields and try again.";
+			}
+			
+			setErrorMessage(errorMsg);
 		}
 	};
 
-	// COMMENT TEMP //
-	// if (lat === 0 || lng === 0) {
-	// 	return <div>Loading map...</div>; // Show loading or default content until lat/lng is valid
-	// }
+	const handleAddressSelect = (selectedAddress) => {
+		// Extract address components
+		const addressComponents = selectedAddress.address_components;
+		let newAddress = {
+			houseNumber: "",
+			street: "",
+			city: "",
+			zip: "",
+			lat: selectedAddress.geometry.location.lat(),
+			lng: selectedAddress.geometry.location.lng(),
+			formattedAddress: selectedAddress.formatted_address
+		};
+
+		// Parse address components
+		addressComponents.forEach(component => {
+			const types = component.types;
+			if (types.includes('street_number')) {
+				newAddress.houseNumber = component.long_name;
+			} else if (types.includes('route')) {
+				newAddress.street = component.long_name;
+			} else if (types.includes('locality')) {
+				newAddress.city = component.long_name;
+			} else if (types.includes('postal_code')) {
+				newAddress.zip = component.long_name;
+			}
+		});
+
+		// If no house number is found, use a placeholder or the first part of the formatted address
+		if (!newAddress.houseNumber) {
+			const firstPart = selectedAddress.formatted_address.split(',')[0];
+			if (firstPart.match(/^\d+/)) {
+				newAddress.houseNumber = firstPart.match(/^\d+/)[0];
+			} else {
+				newAddress.houseNumber = "N/A";
+			}
+		}
+
+		setAddress(newAddress);
+	};
 
 	return (
 		<div>
@@ -1014,19 +1013,13 @@ const EditListing = () => {
 								</div>
 
 								{/* Map Section */}
-								<div
-									className={`rounded-lg h-45 overflow-hidden ${
-										darkMode
-											? "bg-gray-800 text-gray-300"
-											: "bg-gray-100 text-gray-800"
-									}`}
-								>
+								<div className={`rounded-lg h-45 overflow-hidden ${
+									darkMode ? "bg-gray-800 text-gray-300" : "bg-gray-100 text-gray-800"
+								}`}>
 									<div>
-										<label
-											className={`block text-sm font-medium mb-1 ${
-												darkMode ? "text-gray-300" : "text-gray-700"
-											}`}
-										>
+										<label className={`block text-sm font-medium mb-1 ${
+											darkMode ? "text-gray-300" : "text-gray-700"
+										}`}>
 											House Number:
 										</label>
 										<input
@@ -1044,11 +1037,9 @@ const EditListing = () => {
 										/>
 									</div>
 									<div>
-										<label
-											className={`block text-sm font-medium mb-1 ${
-												darkMode ? "text-gray-300" : "text-gray-700"
-											}`}
-										>
+										<label className={`block text-sm font-medium mb-1 ${
+											darkMode ? "text-gray-300" : "text-gray-700"
+										}`}>
 											Street:
 										</label>
 										<input
@@ -1066,11 +1057,9 @@ const EditListing = () => {
 										/>
 									</div>
 									<div>
-										<label
-											className={`block text-sm font-medium mb-1 ${
-												darkMode ? "text-gray-300" : "text-gray-700"
-											}`}
-										>
+										<label className={`block text-sm font-medium mb-1 ${
+											darkMode ? "text-gray-300" : "text-gray-700"
+										}`}>
 											City:
 										</label>
 										<input
@@ -1087,17 +1076,26 @@ const EditListing = () => {
 											}`}
 										/>
 									</div>
-									<MapPicker
-										className={`w-full p-3 border rounded-lg ${
+									<MapPickerV2
+										onAddressSelect={(selectedAddress) => {
+											setAddress({
+												houseNumber: selectedAddress.houseNumber,
+												street: selectedAddress.street,
+												city: selectedAddress.city,
+												zip: selectedAddress.zip,
+												lat: selectedAddress.lat,
+												lng: selectedAddress.lng
+											});
+										}}
+										initialLocation={{
+											lat: parseFloat(address.lat) || 14.586207,
+											lng: parseFloat(address.lng) || 120.986373
+										}}
+										className={`p-3 border rounded-lg ${
 											darkMode
 												? "bg-gray-700 text-gray-300 border-gray-600"
 												: "bg-white text-gray-800 border-gray-300"
 										}`}
-										center={{
-											lat: lat,
-											lng: lng,
-										}}
-										onLocationChange={handleLocationChange}
 									/>
 								</div>
 							</div>

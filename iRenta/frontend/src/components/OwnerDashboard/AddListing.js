@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineClose } from "react-icons/ai";
 import { IoClose } from "react-icons/io5";
 import axios from "axios";
-import MapPicker from "../Mapping/MapPicker.js";
+import MapPickerV2 from "../Mapping/MapPickerV2.js";
 import { GetToken } from "../../global/utils/Token.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
@@ -30,6 +30,7 @@ const AddListing = () => {
 		lng: null,
 		lat: null,
 	});
+	console.log(address)
 	const [visitAvailability, setVisitAvailability] = useState({
 		startTime: "",
 		endTime: "",
@@ -114,7 +115,6 @@ const AddListing = () => {
 
 			if (results && results.length > 0) {
 				const addressComponents = results[0].address_components;
-				console.log(addressComponents);
 
 				let addressData = {
 					houseNumber: "",
@@ -956,13 +956,14 @@ const AddListing = () => {
 											}`}
 										/>
 									</div>
-									<MapPicker
-										className={`w-full p-3 border rounded-lg ${
+									<MapPickerV2
+										onAddressSelect={setAddress}
+										className={` p-3 border rounded-lg ${
 											darkMode
 												? "bg-gray-700 text-gray-300 border-gray-600"
 												: "bg-white text-gray-800 border-gray-300"
 										}`}
-										onLocationChange={handleLocationChange}
+										// onLocationChange={handleLocationChange}
 									/>
 								</div>
 							</div>

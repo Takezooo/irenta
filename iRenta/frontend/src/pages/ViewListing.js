@@ -182,11 +182,15 @@ export const ViewListing = () => {
     return item.charAt(0).toUpperCase() + item.slice(1)
   }
 
-  const customIcon = new Icon ({
+  const customIcon = new Icon({
 	iconRetinaUrl: markerIcon2x,
 	iconUrl: markerIcon,
 	shadowUrl: markerShadow,
-  })
+	iconSize: [25, 41],      // default size
+	iconAnchor: [12, 41],    // tip of the marker = center-bottom
+	shadowSize: [41, 41],
+	shadowAnchor: [12, 41],
+  });
 
 	if (!isLoaded) return <LoadingScreen />;
 

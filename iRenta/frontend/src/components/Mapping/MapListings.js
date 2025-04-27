@@ -12,7 +12,7 @@ export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3, CENTER }
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [isLoaded, setIsLoaded] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(0);
-
+  
   // Effect for initial location detection
   useEffect(() => {
     if (CENTER) {
@@ -131,6 +131,7 @@ export const useMapLogic = ({ fetchListings, initialCenter, RADIUS = 3, CENTER }
     updateCenter
   };
 };
+
 // Center updater component
 export const SetMapCenter = ({ center }) => {
   const map = useMap();
@@ -172,10 +173,21 @@ export const MapListings = ({ isLoaded, mapCenter, nearbyListings, handleViewPro
   // Calculate radius in meters for the circle
   const radiusInMeters = radius * 1000;
 
+  const PHILIPPINES_BOUNDS = [
+    [4.589991, 116.87], 
+    [21.120031, 126.606],
+  ];
+
+  const defaultCenter = {lat: 14.5995, lng: 120.9842}; // Manila
+
+
   return (
     <MapContainer
-      center={[mapCenter.lat, mapCenter.lng]}
+      center={[mapCenter.lat, mapCenter.lng] || defaultCenter}
       zoom={14}
+      minZoom={6}  // Adjusted min zoom
+      maxBounds={PHILIPPINES_BOUNDS}
+      maxBoundsViscosity={1.0}
       style={{ width: "100%", height: "100%" }}
       scrollWheelZoom={true}
       zoomControl={true}

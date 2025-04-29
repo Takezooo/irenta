@@ -42,11 +42,14 @@ const RentPayments = () => {
 
       if (tenant?.rentDates) {
         setRentDates(tenant.rentDates);
+      } else {
+        console.warn('No rent dates found in tenant data');
       }
 
       const paymentsData = await fetchPayments(user?._id);
       setPayments(paymentsData);
     } catch (error) {
+      console.error('Error loading tenant data:', error);
       setErrors(prev => ({
         ...prev,
         fetch: error.message || 'Error loading tenant data'
@@ -165,19 +168,31 @@ const RentPayments = () => {
     }
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className={`${darkMode ? "bg-gray-800" : "bg-white"} p-6 rounded-lg w-96`}>
-          <h3 className="text-lg font-semibold mb-4">Make Payment</h3>
-          
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div className={`${
+          darkMode ? "bg-gray-800" : "bg-white"
+        } p-4 md:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto`}>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Make Payment</h3>
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
           {formErrors.submit && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
               {formErrors.submit}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm mb-1">Rent Period</label>
+              <label className="block text-sm font-medium mb-1">Rent Period</label>
               <select
                 value={selectedRentDate?._id || ""}
                 onChange={(e) => {
@@ -187,7 +202,7 @@ const RentPayments = () => {
                   setSelectedRentDate(selected);
                   setFormErrors(prev => ({...prev, rentDate: ''}));
                 }}
-                className={`w-full p-2 rounded border ${
+                className={`w-full p-2 rounded-lg border ${
                   formErrors.rentDate ? 'border-red-500' :
                   darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
@@ -211,7 +226,7 @@ const RentPayments = () => {
             </div>
 
             <div>
-              <label className="block text-sm mb-1">Amount to Pay</label>
+              <label className="block text-sm font-medium mb-1">Amount to Pay</label>
               <input
                 type="number"
                 value={formData.paidAmount}
@@ -222,7 +237,7 @@ const RentPayments = () => {
                   });
                   setFormErrors(prev => ({...prev, paidAmount: ''}));
                 }}
-                className={`w-full p-2 rounded border ${
+                className={`w-full p-2 rounded-lg border ${
                   formErrors.paidAmount ? 'border-red-500' :
                   darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
@@ -234,14 +249,14 @@ const RentPayments = () => {
             </div>
 
             <div>
-              <label className="block text-sm mb-1">Payment Method</label>
+              <label className="block text-sm font-medium mb-1">Payment Method</label>
               <select
                 value={formData.paymentMethod}
                 onChange={(e) => {
                   setFormData({ ...formData, paymentMethod: e.target.value });
                   setFormErrors(prev => ({...prev, paymentMethod: ''}));
                 }}
-                className={`w-full p-2 rounded border ${
+                className={`w-full p-2 rounded-lg border ${
                   formErrors.paymentMethod ? 'border-red-500' :
                   darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
@@ -255,7 +270,7 @@ const RentPayments = () => {
             </div>
 
             <div>
-              <label className="block text-sm mb-1">Reference Number</label>
+              <label className="block text-sm font-medium mb-1">Reference Number</label>
               <input
                 type="text"
                 value={formData.referenceNumber}
@@ -263,7 +278,7 @@ const RentPayments = () => {
                   setFormData({ ...formData, referenceNumber: e.target.value });
                   setFormErrors(prev => ({...prev, referenceNumber: ''}));
                 }}
-                className={`w-full p-2 rounded border ${
+                className={`w-full p-2 rounded-lg border ${
                   formErrors.referenceNumber ? 'border-red-500' :
                   darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
@@ -274,14 +289,14 @@ const RentPayments = () => {
             </div>
 
             <div>
-              <label className="block text-sm mb-1">Remarks</label>
+              <label className="block text-sm font-medium mb-1">Remarks</label>
               <textarea
                 value={formData.remarks}
                 onChange={(e) => {
                   setFormData({ ...formData, remarks: e.target.value });
                   setFormErrors(prev => ({...prev, remarks: ''}));
                 }}
-                className={`w-full p-2 rounded border ${
+                className={`w-full p-2 rounded-lg border ${
                   darkMode ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
                 }`}
                 rows="3"
@@ -292,15 +307,15 @@ const RentPayments = () => {
               <button
                 type="button"
                 onClick={() => setShowPaymentModal(false)}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded-lg ${
                   darkMode ? "bg-gray-700" : "bg-gray-200"
-                }`}
+                } hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200`}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
               >
                 Submit Payment
               </button>
@@ -325,54 +340,52 @@ const RentPayments = () => {
   };
 
   return (
-    <div className={`rounded-lg ${darkMode ? "bg-gray-800" : "bg-white"} p-6 shadow`}>
+    <div className={`rounded-lg ${darkMode ? "bg-gray-800" : "bg-white"} p-4 md:p-6 shadow-sm`}>
       {errors.general && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg shadow-sm">
           {errors.general}
         </div>
       )}
       
       {errors.fetch && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg shadow-sm">
           {errors.fetch}
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h3 className="text-lg font-semibold">Payment Summary</h3>
         <button
           onClick={() => setShowPaymentModal(true)}
-          className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+          className="w-full md:w-auto px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200"
         >
           Make Payment
         </button>
       </div>
 
       {/* Payment Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div
-          className={`p-4 rounded-lg ${
-            darkMode ? "bg-gray-700" : "bg-gray-50"
-          }`}
-        >
-          <p className="text-sm text-gray-500">Next Payment Due</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
+          darkMode ? "bg-gray-700" : "bg-gray-50"
+        }`}>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Next Payment Due</p>
           <p className="text-xl font-bold">₱{getNextPaymentDue()}</p>
         </div>
-        <div
-          className={`p-4 rounded-lg ${
-            darkMode ? "bg-gray-700" : "bg-gray-50"
-          }`}
-        >
-          <p className="text-sm text-gray-500">Total Paid</p>
+        <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
+          darkMode ? "bg-gray-700" : "bg-gray-50"
+        }`}>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total Paid</p>
           <p className="text-xl font-bold">₱{calculateTotalPaid()}</p>
         </div>
-        <div
-          className={`p-4 rounded-lg ${
-            darkMode ? "bg-gray-700" : "bg-gray-50"
-          }`}
-        >
-          <p className="text-sm text-gray-500">Payment Status</p>
-          <p className="text-xl font-bold text-green-500">
+        <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
+          darkMode ? "bg-gray-700" : "bg-gray-50"
+        }`}>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Payment Status</p>
+          <p className={`text-xl font-bold ${
+            payments.some((p) => p.status === "Pending")
+              ? "text-yellow-500"
+              : "text-green-500"
+          }`}>
             {payments.some((p) => p.status === "Pending")
               ? "Pending"
               : "Current"}
@@ -383,10 +396,12 @@ const RentPayments = () => {
       {/* Payment History Table */}
       <div className="mt-8">
         <h3 className="text-lg font-semibold mb-4">Payment History</h3>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-lg shadow-sm">
           <table className="w-full">
             <thead>
-              <tr className={`${darkMode ? "bg-gray-700" : "bg-gray-50"}`}>
+              <tr className={`${
+                darkMode ? "bg-gray-700" : "bg-gray-50"
+              }`}>
                 <th className="px-4 py-2 text-left">Date</th>
                 <th className="px-4 py-2 text-left">Amount</th>
                 <th className="px-4 py-2 text-left">Method</th>
@@ -398,7 +413,9 @@ const RentPayments = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan="5" className="text-center py-4">
-                    Loading...
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -407,21 +424,22 @@ const RentPayments = () => {
                     key={payment._id}
                     className={`border-b ${
                       darkMode ? "border-gray-700" : "border-gray-200"
-                    }`}
+                    } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150`}
                   >
                     <td className="px-4 py-3">
                       {new Date(payment.paymentDate).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3">₱{payment.paidAmount}</td>
+                    <td className="px-4 py-3">₱{payment.paidAmount.toFixed(2)}</td>
                     <td className="px-4 py-3">{payment.paymentMethod}</td>
-                    <td className="px-4 py-3">{payment.referenceNumber}</td>
+                    <td className="px-4 py-3">{payment.referenceNumber || "-"}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-sm 
-                        ${
+                        className={`px-2 py-1 rounded-full text-sm ${
                           payment.status === "Confirmed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+                            : payment.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
                         }`}
                       >
                         {payment.status}

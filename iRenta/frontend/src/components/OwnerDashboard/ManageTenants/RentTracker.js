@@ -172,63 +172,57 @@ const RentTracker = () => {
   };
 
   return (
-    <div className={`pt-20 pb-4 p-6 ${darkMode ? "text-white" : "text-black"}`}>
+    <div className={`pt-20 pb-4 p-4 md:p-6 ${darkMode ? "text-white" : "text-black"}`}>
       {errors.general && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg shadow-sm">
           {errors.general}
         </div>
       )}
 
       {errors.fetch && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg shadow-sm">
           {errors.fetch}
         </div>
       )}
-      {/* Header with  Button */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Rent Tracker</h2>
-      </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div
-          className={`p-4 rounded-lg ${
+      {/* Header with Stats Overview */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-6">Rent Tracker</h2>
+        
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
             darkMode ? "bg-gray-800" : "bg-blue-900 text-white"
-          }`}
-        >
-          <h3 className="text-sm opacity-75">Total Active Tenants</h3>
-          <p className="text-2xl font-bold mt-2">{tenants.length}</p>
-        </div>
-        <div
-          className={`p-4 rounded-lg ${
+          }`}>
+            <h3 className="text-sm opacity-75">Total Active Tenants</h3>
+            <p className="text-2xl font-bold mt-2">{tenants.length}</p>
+          </div>
+          <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
             darkMode ? "bg-gray-800" : "bg-blue-900 text-white"
-          }`}
-        >
-          <h3 className="text-sm opacity-75">Pending Payments</h3>
-          <p className="text-2xl font-bold mt-2">
-            {
-              Object.values(rentDates)
+          }`}>
+            <h3 className="text-sm opacity-75">Pending Payments</h3>
+            <p className="text-2xl font-bold mt-2">
+              {Object.values(rentDates)
                 .flat()
-                .filter((date) => date.status === "Upcoming").length
-            }
-          </p>
-        </div>
-        <div
-          className={`p-4 rounded-lg ${
+                .filter((date) => date.status === "Upcoming").length}
+            </p>
+          </div>
+          <div className={`p-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md ${
             darkMode ? "bg-gray-800" : "bg-blue-900 text-white"
-          }`}
-        >
-          <h3 className="text-sm opacity-75">Total Properties</h3>
-          <p className="text-2xl font-bold mt-2">{properties.length}</p>
+          }`}>
+            <h3 className="text-sm opacity-75">Total Properties</h3>
+            <p className="text-2xl font-bold mt-2">{properties.length}</p>
+          </div>
         </div>
       </div>
 
       {/* Property Filter */}
-      <div className="mb-4">
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Filter by Property</label>
         <select
           value={selectedProperty}
           onChange={(e) => setSelectedProperty(e.target.value)}
-          className={`p-2 rounded ${
+          className={`w-full md:w-64 p-2 rounded-lg shadow-sm transition-all duration-200 ${
             darkMode
               ? "bg-gray-800 text-white border-gray-700"
               : "bg-white text-black border-gray-300"
@@ -244,23 +238,19 @@ const RentTracker = () => {
       </div>
 
       {/* Rent Tracking Table */}
-      <div className="overflow-x-auto">
-        {/* Responsive Table/Card Layout */}
-        <table
-          className={`min-w-full rounded-md shadow overflow-hidden ${
-            darkMode ? "bg-gray-800" : "bg-white"
-          } hidden md:table`}
-        >
-          <thead
-            className={darkMode ? "bg-gray-700" : "bg-blue-900 text-white"}
-          >
+      <div className="overflow-x-auto rounded-lg shadow-sm">
+        {/* Desktop Table */}
+        <table className={`min-w-full rounded-lg overflow-hidden ${
+          darkMode ? "bg-gray-800" : "bg-white"
+        } hidden md:table`}>
+          <thead className={darkMode ? "bg-gray-700" : "bg-blue-900 text-white"}>
             <tr>
-              <th className="p-4">Tenant</th>
-              <th className="p-4">Property</th>
-              <th className="p-4">Next Due Date</th>
-              <th className="p-4">Amount</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Actions</th>
+              <th className="p-4 text-left">Tenant</th>
+              <th className="p-4 text-left">Property</th>
+              <th className="p-4 text-left">Next Due Date</th>
+              <th className="p-4 text-left">Amount</th>
+              <th className="p-4 text-left">Status</th>
+              <th className="p-4 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -269,11 +259,12 @@ const RentTracker = () => {
               return (
                 <tr
                   key={tenant._id}
-                  className={darkMode ? "border-gray-700" : "border-gray-200"}
+                  className={`border-b ${
+                    darkMode ? "border-gray-700" : "border-gray-200"
+                  } hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150`}
                 >
                   <td className="p-4">
-                    {tenant.seekerId.info.firstName}{" "}
-                    {tenant.seekerId.info.lastName}
+                    {tenant.seekerId.info.firstName} {tenant.seekerId.info.lastName}
                   </td>
                   <td className="p-4">{tenant.propertyId.title}</td>
                   <td className="p-4">
@@ -285,9 +276,7 @@ const RentTracker = () => {
                     ₱{nextDueDate ? nextDueDate.baseAmount.toFixed(2) : "N/A"}
                   </td>
                   <td className="p-4">
-                    {nextDueDate && (
-                      <PaymentStatus status={nextDueDate.status} />
-                    )}
+                    {nextDueDate && <PaymentStatus status={nextDueDate.status} />}
                   </td>
                   <td className="p-4 space-x-2">
                     <button
@@ -295,7 +284,7 @@ const RentTracker = () => {
                         setSelectedTenant(tenant);
                         setShowPaymentModal(true);
                       }}
-                      className="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600"
+                      className="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors duration-200"
                     >
                       Record Payment
                     </button>
@@ -304,7 +293,7 @@ const RentTracker = () => {
                         setSelectedTenant(tenant);
                         setShowPaymentHistoryModal(true);
                       }}
-                      className="px-3 py-1 rounded bg-gray-500 text-white text-sm hover:bg-gray-600"
+                      className="px-3 py-1 rounded bg-gray-500 text-white text-sm hover:bg-gray-600 transition-colors duration-200"
                     >
                       View Payments
                     </button>
@@ -314,6 +303,7 @@ const RentTracker = () => {
             })}
           </tbody>
         </table>
+
         {/* Mobile Card Layout */}
         <div className="md:hidden space-y-4">
           {filteredTenants.map((tenant) => {
@@ -321,30 +311,34 @@ const RentTracker = () => {
             return (
               <div
                 key={tenant._id}
-                className={`rounded-lg shadow p-4 ${darkMode ? "bg-gray-800" : "bg-white"}`}
+                className={`rounded-lg shadow-sm p-4 ${
+                  darkMode ? "bg-gray-800" : "bg-white"
+                }`}
               >
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center mb-3">
                   <span className="font-semibold text-lg">
                     {tenant.seekerId.info.firstName} {tenant.seekerId.info.lastName}
                   </span>
                   {nextDueDate && <PaymentStatus status={nextDueDate.status} />}
                 </div>
-                <div className="text-sm mb-1">
-                  <span className="font-semibold">Property:</span> {tenant.propertyId.title}
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-semibold">Property:</span> {tenant.propertyId.title}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold">Next Due Date:</span> {nextDueDate ? new Date(nextDueDate.dueDate).toLocaleDateString() : "N/A"}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold">Amount:</span> ₱{nextDueDate ? nextDueDate.baseAmount.toFixed(2) : "N/A"}
+                  </div>
                 </div>
-                <div className="text-sm mb-1">
-                  <span className="font-semibold">Next Due Date:</span> {nextDueDate ? new Date(nextDueDate.dueDate).toLocaleDateString() : "N/A"}
-                </div>
-                <div className="text-sm mb-1">
-                  <span className="font-semibold">Amount:</span> ₱{nextDueDate ? nextDueDate.baseAmount.toFixed(2) : "N/A"}
-                </div>
-                <div className="flex flex-col gap-2 mt-3">
+                <div className="flex flex-col gap-2 mt-4">
                   <button
                     onClick={() => {
                       setSelectedTenant(tenant);
                       setShowPaymentModal(true);
                     }}
-                    className="w-full px-3 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600"
+                    className="w-full px-3 py-2 rounded bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors duration-200"
                   >
                     Record Payment
                   </button>
@@ -353,7 +347,7 @@ const RentTracker = () => {
                       setSelectedTenant(tenant);
                       setShowPaymentHistoryModal(true);
                     }}
-                    className="w-full px-3 py-2 rounded bg-gray-500 text-white text-sm hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded bg-gray-500 text-white text-sm hover:bg-gray-600 transition-colors duration-200"
                   >
                     View Payments
                   </button>
@@ -365,21 +359,20 @@ const RentTracker = () => {
       </div>
 
       {filteredTenants.length === 0 && (
-        <div
-          className={`text-center py-8 ${
-            darkMode ? "text-gray-400" : "text-gray-600"
-          }`}
-        >
+        <div className={`text-center py-8 ${
+          darkMode ? "text-gray-400" : "text-gray-600"
+        }`}>
           No tenants found for the selected property.
         </div>
       )}
 
       {errors.confirmation && (
-        <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg shadow-sm">
           {errors.confirmation}
         </div>
       )}
 
+      {/* Modals */}
       {showPaymentHistoryModal && (
         <PaymentHistoryModal
           selectedTenant={selectedTenant}
@@ -396,7 +389,6 @@ const RentTracker = () => {
           setShowPaymentModal={setShowPaymentModal}
           darkMode={darkMode}
           rentDates={rentDates}
-          // loadData={loadData}
         />
       )}
     </div>
@@ -426,18 +418,26 @@ const PaymentHistoryModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-2">
-      <div
-        className={`$${
-          darkMode ? "bg-gray-800" : "bg-white"
-        } p-4 md:p-6 rounded-lg w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto`}
-      >
-        <h3 className="text-lg font-semibold mb-4">
-          Payment History - {selectedTenant?.seekerId?.info?.firstName}
-        </h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+      <div className={`${
+        darkMode ? "bg-gray-800" : "bg-white"
+      } p-4 md:p-6 rounded-lg w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto`}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">
+            Payment History - {selectedTenant?.seekerId?.info?.firstName}
+          </h3>
+          <button
+            onClick={() => setShowModal(false)}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         {modalErrors.confirmation && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-sm">
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
             {modalErrors.confirmation}
           </div>
         )}
@@ -446,7 +446,9 @@ const PaymentHistoryModal = ({
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left">
+                <tr className={`text-left ${
+                  darkMode ? "bg-gray-700" : "bg-gray-50"
+                }`}>
                   <th className="p-2">Date</th>
                   <th className="p-2">Amount</th>
                   <th className="p-2">Method</th>
@@ -457,7 +459,7 @@ const PaymentHistoryModal = ({
               </thead>
               <tbody>
                 {payments.map((payment) => (
-                  <tr key={payment._id}>
+                  <tr key={payment._id} className="border-b border-gray-200 dark:border-gray-700">
                     <td className="p-2">
                       {new Date(payment.paymentDate).toLocaleDateString()}
                     </td>
@@ -470,8 +472,8 @@ const PaymentHistoryModal = ({
                     <td className="p-2">
                       {payment.status === "Pending" && (
                         <button
-                          onClick={() => onConfirmPayment(payment._id)}
-                          className="px-2 py-1 rounded bg-green-500 text-white text-sm hover:bg-green-600"
+                          onClick={() => handleConfirm(payment._id)}
+                          className="px-2 py-1 rounded bg-green-500 text-white text-sm hover:bg-green-600 transition-colors duration-200"
                         >
                           Confirm
                         </button>
@@ -487,14 +489,6 @@ const PaymentHistoryModal = ({
             No payment records found for this tenant.
           </div>
         )}
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={() => setShowModal(false)}
-            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
-          >
-            Close
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -521,7 +515,7 @@ const PaymentModal = ({
     paymentMethod: "",
     referenceNumber: "",
     remarks: "",
-    general: "", // For general errors
+    general: "",
   });
 
   const validatePayment = (amount, rentDate) => {
@@ -580,36 +574,39 @@ const PaymentModal = ({
     ) || [];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-2">
-      <div
-        className={`$${
-          darkMode ? "bg-gray-800" : "bg-white"
-        } p-4 md:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto`}
-      >
-        <h3 className="text-lg font-semibold mb-4">
-          Record Payment for {selectedTenant?.seekerId.info.firstName}
-        </h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+      <div className={`${
+        darkMode ? "bg-gray-800" : "bg-white"
+      } p-4 md:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto`}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">
+            Record Payment for {selectedTenant?.seekerId.info.firstName}
+          </h3>
+          <button
+            onClick={() => setShowPaymentModal(false)}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         {errors.general && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
             {errors.general}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {errors.general && (
-            <div className="p-2 bg-red-100 text-red-700 rounded text-sm">
-              {errors.general}
-            </div>
-          )}
           <div>
-            <label className="block text-sm mb-1">Rent Period</label>
+            <label className="block text-sm font-medium mb-1">Rent Period</label>
             <select
               value={formData.rentDateId}
               onChange={(e) =>
                 setFormData({ ...formData, rentDateId: e.target.value })
               }
-              className={`w-full p-2 rounded border ${
+              className={`w-full p-2 rounded-lg border ${
                 darkMode
                   ? "bg-gray-700 border-gray-600"
                   : "bg-white border-gray-300"
@@ -619,9 +616,7 @@ const PaymentModal = ({
               <option value="">Select rent period</option>
               {availableRentDates.map((date) => (
                 <option key={date._id} value={date._id}>
-                  {`${new Date(
-                    date.rentDate
-                  ).toLocaleDateString()} - ${new Date(
+                  {`${new Date(date.rentDate).toLocaleDateString()} - ${new Date(
                     date.endDate
                   ).toLocaleDateString()}`}
                   {` (₱${date.baseAmount.toFixed(2)})`}
@@ -634,14 +629,14 @@ const PaymentModal = ({
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Amount</label>
+            <label className="block text-sm font-medium mb-1">Amount</label>
             <input
               type="number"
               value={formData.paidAmount}
               onChange={(e) =>
                 setFormData({ ...formData, paidAmount: Number(e.target.value) })
               }
-              className={`w-full p-2 rounded border ${
+              className={`w-full p-2 rounded-lg border ${
                 darkMode
                   ? "bg-gray-700 border-gray-600"
                   : "bg-white border-gray-300"
@@ -656,13 +651,13 @@ const PaymentModal = ({
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Payment Method</label>
+            <label className="block text-sm font-medium mb-1">Payment Method</label>
             <select
               value={formData.paymentMethod}
               onChange={(e) =>
                 setFormData({ ...formData, paymentMethod: e.target.value })
               }
-              className={`w-full p-2 rounded border ${
+              className={`w-full p-2 rounded-lg border ${
                 darkMode
                   ? "bg-gray-700 border-gray-600"
                   : "bg-white border-gray-300"
@@ -677,34 +672,32 @@ const PaymentModal = ({
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Reference Number</label>
+            <label className="block text-sm font-medium mb-1">Reference Number</label>
             <input
               type="text"
               value={formData.referenceNumber}
               onChange={(e) =>
                 setFormData({ ...formData, referenceNumber: e.target.value })
               }
-              className={`w-full p-2 rounded border ${
+              className={`w-full p-2 rounded-lg border ${
                 darkMode
                   ? "bg-gray-700 border-gray-600"
                   : "bg-white border-gray-300"
               }`}
             />
             {errors.referenceNumber && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.referenceNumber}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.referenceNumber}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Remarks</label>
+            <label className="block text-sm font-medium mb-1">Remarks</label>
             <textarea
               value={formData.remarks}
               onChange={(e) =>
                 setFormData({ ...formData, remarks: e.target.value })
               }
-              className={`w-full p-2 rounded border ${
+              className={`w-full p-2 rounded-lg border ${
                 darkMode
                   ? "bg-gray-700 border-gray-600"
                   : "bg-white border-gray-300"
@@ -717,14 +710,16 @@ const PaymentModal = ({
             <button
               type="button"
               onClick={() => setShowPaymentModal(false)}
-              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              className={`px-4 py-2 rounded-lg ${
+                darkMode ? "bg-gray-700" : "bg-gray-200"
+              } hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200`}
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Recording..." : "Record Payment"}

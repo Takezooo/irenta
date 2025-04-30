@@ -14,6 +14,8 @@ import { IoDocumentText, IoDownload, IoSend } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
 import imageCompression from "browser-image-compression";
 import SignaturePad from "react-signature-canvas";
+import { fetchSeekersWithReservations } from '../../../global/api/Reservations.js';
+import { toast } from "react-toastify";
 
 const ManageLease = ({ seekerId }) => {
   const passedSeekerId = seekerId || "";
@@ -30,6 +32,7 @@ const ManageLease = ({ seekerId }) => {
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const signaturePadRef = React.useRef();
+  const [seekers, setSeekers] = useState([]);
 
   // Fetch leases from the backend
   useEffect(() => {
@@ -45,10 +48,24 @@ const ManageLease = ({ seekerId }) => {
     getLeases();
   }, []);
 
+  useEffect(() => {
+    if (showTenantModal) {
+      const fetchSeekers = async () => {
+        try {
+          const data = await fetchSeekersWithReservations();
+          setSeekers(data);
+        } catch (err) {
+          console.error('Failed to fetch seekers with reservations:', err);
+        }
+      };
+      fetchSeekers();
+    }
+  }, [showTenantModal]);
+
   const handleAttachSignature = async (event) => {
     const file = event.target.files[0];
     if (!file || !file.type.includes("png")) {
-      alert("Only PNG files with a transparent background are allowed.");
+      toast.error("Only PNG files with a transparent background are allowed.");
       return;
     }
     const options = {
@@ -60,10 +77,10 @@ const ManageLease = ({ seekerId }) => {
     try {
       const compressedFile = await imageCompression(file, options);
       setSignatureFile(compressedFile);
-      alert("File compressed successfully!");
+      toast.success("File compressed successfully!");
     } catch (error) {
       console.error("Error compressing file:", error);
-      alert("Failed to compress the file.");
+      toast.error("Failed to compress the file.");
     }
   };
 
@@ -105,10 +122,10 @@ const ManageLease = ({ seekerId }) => {
         // Hide the signature pad
         setShowSignaturePad(false);
 
-        alert("File compressed and saved successfully!");
+        toast.success("File compressed and saved successfully!");
       } catch (error) {
         console.error("Error handling the signature:", error);
-        alert("Failed to process the signature. Please try again.");
+        toast.error("Failed to process the signature. Please try again.");
       }
     }
   };
@@ -126,12 +143,32 @@ const ManageLease = ({ seekerId }) => {
     const targetSeekerId = passedSeekerId || tenantId;
 
     if (!signatureFile) {
-      alert("Please attach a signature or draw a digital signature.");
+      toast.error("Please attach a signature or draw a digital signature.");
       return;
     }
 
     if (!targetSeekerId) {
       setShowTenantModal(true);
+      return;
+    }
+
+    // Fetch the lease to check required fields
+    const lease = leases.find(l => l._id === leaseId);
+    if (!lease || !lease.property || !lease.tenant || !lease.contractDetails) {
+      toast.error("Please ensure all required lease details are filled before sending.");
+      return;
+    }
+    const rb = lease.contractDetails.rentBreakdown || {};
+    if (
+      !rb.baseRent ||
+      !lease.contractDetails.startDate ||
+      !lease.contractDetails.endDate ||
+      !lease.contractDetails.paymentFrequency ||
+      !lease.contractDetails.termsAndConditionsId ||
+      !lease.contractDetails.rulesAndRegulations ||
+      !lease.contractDetails.renewalTerms
+    ) {
+      toast.error("Please ensure all required lease details are filled before sending.");
       return;
     }
 
@@ -143,15 +180,19 @@ const ManageLease = ({ seekerId }) => {
       await updateLease(leaseId, formData);
 
       await sendLeaseToSeeker(leaseId); // Call sendLeaseToSeeker API to send the lease
-      alert("Lease sent to Seeker!");
+
+      // Update lease status to 'Sent' in the local state
+      setLeases(prevLeases => prevLeases.map(l => l._id === leaseId ? { ...l, status: 'Sent' } : l));
+      setFilteredLeases(prevLeases => prevLeases.map(l => l._id === leaseId ? { ...l, status: 'Sent' } : l));
+
+      // Only show a single toast for success (handled in sendLeaseToSeeker)
 
       const updatedLeases = await fetchLeases();
-
       setLeases(updatedLeases);
       setFilteredLeases(updatedLeases);
     } catch (err) {
       console.error("Failed to update lease status:", err);
-      alert("Failed to mark lease as ready to send.");
+      toast.error("Failed to mark lease as ready to send.");
     }
   };
 
@@ -183,7 +224,7 @@ const ManageLease = ({ seekerId }) => {
       setShowTenantModal(false);
       setShowSignatureModal(true); // Open the signature modal after tenant ID is provided
     } else {
-      alert("Please provide a valid Tenant ID.");
+      toast.error("Please provide a valid Tenant ID.");
     }
   };
 
@@ -201,18 +242,23 @@ const ManageLease = ({ seekerId }) => {
               darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
             }`}
           >
-            <h2 className="text-xl font-bold mb-4">Enter Tenant ID</h2>
-            <input
-              type="text"
-              placeholder="Tenant ID"
+            <h2 className="text-xl font-bold mb-4">Select Tenant</h2>
+            <select
               value={tenantId}
-              onChange={(e) => setTenantId(e.target.value)}
+              onChange={e => setTenantId(e.target.value)}
               className={`w-full px-4 py-2 rounded mb-4 ${
                 darkMode
                   ? "bg-gray-700 text-white border-gray-600"
                   : "bg-gray-200 border-gray-300"
               }`}
-            />
+            >
+              <option value="">Select a tenant</option>
+              {seekers.map(seeker => (
+                <option key={seeker._id} value={seeker._id}>
+                  {seeker.firstName} {seeker.lastName}
+                </option>
+              ))}
+            </select>
             <div className="flex justify-end">
               <button
                 onClick={() => setShowTenantModal(false)}
@@ -285,15 +331,7 @@ const ManageLease = ({ seekerId }) => {
             >
               <thead className={darkMode ? "bg-gray-700" : "bg-gray-100"}>
                 <tr>
-                  {[
-                    "Property Name",
-                    "Tenant",
-                    "Landlord",
-                    "Rent Amount",
-                    "Status",
-                    "Actions",
-                    "File",
-                  ].map((header) => (
+                  {["Property Name", "Tenant", "Total Rent", "Status", "Actions", "File"].map((header) => (
                     <th
                       key={header}
                       className={`px-6 py-3 text-center text-xs font-medium uppercase tracking-wider ${
@@ -306,97 +344,104 @@ const ManageLease = ({ seekerId }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredLeases.map((lease) => (
-                  <tr
-                    key={lease?._id}
-                    className={`border-b text-center ${
-                      darkMode ? "border-gray-700" : "border-gray-200"
-                    }`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {lease?.property.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {(lease?.tenant?.info?.firsname,
-                      lease?.tenant?.info?.lastName) ||
-                        lease?.tenantPlaceholder?.name ||
-                        "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {lease?.landlordName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      ₱ {lease?.contractDetails.rentAmount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {lease?.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        className={`px-4 py-2 text-lg font-bold rounded ${
-                          darkMode
-                            ? "bg-blue-600 text-white hover:bg-blue-500"
-                            : "bg-blue-500 text-white hover:bg-blue-600"
-                        }`}
-                        onClick={() => {
-                          setSelectedLeaseId(lease?._id);
-                          setView("EditLease");
-                        }}
-                      >
-                        <AiFillEdit />
-                      </button>
-                      <button
-                        className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
-                          darkMode
-                            ? "bg-green-600 text-white hover:bg-green-500"
-                            : "bg-green-500 text-white hover:bg-green-600"
-                        }`}
-                        onClick={() => {
-                          setSelectedLeaseId(lease?._id);
-                          setView("ViewLease");
-                        }}
-                      >
-                        <IoDocumentText />
-                      </button>
-                      {lease?.status === "Draft" ? (
+                {filteredLeases.map((lease) => {
+                  // Calculate total rent
+                  const rb = lease?.contractDetails?.rentBreakdown || {};
+                  const baseRent = parseFloat(rb.baseRent) || 0;
+                  const utilities = parseFloat(rb.utilities) || 0;
+                  const amenities = parseFloat(rb.amenities) || 0;
+                  let otherFees = 0;
+                  if (Array.isArray(rb.otherFees)) {
+                    otherFees = rb.otherFees.reduce((sum, fee) => sum + (parseFloat(fee.amount) || 0), 0);
+                  } else if (typeof rb.otherFees === 'string') {
+                    // If stored as string (e.g. "Name:Amount,Name:Amount")
+                    otherFees = rb.otherFees.split(',').reduce((sum, fee) => {
+                      const parts = fee.split(':');
+                      return sum + (parseFloat(parts[1]) || 0);
+                    }, 0);
+                  }
+                  const totalRent = baseRent + utilities + amenities + otherFees;
+                  return (
+                    <tr
+                      key={lease?._id}
+                      className={`border-b text-center ${
+                        darkMode ? "border-gray-700" : "border-gray-200"
+                      }`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {lease?.property?.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {(lease?.tenant?.info?.firstName && lease?.tenant?.info?.lastName)
+                          ? `${lease.tenant.info.firstName} ${lease.tenant.info.lastName}`
+                          : lease?.tenantPlaceholder?.name || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        ₱ {totalRent}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {lease?.status}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
-                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
-                            darkMode
-                              ? "bg-red-600 text-white hover:bg-red-500"
-                              : "bg-red-500 text-white hover:bg-red-600"
+                          className={`px-4 py-2 text-lg font-bold rounded ${
+                            lease?.status === "Active"
+                              ? "bg-gray-400 text-white cursor-not-allowed"
+                              : darkMode
+                                ? "bg-blue-600 text-white hover:bg-blue-500"
+                                : "bg-blue-500 text-white hover:bg-blue-600"
                           }`}
-                          onClick={() => handleSend(lease)}
+                          onClick={() => {
+                            setSelectedLeaseId(lease?._id);
+                            setView("EditLease");
+                          }}
+                          disabled={lease?.status === "Active"}
                         >
-                          <MdDelete />
+                          <AiFillEdit />
                         </button>
-                      ) : (
                         <button
                           className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
                             darkMode
-                              ? "bg-orange-600 text-white hover:bg-orange-500"
-                              : "bg-orange-500 text-white hover:bg-orange-600"
+                              ? "bg-green-600 text-white hover:bg-green-500"
+                              : "bg-green-500 text-white hover:bg-green-600"
+                          }`}
+                          onClick={() => {
+                            setSelectedLeaseId(lease?._id);
+                            setView("ViewLease");
+                          }}
+                        >
+                          <IoDocumentText />
+                        </button>
+                        <button
+                          className={`ml-2 px-4 py-2 text-lg font-bold rounded ${
+                            lease?.status === "Active"
+                              ? "bg-gray-400 text-white cursor-not-allowed"
+                              : darkMode
+                                ? "bg-orange-600 text-white hover:bg-orange-500"
+                                : "bg-orange-500 text-white hover:bg-orange-600"
                           }`}
                           onClick={() => handleSend(lease._id)}
+                          disabled={lease?.status === "Active"}
                         >
                           <IoSend />
                         </button>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        className={`px-4 py-2 text-lg font-bold rounded ${
-                          darkMode
-                            ? "bg-blue-600 text-white hover:bg-blue-500"
-                            : "bg-blue-500 text-white hover:bg-blue-600"
-                        }`}
-                        onClick={() => handleDownload(lease._id)}
-                        disabled={!lease._id}
-                      >
-                        <IoDownload />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          className={`px-4 py-2 text-lg font-bold rounded ${
+                            darkMode
+                              ? "bg-blue-600 text-white hover:bg-blue-500"
+                              : "bg-blue-500 text-white hover:bg-blue-600"
+                          }`}
+                          onClick={() => handleDownload(lease._id)}
+                          disabled={!lease._id}
+                        >
+                          <IoDownload />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

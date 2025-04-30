@@ -36,18 +36,18 @@ const ManageTenant = () => {
     <div className={`min-h-screen ${
       darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
         <div className="mb-8">         
           {/* Tab Navigation */}
           <div className="border-b mt-20 mb-6">
-            <nav className="flex space-x-8">
+            <nav className="flex space-x-2 sm:space-x-8 overflow-x-auto flex-nowrap">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 transition-colors duration-150 text-2xl font-bold text-center${
+                  className={`py-2 px-1 transition-colors duration-150 text-base sm:text-2xl font-bold text-center whitespace-nowrap${
                     activeTab === tab.id
-                      ? `border-b-2 ${darkMode ? 'border-blue-400 text-blue-400' : 'border-blue-500 text-blue-500'}`
+                      ? ` border-b-2 ${darkMode ? 'border-blue-400 text-blue-400' : 'border-blue-500 text-blue-500'}`
                       : `${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`
                   }`}
                 >
@@ -102,7 +102,7 @@ const ManageTenant = () => {
           {/* Tab Content */}
           <div className={`mt-6 ${
             darkMode ? 'bg-gray-800' : 'bg-white'
-          } rounded-lg shadow-sm`}>
+          } rounded-lg shadow-sm p-2 sm:p-6`}>
             {renderContent()}
           </div>
         </div>

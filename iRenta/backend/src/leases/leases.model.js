@@ -1,111 +1,131 @@
 import mongoose from "mongoose";
 
-const leaseSchema = new mongoose.Schema(
+const LeaseSchema = new mongoose.Schema(
   {
-    tenant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: false, // Not required since tenantPlaceholder can be used
-    },
-    tenantPlaceholder: {
-      name: { type: String, required: false }, // Optional placeholder for tenant name
-      email: { type: String, required: false }, // Optional placeholder for tenant email
-      phoneNumber: { type: String, required: false }, // Optional placeholder for tenant phone number
-    },
-    landlord: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    landlordName: { type: String, required: true },
     property: {
       propertyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Listing",
         required: true,
       },
-      name: { type: String, required: true },
-      address: {
-        houseNumber: { type: String, required: true },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        zip: { type: String, required: true },
-      },
-    },
-    contractDetails: {
-      startDate: { type: Date, required: false },
-      endDate: { type: Date, required: false },
-      rentAmount: { type: Number, required: false },
-      paymentFrequency: {
+      name: {
         type: String,
-        enum: ["Monthly", "Quarterly", "Yearly"],
         required: true,
       },
-      depositAmount: { type: Number, required: false },
+      address: {
+        houseNumber: { type: String, default: "" },
+        street: { type: String, default: "" },
+        city: { type: String, default: "" },
+        zip: { type: String, default: "" },
+      },
+    },
+    tenant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    tenantPlaceholder: {
+      name: { type: String, default: "" },
+      email: { type: String, default: "" },
+      phoneNumber: { type: String, default: "" },
+      emergencyContact: {
+        name: { type: String, default: "" },
+        phoneNumber: { type: String, default: "" },
+      },
+    },
+    landlord: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    landlordName: {
+      type: String,
+      required: true,
+    },
+    amenities: [
+      {
+        name: { type: String, required: true },
+        amount: { type: Number, required: true, default: 0 },
+        selected: { type: Boolean, default: true }
+      }
+    ],
+    utilities: [
+      {
+        name: { type: String, required: true },
+        amount: { type: Number, required: true, default: 0 },
+        selected: { type: Boolean, default: true }
+      }
+    ],
+    contractDetails: {
+      startDate: { type: Date },
+      endDate: { type: Date },
+      moveInDate: { type: Date },
+      moveOutDate: { type: Date },
+      paymentFrequency: {
+        type: String,
+        enum: ["Monthly", "Quarterly", "Yearly", ""],
+        default: "",
+      },
+      depositAmount: { type: Number, default: 0 },
       termsAndConditionsId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "TermsAndConditions",
-        required: false,
+        ref: "Terms",
+        default: null, // Allow null for drafts
       },
-      customTermsAndConditions: {
+      customTermsAndConditions: { type: String, default: "" },
+      rulesAndRegulations: { type: String, default: "" },
+      rentBreakdown: {
+        baseRent: { type: Number, default: 0 },
+        utilities: { type: Number, default: 0 },
+        amenities: { type: Number, default: 0 },
+        otherFees: [
+          {
+            name: { type: String, required: true },
+            amount: { type: Number, required: true },
+          },
+        ],
+      },
+      gracePeriod: { type: Number, default: 0 },
+      latePaymentPolicy: { type: String, default: "" },
+      noticePeriod: { type: Number, default: 0 },
+      renewalTerms: {
         type: String,
-        required: false,
+        enum: ["Automatic", "Manual", "No Renewal", ""],
+        default: "",
       },
-      rulesAndRegulations: { type: String, required: false },
     },
-    moveInDate: { type: Date, required: false }, // Optional field
-    moveOutDate: { type: Date, required: false }, // Optional field
     leaseType: {
       type: String,
-      enum: ["Month-to-Month", "Fixed-Term"],
-      required: false, // Optional, default behavior can be managed in app logic
+      enum: ["Fixed-Term", "Month-to-Month"],
+      default: "Fixed-Term",
     },
     status: {
       type: String,
-      enum: [
-        "Draft",
-        "Ready",
-        "Sent",
-        "Signed",
-        "Declined",
-        "Active",
-        "Completed",
-        "Terminated",
-        "Renewed",
-        "Modified", // if sent na tapos binago pa,
-      ],
+      enum: ["Draft", "Ready", "Pending", "Sent", "Active", "Expired", "Terminated"],
       default: "Draft",
     },
-    pdfPath: { type: String },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-    isSignedByLandlord: { type: Boolean, default: false },
-    uploadedOwnerSignature: { data: Buffer, contentType: String },
-    isAgreed: { type: Boolean, default: false },
-    isSignedBySeeker: { type: Boolean, default: false },
-    uploadedSignature: { data: Buffer, contentType: String },
-    uploadedAgreementPath: { type: String },
+    uploadedSignature: {
+      data: Buffer,
+      contentType: String,
+    },
+    uploadedOwnerSignature: {
+      data: Buffer,
+      contentType: String,
+    },
+    isSignedBySeeker: {
+      type: Boolean,
+      default: false,
+    },
+    isSignedByLandlord: {
+      type: Boolean,
+      default: false,
+    },
+    isAgreed: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
-// Custom validation to ensure at least one of `tenant` or `tenantPlaceholder` is provided
-leaseSchema.pre("save", function (next) {
-  if (
-    !this.tenant &&
-    (!this.tenantPlaceholder ||
-      !this.tenantPlaceholder.name ||
-      !this.tenantPlaceholder.email)
-  ) {
-    return next(
-      new Error(
-        "Either tenant (User reference) or tenantPlaceholder (name and email) must be provided."
-      )
-    );
-  }
-  next();
-});
-
-const Lease = mongoose.model("Lease", leaseSchema);
-
-export default Lease;
+export default mongoose.model("Lease", LeaseSchema);

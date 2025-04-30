@@ -26,6 +26,14 @@ const ChatDropdown = ({ darkMode }) => {
     setShowChatRoom(true); // Navigate to the chat room
   };
 
+  const handleChatToggle = () => {
+    // Toggle chat dropdown and close chat room view if showing the dropdown
+    if (!dropdownOpen) {
+      setShowChatRoom(false);
+    }
+    setDropdownOpen(!dropdownOpen);
+  };
+
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add("dark");
@@ -39,11 +47,9 @@ const ChatDropdown = ({ darkMode }) => {
       {/* Chat Button with Icon */}
       <div className="hidden lg:block relative group">
         <button
-          onClick={() => {
-            setDropdownOpen(!dropdownOpen);
-            setShowChatRoom(false); // Ensure dropdown is displayed initially
-          }}
-          className="h-10 w-10 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-full text-blue-500 dark:text-blue-400 hover:text-blue-600 flex justify-center items-center"
+          onClick={handleChatToggle}
+          data-dropdown-toggle="chat-dropdown"
+          className="dropdown-toggle h-10 w-10 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-full text-blue-500 dark:text-blue-400 hover:text-blue-600 flex justify-center items-center"
         >
           <FaCommentAlt className="text-md" />
         </button>
@@ -55,8 +61,9 @@ const ChatDropdown = ({ darkMode }) => {
       {/* Chat Button on Mobile */}
       <div className="lg:hidden w-full h-full group mx-auto">
         <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className={`h-full w-full hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 ${
+          onClick={handleChatToggle}
+          data-dropdown-toggle="chat-dropdown-mobile"
+          className={`dropdown-toggle h-full w-full hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 ${
             dropdownOpen ? "bg-blue-100 dark:bg-blue-800 text-blue-500" : "text-gray-500 dark:text-gray-300"
           } hover:text-blue-600 flex justify-center items-center`}
         >
@@ -115,6 +122,12 @@ const ChatDropdown = ({ darkMode }) => {
         >
           <div className="flex justify-between items-center px-4 py-2 border-b text-gray-700 dark:text-gray-300">
             <h2 className="text-lg font-bold">Your Chats</h2>
+            <button
+              onClick={() => setDropdownOpen(false)}
+              className="text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-all"
+            >
+              &times;
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto">
             <UserList
@@ -135,7 +148,10 @@ const ChatDropdown = ({ darkMode }) => {
           <div className="flex items-center justify-between bg-blue-500 dark:bg-blue-700 text-white px-4 py-2 rounded-t-lg">
             <h3 className="text-lg font-bold">Chat Room</h3>
             <button
-              onClick={() => setChatRoomOpen(false)}
+              onClick={() => {
+                setChatRoomOpen(false);
+                setDropdownOpen(false);
+              }}
               className="text-white hover:text-gray-200"
             >
               &times;

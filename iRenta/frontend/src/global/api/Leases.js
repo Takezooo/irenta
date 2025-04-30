@@ -1,5 +1,6 @@
 import axios from "axios";
 import { GetToken } from "../../global/utils/Token.js";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = "http://localhost:5000/api/leases";
 
@@ -18,20 +19,51 @@ export const createLease = async (leaseData) => {
 };
 
 export const downloadPdf = async (leaseId) => {
+  const authToken = GetToken();
   try {
+    // First, fetch the lease details to get property name for better file naming
+    const leaseDetails = await fetchLeaseById(leaseId);
+    
     const response = await axios.get(`${API_BASE_URL}/${leaseId}/pdf`, {
       responseType: "blob", // Treat the response as a binary file
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
+
+    // Ensure response has data before proceeding
+    if (!response.data) {
+      throw new Error("Received empty PDF data");
+    }
 
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
+    
+    // Create and click a link to download the file
     const link = document.createElement("a");
     link.href = url;
-    link.download = `lease_${leaseId}.pdf`; // Default file name
+    
+    // Create a more descriptive filename
+    const propertyName = leaseDetails?.property?.name 
+      ? leaseDetails.property.name.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_') 
+      : 'property';
+    const today = new Date().toISOString().split('T')[0];
+    
+    link.download = `Lease_Agreement_${propertyName}_${today}.pdf`;
+    document.body.appendChild(link); // Temporarily add to document
     link.click();
-    window.URL.revokeObjectURL(url); // Clean up the object URL
+    document.body.removeChild(link); // Clean up
+    
+    // Clean up the object URL after a delay to ensure download starts
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 1000);
+    
+    return true;
   } catch (error) {
     console.error("Error downloading PDF:", error);
+    alert("There was a problem downloading the PDF. Please try again.");
+    throw error;
   }
 };
 
@@ -73,14 +105,19 @@ export const updateLease = async (leaseId, updatedData) => {
   const authToken = GetToken();
 
   try {
+    // Determine if updatedData is FormData or a regular object
+    const isFormData = updatedData instanceof FormData;
+    
+    // Set headers based on data type
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+      ...(!isFormData && { 'Content-Type': 'application/json' })
+    };
+
     const response = await axios.put(
       `${API_BASE_URL}/${leaseId}`,
       updatedData,
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      }
+      { headers }
     );
     return response.data;
   } catch (error) {
@@ -102,8 +139,9 @@ export const sendLeaseToSeeker = async (leaseId) => {
         headers: { Authorization: `Bearer ${authToken}` },
       }
     );
-    alert("Lease sent to Seeker successfully!");
+    toast.success("Lease sent to Seeker successfully!");
   } catch (error) {
     console.error("Error sending lease:", error);
+    toast.error("Error sending lease. Please try again.");
   }
 };

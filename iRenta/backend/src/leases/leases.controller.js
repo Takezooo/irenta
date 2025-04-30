@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
+import mongoose from "mongoose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,48 +20,27 @@ export const uploadMiddleware = upload.fields([
   { name: "uploadedSignature", maxCount: 1 }, // Seeker's signature
   { name: "uploadedOwnerSignature", maxCount: 1 }, // Owner's signature
 ]);
+
 // Create a new lease
 export const CreateLease = async (req, res) => {
   try {
     const {
       property,
-      contractDetails,
-      landlordName,
       tenant,
       tenantPlaceholder,
+      contractDetails,
+      landlordName,
+      action,
       termsTemplateId,
-      action, // "saveAsDraft" or "saveAndSend"
+      amenities,
+      utilities
     } = req.body;
 
-    // Validation for "saveAndSend" only
-    if (action === "saveAndSend") {
-      if (!landlordName) {
-        return res.status(400).json({ message: "Landlord name is required" });
-      }
-      if (
-        !property?.name ||
-        !property?.address?.houseNumber ||
-        !property?.address?.street ||
-        !property?.address?.city ||
-        !property?.address?.zip
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Property details are incomplete" });
-      }
-      if (
-        !contractDetails?.startDate ||
-        !contractDetails?.endDate ||
-        !contractDetails?.rentAmount ||
-        !contractDetails?.depositAmount
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Lease details are incomplete" });
-      }
+    if (!req.user?.id) {
+      console.error("Authentication failed: No user ID found in request");
+      return res.status(401).json({ message: "User authentication required" });
     }
 
-    // Handle terms template
     let termsContent = "";
     if (termsTemplateId) {
       const termsTemplate = await Terms.findById(termsTemplateId);
@@ -68,63 +48,140 @@ export const CreateLease = async (req, res) => {
         return res.status(404).json({ message: "Terms template not found" });
       }
       termsContent = termsTemplate.content;
+      req.body.contractDetails = {
+        ...req.body.contractDetails,
+        termsAndConditionsId: termsTemplateId,
+      };
+    } else {
+      // Ensure termsAndConditionsId is null if no template is provided
+      req.body.contractDetails = {
+        ...req.body.contractDetails,
+        termsAndConditionsId: null,
+      };
     }
 
+    if (action === "saveAndSend") {
+      const { startDate, endDate, paymentFrequency, depositAmount, termsAndConditionsId } = contractDetails || {};
+      if (!property?.propertyId || !landlordName || (!tenant && !tenantPlaceholder?.name && !tenantPlaceholder?.email && !tenantPlaceholder?.phoneNumber)) {
+        return res.status(400).json({ message: "Required fields are missing for saving and sending" });
+      }
+      if (!startDate || !endDate || !paymentFrequency || !depositAmount || !termsAndConditionsId) {
+        return res.status(400).json({ message: "Basic lease details are incomplete for sending" });
+      }
+      if (!property.address.zip) {
+        return res.status(400).json({ message: "ZIP code is required for sending" });
+      }
+    } else if (action === "saveAsDraft") {
+      if (!property?.propertyId || !landlordName) {
+        return res.status(400).json({ message: "Property and landlord are required for drafts" });
+      }
+      if (!tenant && !tenantPlaceholder?.name && !tenantPlaceholder?.email && !tenantPlaceholder?.phoneNumber) {
+        return res.status(400).json({ message: "Either a tenant or at least one placeholder detail is required for drafts" });
+      }
+    }
+
+    // Process amenities and utilities to ensure they have the correct structure
+    const processedAmenities = Array.isArray(amenities) 
+      ? amenities
+          .filter(amenity => amenity && (amenity.selected === undefined || amenity.selected === true))
+          .map(amenity => ({
+            name: amenity.name || '',
+            amount: parseFloat(amenity.amount || amenity.fee || 0),
+            selected: true
+          }))
+      : [];
+
+    const processedUtilities = Array.isArray(utilities)
+      ? utilities
+          .filter(utility => utility && (utility.selected === undefined || utility.selected === true))
+          .map(utility => ({
+            name: utility.name || '',
+            amount: parseFloat(utility.amount || utility.fee || 0),
+            selected: true
+          }))
+      : [];
+
     const leaseData = {
-      ...req.body,
-      tenant: tenant || undefined,
-      status: action === "saveAndSend" ? "Ready" : "Draft", // Set status based on action
+      property: {
+        ...property,
+        address: {
+          houseNumber: property.address?.houseNumber || "",
+          street: property.address?.street || "",
+          city: property.address?.city || "",
+          zip: property.address?.zip || "",
+        },
+      },
+      landlord: req.user.id,
+      landlordName,
+      tenant: tenant || null,
+      tenantPlaceholder: tenantPlaceholder || {},
+      contractDetails: {
+        ...contractDetails,
+        customTermsAndConditions: termsContent,
+        termsAndConditionsId: termsTemplateId || null, // Explicitly set to null if not provided
+        rentBreakdown: {
+          ...contractDetails.rentBreakdown,
+          otherFees: Array.isArray(contractDetails.rentBreakdown.otherFees)
+            ? contractDetails.rentBreakdown.otherFees
+            : [],
+        },
+      },
+      status: action === "saveAsDraft" ? "Draft" : "Pending",
+      amenities: processedAmenities,
+      utilities: processedUtilities
     };
 
-    const lease = await Lease.create(leaseData);
+    const lease = new Lease(leaseData);
+    await lease.save();
 
-    res.status(201).json(lease);
+    return res.status(201).json({ message: "Lease created successfully", lease });
   } catch (error) {
     console.error("Error creating lease:", error);
-    res.status(500).json({ message: "Failed to create lease" });
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
+    }
+    res.status(500).json({ message: "Failed to create lease", error: error.message });
   }
 };
 
-// Fetch all leases created by the landlord
 export const GetCreatedLeases = async (req, res) => {
   try {
-    const ownerId = req.user.id; // Get the landlord's ID from the decoded token
+    const ownerId = req.user.id;
     const leases = await Lease.find({ landlord: ownerId })
-      .populate("tenant") // Populate tenant details if needed
-      .populate("landlord"); // Populate landlord details if needed
+      .populate("tenant")
+      .populate("landlord");
     res.status(200).json(leases);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Fetch a lease by its ID
 export const GetLeaseById = async (req, res) => {
   try {
-    const { id } = req.params; // Extract the lease ID from the URL
+    const { id } = req.params;
 
-    const lease = await Lease.findById(id) // Fetch the lease by ID
-    .populate('tenant')
-    .populate('landlord', 'info.firstName info.lastName credentials.email info.phoneNumber');
+    const lease = await Lease.findById(id)
+      .populate("tenant", "info.firstName info.lastName credentials.email info.phoneNumber")
+      .populate("landlord", "info.firstName info.lastName credentials.email info.phoneNumber")
+      .populate("contractDetails.termsAndConditionsId");
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
-    res.status(200).json(lease); // Return the lease data
+    res.status(200).json(lease);
   } catch (error) {
     console.error("Error fetching lease by ID:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Update an existing lease
 export const UpdateLease = async (req, res) => {
   try {
-    const { id } = req.params; // Get the lease ID from the URL
-    const updatedData = req.body; // Get the updated data from the request body
+    const { id } = req.params;
+    const updatedData = req.body;
 
-    // Handle Seeker's signature
+    // Handle form data conversions
     if (req.files?.uploadedSignature?.length > 0) {
       updatedData.uploadedSignature = {
         data: req.files.uploadedSignature[0].buffer,
@@ -132,7 +189,6 @@ export const UpdateLease = async (req, res) => {
       };
     }
 
-    // Handle Owner's signature
     if (req.files?.uploadedOwnerSignature?.length > 0) {
       updatedData.uploadedOwnerSignature = {
         data: req.files.uploadedOwnerSignature[0].buffer,
@@ -140,21 +196,83 @@ export const UpdateLease = async (req, res) => {
       };
     }
 
-    // Handle other fields from the form
-    if (req.body.isAgreed) {
-      updatedData.isAgreed = req.body.isAgreed === "true"; // Convert to boolean
+    // Convert string value "true"/"false" to boolean
+    if (updatedData.isAgreed) {
+      updatedData.isAgreed = updatedData.isAgreed === "true";
+    }
+    
+    // Handle tenant field - convert string "null" to actual null
+    if (updatedData.tenant === "null" || updatedData.tenant === "" || updatedData.tenant === "undefined") {
+      updatedData.tenant = null;
+      // If we're removing the tenant, make sure the tenantPlaceholder is provided
+      if (!updatedData.tenantPlaceholder) {
+        updatedData.tenantPlaceholder = {};
+      }
+    }
+
+    // Parse nested JSON objects if they are strings
+    ['property', 'contractDetails', 'tenantPlaceholder'].forEach(field => {
+      if (typeof updatedData[field] === 'string') {
+        try {
+          updatedData[field] = JSON.parse(updatedData[field]);
+        } catch (error) {
+          console.error(`Error parsing ${field}:`, error);
+        }
+      }
+    });
+
+    // Ensure amenities and utilities are properly handled
+    if (updatedData.amenities) {
+      try {
+        // Check if amenities is a string (from FormData) and parse it
+        if (typeof updatedData.amenities === 'string') {
+          updatedData.amenities = JSON.parse(updatedData.amenities);
+        }
+        
+        // Ensure each amenity has the required fields
+        updatedData.amenities = updatedData.amenities
+          .filter(amenity => amenity) // Filter out null/undefined values
+          .map(amenity => ({
+            name: amenity.name || '',
+            amount: parseFloat(amenity.amount || amenity.fee || 0),
+            selected: amenity.selected !== false // default to true if not specified
+          }));
+      } catch (error) {
+        console.error("Error processing amenities:", error);
+        // If parsing fails, keep the amenities as is
+      }
+    }
+
+    if (updatedData.utilities) {
+      try {
+        // Check if utilities is a string (from FormData) and parse it
+        if (typeof updatedData.utilities === 'string') {
+          updatedData.utilities = JSON.parse(updatedData.utilities);
+        }
+        
+        // Ensure each utility has the required fields
+        updatedData.utilities = updatedData.utilities
+          .filter(utility => utility) // Filter out null/undefined values
+          .map(utility => ({
+            name: utility.name || '',
+            amount: parseFloat(utility.amount || utility.fee || 0),
+            selected: utility.selected !== false // default to true if not specified
+          }));
+      } catch (error) {
+        console.error("Error processing utilities:", error);
+        // If parsing fails, keep the utilities as is
+      }
     }
 
     const lease = await Lease.findByIdAndUpdate(id, updatedData, {
-      new: true, // Return the updated lease
-      runValidators: true, // Validate the update against the schema
+      new: true,
+      runValidators: true,
     });
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
-    // Check if both parties have signed and today is move-in date
     if (
       lease.isSignedByLandlord &&
       lease.isSignedBySeeker &&
@@ -163,9 +281,7 @@ export const UpdateLease = async (req, res) => {
       const today = new Date();
       const moveInDate = new Date(lease.moveInDate);
 
-      // Compare dates (ignoring time)
       if (today.toDateString() === moveInDate.toDateString()) {
-        // Create tenant record
         const tenantData = {
           seekerId: lease.tenant,
           propertyId: lease.property.propertyId,
@@ -173,14 +289,12 @@ export const UpdateLease = async (req, res) => {
           landlordId: lease.landlord,
           movedInDate: lease.moveInDate,
           active: true,
-          isWaitListed: false
+          isWaitListed: false,
         };
 
-        // Import and create Tenant record
         const Tenant = mongoose.model("Tenant");
         await Tenant.create(tenantData);
 
-        // Update lease status to Active
         lease.status = "Active";
         await lease.save();
       }
@@ -189,7 +303,7 @@ export const UpdateLease = async (req, res) => {
     res.status(200).json(lease);
   } catch (error) {
     console.error("Error updating lease:", error);
-    res.status(500).json({ message: "Failed to update lease" });
+    res.status(500).json({ message: "Failed to update lease", error: error.message });
   }
 };
 
@@ -199,27 +313,63 @@ export const GetPdf = async (req, res) => {
     const { id } = req.params;
 
     // Find the lease by ID
-    const lease = await Lease.findById(id);
-    const tenant = lease.tenant ? await Users.findById(lease.tenant) : null;
+    const lease = await Lease.findById(id)
+      .populate("tenant", "info.firstName info.lastName credentials.email info.phoneNumber")
+      .populate("landlord", "info.firstName info.lastName credentials.email info.phoneNumber")
+      .populate("contractDetails.termsAndConditionsId");
 
     if (!lease) {
       return res.status(404).json({ message: "Lease not found" });
     }
 
-    // Generate PDF dynamically and stream it
-    const pdfStream = await generatePdf(lease, tenant);
+    // Ensure amenities and utilities arrays exist
+    lease.amenities = Array.isArray(lease.amenities) ? lease.amenities : [];
+    lease.utilities = Array.isArray(lease.utilities) ? lease.utilities : [];
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${lease.property.name}_lease.pdf"`
-    );
-    res.setHeader("Content-Type", "application/pdf");
+    // Generate PDF dynamically
+    let pdfStream;
+    try {
+      pdfStream = await generatePdf(lease, lease.tenant);
+    } catch (pdfError) {
+      console.error("Error generating PDF:", pdfError);
+      return res.status(500).json({ 
+        message: "Failed to generate PDF", 
+        error: pdfError.message 
+      });
+    }
 
+    // Get a cleaned property name for the filename
+    const propertyName = lease.property?.name
+      ? lease.property.name.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_')
+      : 'property';
+    const today = new Date().toISOString().split('T')[0];
+    const filename = `Lease_Agreement_${propertyName}_${today}.pdf`;
+
+    // Set appropriate headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    // Handle stream errors
+    pdfStream.on('error', (err) => {
+      console.error('PDF Stream Error:', err);
+      // Only send error response if headers haven't been sent yet
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Error generating PDF', error: err.message });
+      }
+    });
+    
+    // Pipe the PDF stream to the response
     pdfStream.pipe(res);
-    pdfStream.end();
+    
   } catch (error) {
     console.error("Error in GetPdf:", error);
-    res.status(500).json({ message: error.message });
+    // Only send error response if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Failed to generate PDF", error: error.message });
+    }
   }
 };
 
@@ -234,7 +384,7 @@ export const SendLeaseToSeeker = async (req, res) => {
     }
 
     // Mark lease as sent to the tenant
-    lease.status = "Sent";
+    lease.status = "Ready";
     await lease.save();
     console.log("Tenant ID:", lease.tenant);
     // Notify Tenant

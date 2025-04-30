@@ -7,6 +7,7 @@ import { ChatDropdownProvider } from "./global/contexts/ChatDropdownContext";
 import { NotificationProvider } from "./global/contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const App = () => {

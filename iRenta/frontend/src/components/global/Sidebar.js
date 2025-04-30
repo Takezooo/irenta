@@ -9,6 +9,8 @@ import {
   FaPowerOff,
   FaFileContract,
 } from "react-icons/fa6";
+import { MdOutlineDescription } from "react-icons/md";
+
 
 import MainDashboard from "../OwnerDashboard/MainDashboard.js";
 import { PropertyListing } from "../OwnerDashboard/PropertyListing.js";
@@ -139,7 +141,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
                     isActive("content5") ? "bg-gray-300 dark:bg-gray-700" : ""
                   }`}
                 >
-                  <FaFileContract
+                  <MdOutlineDescription 
                     className={`text-xl text-blue-700 dark:text-blue-400 transition duration-75 group-hover:text-gray-900 dark:group-hover:text-gray-300 ${
                       isOpen ? "" : "mx-auto"
                     }`}
@@ -242,7 +244,7 @@ const Sidebar = ({ isOpen, darkMode, toggleDarkMode }) => {
               isActive("content5") ? "text-blue-900 dark:text-blue-500" : ""
             }`}
           >
-            <FaFileContract size={24} />
+            <MdOutlineDescription size={24} />
             <span className="text-xs">Manage Terms</span>
           </button>
           <button

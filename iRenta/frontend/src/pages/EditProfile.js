@@ -12,7 +12,7 @@ const EditProfile = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
   const { darkMode } = useContext(ThemeContext);
-  const API_BASE_URL = "http://localhost:5000/api/users";
+  const API_BASE_URL = "https://irenta-production.up.railway.app/api/users";
   const authToken = GetToken();
   const navigate = useNavigate(); // Hook for navigation
 

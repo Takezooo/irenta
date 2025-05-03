@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-const API_LINK = "http://localhost:5000/api";
+const API_LINK = "https://irenta-production.up.railway.app/api";
 
 const Register = () => {
   const [errorMessage, setErrorMessage] = useState("");

@@ -7,7 +7,7 @@ import MapPickerV2 from "../Mapping/MapPickerV2.js";
 import { GetToken } from "../../global/utils/Token.js";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
-const API_LINK = "http://localhost:5000/api";
+const API_LINK = "https://irenta-production.up.railway.app/api";
 
 const AddListing = () => {
 	const { darkMode } = useContext(ThemeContext);

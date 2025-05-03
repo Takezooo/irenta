@@ -2,7 +2,7 @@ import axios from "axios";
 import { GetToken } from "../../global/utils/Token.js";
 import { toast } from "react-toastify";
 
-const API_BASE_URL = "http://localhost:5000/api/leases";
+const API_BASE_URL = "https://irenta-production.up.railway.app/api/leases";
 
 export const createLease = async (leaseData) => {
   const authToken = GetToken(); // Retrieve the user's auth token

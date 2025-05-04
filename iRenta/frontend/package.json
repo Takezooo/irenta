@@ -60,7 +60,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "https://irenta-production.up.railway.app",
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",

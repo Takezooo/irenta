@@ -3,7 +3,7 @@ import { GetToken } from "./Token";
 
 const authToken = GetToken();
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://irenta-production.up.railway.app", {
   auth: {
     token: authToken, // Attach the JWT token
   },

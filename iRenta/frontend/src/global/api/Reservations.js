@@ -75,7 +75,7 @@ export const fetchSeekersWithReservations = async () => {
   const authToken = GetToken();
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/reservations/seekers`,
+      `https://irenta-production.up.railway.app/api/reservations/seekers`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
       }

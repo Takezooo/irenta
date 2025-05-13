@@ -24,6 +24,7 @@ const Register = () => {
       gender: "Male",
       phoneNumber: "",
       userType: "Seeker",
+      username: "",
       address: {
         houseNumber: "",
         street: "",
@@ -41,10 +42,32 @@ const Register = () => {
 
   const handleInputCorrectness = async (user) => {
     try {
-      if (user.password.length >= 8) {
-        return true;
-      }else { 
-        toast.error("Password length must be 8");
+      // Check required fields
+      const requiredFields = ['username', 'password', 'email', 'firstName', 'lastName', 'birthDate', 'gender', 'phoneNumber'];
+      const missingFields = requiredFields.filter(field => !user[field]);
+      
+      if (missingFields.length > 0) {
+        toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        return false;
+      }
+
+      // Password validation
+      if (user.password.length < 8) {
+        toast.error("Password must be at least 8 characters long");
+        return false;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(user.email)) {
+        toast.error("Please enter a valid email address");
+        return false;
+      }
+
+      // Phone number validation
+      const phoneRegex = /^09\d{9}$/;
+      if (!phoneRegex.test(user.phoneNumber)) {
+        toast.error("Phone number must start with '09' and be 11 digits long");
         return false;
       }
     } catch (err) {
@@ -196,7 +219,6 @@ const Register = () => {
               value={user.gender}
               className="focus:text-black w-full px-[20px] py-[10px] rounded-lg border text-gray-400 border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300 cursor-pointer"
             >
-              <option selected>Please choose</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Non-binary">Non-binary</option>

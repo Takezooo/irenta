@@ -59,6 +59,18 @@ const CreateUser = async (req, res) => {
     const { body, file } = req;
     const user = JSON.parse(body.user);
 
+    // Check for duplicate username
+    const existingUsername = await Users.findOne({ "credentials.username": user.username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    // Check for duplicate email
+    const existingEmail = await Users.findOne({ "credentials.email": user.email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     let userProfile = {};
 
     // upload file part
@@ -96,7 +108,22 @@ const CreateUser = async (req, res) => {
 
     res.status(200).json(result);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    // Handle specific MongoDB errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` 
+      });
+    }
+    
+    // Handle validation errors
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(error => error.message);
+      return res.status(400).json({ message: errors.join(', ') });
+    }
+
+    console.error('Registration error:', err);
+    res.status(400).json({ message: "Registration failed. Please try again." });
   }
 };
 

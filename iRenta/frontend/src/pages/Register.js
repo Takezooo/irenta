@@ -129,11 +129,15 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     try {
+      console.log("Form submission started");
       e.preventDefault();
+      console.log("Current user state:", user);
 
       const isCorrect = await handleInputCorrectness(user);
+      console.log("Validation result:", isCorrect);
 
       if (!isCorrect) {
+        console.log("Validation failed");
         return;
       }
 
@@ -154,25 +158,30 @@ const Register = () => {
         address: user.userType === "Owner" ? user.address : undefined
       };
 
+      console.log("Structured user data:", userData);
       formData.append("user", JSON.stringify(userData));
       if (profile) {
+        console.log("Adding profile picture to form data");
         formData.append("file", profile);
       }
 
+      console.log("Sending request to:", `${API_LINK}/users`);
       const res = await axios.post(`${API_LINK}/users`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
+      console.log("Server response:", res);
+
       if (res.status === 200) {
         toast.success("Registration successful!");
         navigate("/login");
       }
     } catch (err) {
+      console.error("Registration error details:", err);
       const errorMessage = err.response?.data?.message || err.message;
       toast.error(`Registration failed: ${errorMessage}`);
-      console.error(err);
     }
   };
 
@@ -185,6 +194,7 @@ const Register = () => {
           <form
             onSubmit={handleSubmit}
             className="flex flex-col gap-1 items-start"
+            method="POST"
           >
             <div className="w-full flex gap-2 justify-between">
               <div>
@@ -399,6 +409,7 @@ const Register = () => {
             </div>
             <button
               type="submit"
+              onClick={handleSubmit}
               className="mt-[10px] w-[100%] px-[20px] py-[10px] rounded-md bg-blue-800 text-white hover:bg-blue-600 transition ease-in duration-300"
             >
               Create an Account

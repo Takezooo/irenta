@@ -42,34 +42,41 @@ const Register = () => {
 
   const handleInputCorrectness = async (user) => {
     try {
-      // Check required fields
-      const requiredFields = ['username', 'password', 'email', 'firstName', 'lastName', 'birthDate', 'gender', 'phoneNumber'];
-      const missingFields = requiredFields.filter(field => !user[field]);
-      
-      if (missingFields.length > 0) {
-        toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      if (!user.firstName || !user.lastName) {
+        toast.error("First name and last name are required");
         return false;
       }
-
-      // Password validation
+      if (!user.birthDate) {
+        toast.error("Birth date is required");
+        return false;
+      }
+      if (!user.phoneNumber) {
+        toast.error("Phone number is required");
+        return false;
+      }
+      if (!user.username) {
+        toast.error("Username is required");
+        return false;
+      }
+      if (!user.email) {
+        toast.error("Email is required");
+        return false;
+      }
+      if (!user.password) {
+        toast.error("Password is required");
+        return false;
+      }
       if (user.password.length < 8) {
-        toast.error("Password must be at least 8 characters long");
+        toast.error("Password must be at least 8 characters");
         return false;
       }
-
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(user.email)) {
-        toast.error("Please enter a valid email address");
-        return false;
+      if (user.userType === "Owner") {
+        if (!user.address.houseNumber || !user.address.street || !user.address.city || !user.address.zip) {
+          toast.error("All address fields are required for property owners");
+          return false;
+        }
       }
-
-      // Phone number validation
-      const phoneRegex = /^09\d{9}$/;
-      if (!phoneRegex.test(user.phoneNumber)) {
-        toast.error("Phone number must start with '09' and be 11 digits long");
-        return false;
-      }
+      return true;
     } catch (err) {
       console.log(err);
       return false;
@@ -124,29 +131,48 @@ const Register = () => {
     try {
       e.preventDefault();
 
+      const isCorrect = await handleInputCorrectness(user);
+
+      if (!isCorrect) {
+        return;
+      }
+
       var formData = new FormData();
 
-      formData.append("user", JSON.stringify(user));
-      formData.append("file", profile);
+      // Structure the user data according to the backend schema
+      const userData = {
+        username: user.username,
+        password: user.password,
+        email: user.email,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
+        birthDate: user.birthDate,
+        gender: user.gender,
+        phoneNumber: user.phoneNumber,
+        userType: user.userType,
+        address: user.userType === "Owner" ? user.address : undefined
+      };
 
-      const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
+      formData.append("user", JSON.stringify(userData));
+      if (profile) {
+        formData.append("file", profile);
+      }
 
-      if (isCorrect){ // check fields if information is correct
-        const res = await axios.post(`${API_LINK}/users`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-  
-        if (res.status === 200) {
-          toast.success("Succesful");
-          navigate("/login");
-          console.log(res.data);
-        }
-      } 
+      const res = await axios.post(`${API_LINK}/users`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 200) {
+        toast.success("Registration successful!");
+        navigate("/login");
+      }
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
-      console.log(err);
+      const errorMessage = err.response?.data?.message || err.message;
+      toast.error(`Registration failed: ${errorMessage}`);
+      console.error(err);
     }
   };
 
@@ -219,6 +245,7 @@ const Register = () => {
               value={user.gender}
               className="focus:text-black w-full px-[20px] py-[10px] rounded-lg border text-gray-400 border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition duration-300 cursor-pointer"
             >
+              <option selected>Please choose</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Non-binary">Non-binary</option>

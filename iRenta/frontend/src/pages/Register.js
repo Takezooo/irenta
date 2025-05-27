@@ -172,27 +172,22 @@ const Register = () => {
 
       // Structure the user data according to the backend schema
       const userData = {
-        credentials: {
-          username: user.username.trim(),
-          password: user.password,
-          email: user.email.trim(),
-        },
-        info: {
-          firstName: user.firstName.trim(),
-          middleName: user.middleName ? user.middleName.trim() : "",
-          lastName: user.lastName.trim(),
-          birthDate: formattedBirthDate,
-          gender: user.gender,
-          phoneNumber: phoneNumber,
-          userType: user.userType,
-          address: user.userType === "Owner" ? {
-            houseNumber: user.address.houseNumber.trim(),
-            street: user.address.street.trim(),
-            city: user.address.city.trim(),
-            zip: user.address.zip.trim()
-          } : undefined,
-          profile: {} // Empty profile object as it will be handled by the file upload
-        }
+        username: user.username.trim(),
+        password: user.password,
+        email: user.email.trim(),
+        firstName: user.firstName.trim(),
+        middleName: user.middleName ? user.middleName.trim() : "",
+        lastName: user.lastName.trim(),
+        birthDate: formattedBirthDate,
+        gender: user.gender,
+        phoneNumber: phoneNumber,
+        userType: user.userType,
+        address: user.userType === "Owner" ? {
+          houseNumber: user.address.houseNumber.trim(),
+          street: user.address.street.trim(),
+          city: user.address.city.trim(),
+          zip: user.address.zip.trim()
+        } : undefined
       };
 
       console.log("Structured user data:", userData);

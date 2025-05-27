@@ -155,31 +155,49 @@ const Register = () => {
 
       var formData = new FormData();
 
-      // Format birth date to ISO string
-      const formattedBirthDate = new Date(user.birthDate).toISOString();
+      // Format birth date to ISO string and ensure it's a valid date
+      const birthDate = new Date(user.birthDate);
+      if (isNaN(birthDate.getTime())) {
+        toast.error("Invalid birth date format");
+        return;
+      }
+      const formattedBirthDate = birthDate.toISOString();
+
+      // Convert phone number to integer
+      const phoneNumber = parseInt(user.phoneNumber);
+      if (isNaN(phoneNumber)) {
+        toast.error("Invalid phone number format");
+        return;
+      }
 
       // Structure the user data according to the backend schema
       const userData = {
         credentials: {
-          username: user.username,
+          username: user.username.trim(),
           password: user.password,
-          email: user.email,
+          email: user.email.trim(),
         },
         info: {
-          firstName: user.firstName,
-          middleName: user.middleName || "",
-          lastName: user.lastName,
+          firstName: user.firstName.trim(),
+          middleName: user.middleName ? user.middleName.trim() : "",
+          lastName: user.lastName.trim(),
           birthDate: formattedBirthDate,
           gender: user.gender,
-          phoneNumber: parseInt(user.phoneNumber),
+          phoneNumber: phoneNumber,
           userType: user.userType,
-          address: user.userType === "Owner" ? user.address : undefined,
+          address: user.userType === "Owner" ? {
+            houseNumber: user.address.houseNumber.trim(),
+            street: user.address.street.trim(),
+            city: user.address.city.trim(),
+            zip: user.address.zip.trim()
+          } : undefined,
           profile: {} // Empty profile object as it will be handled by the file upload
         }
       };
 
       console.log("Structured user data:", userData);
       formData.append("user", JSON.stringify(userData));
+      
       if (profile) {
         console.log("Adding profile picture to form data");
         formData.append("file", profile);

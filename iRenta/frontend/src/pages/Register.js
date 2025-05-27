@@ -54,12 +54,24 @@ const Register = () => {
         toast.error("Phone number is required");
         return false;
       }
+      // Add phone number format validation
+      const phoneRegex = /^09\d{9}$/;
+      if (!phoneRegex.test(user.phoneNumber)) {
+        toast.error("Phone number must start with '09' and be 11 digits long");
+        return false;
+      }
       if (!user.username) {
         toast.error("Username is required");
         return false;
       }
       if (!user.email) {
         toast.error("Email is required");
+        return false;
+      }
+      // Add email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(user.email)) {
+        toast.error("Please enter a valid email address");
         return false;
       }
       if (!user.password) {
@@ -143,6 +155,9 @@ const Register = () => {
 
       var formData = new FormData();
 
+      // Format birth date to ISO string
+      const formattedBirthDate = new Date(user.birthDate).toISOString();
+
       // Structure the user data according to the backend schema
       const userData = {
         credentials: {
@@ -152,11 +167,11 @@ const Register = () => {
         },
         info: {
           firstName: user.firstName,
-          middleName: user.middleName,
+          middleName: user.middleName || "",
           lastName: user.lastName,
-          birthDate: user.birthDate,
+          birthDate: formattedBirthDate,
           gender: user.gender,
-          phoneNumber: user.phoneNumber,
+          phoneNumber: parseInt(user.phoneNumber),
           userType: user.userType,
           address: user.userType === "Owner" ? user.address : undefined,
           profile: {} // Empty profile object as it will be handled by the file upload
@@ -170,8 +185,8 @@ const Register = () => {
         formData.append("file", profile);
       }
 
-      console.log("Sending request to:", `${API_LINK}/users`);
-      const res = await axios.post(`${API_LINK}/users`, formData, {
+      console.log("Sending request to:", `${API_LINK}/users/register`);
+      const res = await axios.post(`${API_LINK}/users/register`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

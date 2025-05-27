@@ -38,6 +38,7 @@ const Register = () => {
   
 
   const [profile, setProfile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputCorrectness = async (user) => {
     try {
@@ -72,7 +73,22 @@ const Register = () => {
 
   const handleUploadImage = (e) => {
     e.preventDefault();
-    setProfile(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+    if (!file) {
+      setErrorMessage(""); // Clear error message if no file is selected
+      return;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      setErrorMessage("Invalid file type. Only PNG, JPG, and JPEG are allowed.");
+      e.target.value = ""; // Reset the input field
+      return;
+    }
+
+    setErrorMessage(""); // Clear error message on valid file
+    setProfile(file);
   };
 
   const handleChangeUserType = (role) => {

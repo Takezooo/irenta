@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 const API_LINK = "https://irenta-production.up.railway.app/api";
 
 const Register = () => {
-  const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -24,7 +24,6 @@ const Register = () => {
       gender: "Male",
       phoneNumber: "",
       userType: "Seeker",
-      username: "",
       address: {
         houseNumber: "",
         street: "",
@@ -42,53 +41,12 @@ const Register = () => {
 
   const handleInputCorrectness = async (user) => {
     try {
-      if (!user.firstName || !user.lastName) {
-        toast.error("First name and last name are required");
+      if (user.password.length >= 8) {
+        return true;
+      }else { 
+        toast.error("Password length must be 8");
         return false;
       }
-      if (!user.birthDate) {
-        toast.error("Birth date is required");
-        return false;
-      }
-      if (!user.phoneNumber) {
-        toast.error("Phone number is required");
-        return false;
-      }
-      // Add phone number format validation
-      const phoneRegex = /^09\d{9}$/;
-      if (!phoneRegex.test(user.phoneNumber)) {
-        toast.error("Phone number must start with '09' and be 11 digits long");
-        return false;
-      }
-      if (!user.username) {
-        toast.error("Username is required");
-        return false;
-      }
-      if (!user.email) {
-        toast.error("Email is required");
-        return false;
-      }
-      // Add email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(user.email)) {
-        toast.error("Please enter a valid email address");
-        return false;
-      }
-      if (!user.password) {
-        toast.error("Password is required");
-        return false;
-      }
-      if (user.password.length < 8) {
-        toast.error("Password must be at least 8 characters");
-        return false;
-      }
-      if (user.userType === "Owner") {
-        if (!user.address.houseNumber || !user.address.street || !user.address.city || !user.address.zip) {
-          toast.error("All address fields are required for property owners");
-          return false;
-        }
-      }
-      return true;
     } catch (err) {
       console.log(err);
       return false;
@@ -114,24 +72,9 @@ const Register = () => {
 
   const handleUploadImage = (e) => {
     e.preventDefault();
-    const file = e.target.files[0];
-    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
-
-    if (!file) {
-      setErrorMessage(""); // Clear error message if no file is selected
-      return;
-    }
-
-    if (!allowedTypes.includes(file.type)) {
-      setErrorMessage(`Invalid file type. Only PNG, JPG, and JPEG are allowed.`);
-      e.target.value = ""; // Reset the input field to clear the file name
-      return;
-    }
-
-    setErrorMessage(""); // Clear error message on valid file
-    setProfile(file); // Save the valid file
+    setProfile(e.target.files[0]);
   };
-  
+
   const handleChangeUserType = (role) => {
     setUser((prev) => ({
       ...prev,
@@ -141,80 +84,31 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     try {
-      console.log("Form submission started");
       e.preventDefault();
-      console.log("Current user state:", user);
-
-      const isCorrect = await handleInputCorrectness(user);
-      console.log("Validation result:", isCorrect);
-
-      if (!isCorrect) {
-        console.log("Validation failed");
-        return;
-      }
 
       var formData = new FormData();
 
-      // Format birth date to ISO string and ensure it's a valid date
-      const birthDate = new Date(user.birthDate);
-      if (isNaN(birthDate.getTime())) {
-        toast.error("Invalid birth date format");
-        return;
-      }
-      const formattedBirthDate = birthDate.toISOString();
+      formData.append("user", JSON.stringify(user));
+      formData.append("file", profile);
 
-      // Convert phone number to integer
-      const phoneNumber = parseInt(user.phoneNumber);
-      if (isNaN(phoneNumber)) {
-        toast.error("Invalid phone number format");
-        return;
-      }
+      const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
 
-      // Structure the user data according to the backend schema
-      const userData = {
-        username: user.username.trim(),
-        password: user.password,
-        email: user.email.trim(),
-        firstName: user.firstName.trim(),
-        middleName: user.middleName ? user.middleName.trim() : "",
-        lastName: user.lastName.trim(),
-        birthDate: formattedBirthDate,
-        gender: user.gender,
-        phoneNumber: phoneNumber,
-        userType: user.userType,
-        address: user.userType === "Owner" ? {
-          houseNumber: user.address.houseNumber.trim(),
-          street: user.address.street.trim(),
-          city: user.address.city.trim(),
-          zip: user.address.zip.trim()
-        } : undefined
-      };
-
-      console.log("Structured user data:", userData);
-      formData.append("user", JSON.stringify(userData));
-      
-      if (profile) {
-        console.log("Adding profile picture to form data");
-        formData.append("file", profile);
-      }
-
-      console.log("Sending request to:", `${API_LINK}/users`);
-      const res = await axios.post(`${API_LINK}/users`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      console.log("Server response:", res);
-
-      if (res.status === 200) {
-        toast.success("Registration successful!");
-        navigate("/login");
-      }
+      if (isCorrect){ // check fields if information is correct
+        const res = await axios.post(`${API_LINK}/users/`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+  
+        if (res.status === 200) {
+          toast.success("Succesful");
+          navigate("/login");
+          console.log(res.data);
+        }
+      } 
     } catch (err) {
-      console.error("Registration error details:", err);
-      const errorMessage = err.response?.data?.message || err.message;
-      toast.error(`Registration failed: ${errorMessage}`);
+      toast.error(`Error: ${err.message}`);
+      console.log(err);
     }
   };
 

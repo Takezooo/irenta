@@ -8,7 +8,7 @@ import {
 } from "../utils/Token.js";
 
 // Base API URL
-const API_BASE_URL = "https://irenta-production.up.railway.app/api/users"; // Update with your backend API endpoint
+const API_BASE_URL = "http://localhost:5000/api/users"; // Update with your backend API endpoint
 
 // Login API call
 export const loginUser = async (username, password) => {
@@ -108,11 +108,7 @@ export const refreshAccessToken = async () => {
 // Register API call
 export const register = async (userData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}`, userData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post(`${API_BASE_URL}/register`, userData);
     return response.data; // Return registered user details
   } catch (error) {
     throw new Error(error.response?.data?.message || "Registration failed");

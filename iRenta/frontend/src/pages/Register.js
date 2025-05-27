@@ -41,12 +41,54 @@ const Register = () => {
 
   const handleInputCorrectness = async (user) => {
     try {
-      if (user.password.length >= 8) {
-        return true;
-      }else { 
-        toast.error("Password length must be 8");
+      // Required fields validation
+      if (!user.firstName || !user.lastName) {
+        toast.error("First name and last name are required");
         return false;
       }
+      if (!user.birthDate) {
+        toast.error("Birth date is required");
+        return false;
+      }
+      if (!user.phoneNumber) {
+        toast.error("Phone number is required");
+        return false;
+      }
+      // Phone number format validation
+      const phoneRegex = /^09\d{9}$/;
+      if (!phoneRegex.test(user.phoneNumber)) {
+        toast.error("Phone number must start with '09' and be 11 digits long");
+        return false;
+      }
+      if (!user.username) {
+        toast.error("Username is required");
+        return false;
+      }
+      if (!user.email) {
+        toast.error("Email is required");
+        return false;
+      }
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(user.email)) {
+        toast.error("Please enter a valid email address");
+        return false;
+      }
+      if (!user.password) {
+        toast.error("Password is required");
+        return false;
+      }
+      if (user.password.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        return false;
+      }
+      if (user.userType === "Owner") {
+        if (!user.address.houseNumber || !user.address.street || !user.address.city || !user.address.zip) {
+          toast.error("All address fields are required for property owners");
+          return false;
+        }
+      }
+      return true;
     } catch (err) {
       console.log(err);
       return false;
@@ -72,7 +114,20 @@ const Register = () => {
 
   const handleUploadImage = (e) => {
     e.preventDefault();
-    setProfile(e.target.files[0]);
+    const file = e.target.files[0];
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+    if (!file) {
+      return;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Only PNG, JPG, and JPEG are allowed.");
+      e.target.value = ""; // Reset the input field
+      return;
+    }
+
+    setProfile(file);
   };
 
   const handleChangeUserType = (role) => {
@@ -86,29 +141,70 @@ const Register = () => {
     try {
       e.preventDefault();
 
+      const isCorrect = await handleInputCorrectness(user);
+      if (!isCorrect) {
+        return;
+      }
+
       var formData = new FormData();
 
-      formData.append("user", JSON.stringify(user));
-      formData.append("file", profile);
+      // Format birth date to ISO string
+      const birthDate = new Date(user.birthDate);
+      if (isNaN(birthDate.getTime())) {
+        toast.error("Invalid birth date format");
+        return;
+      }
 
-      const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
+      // Convert phone number to integer
+      const phoneNumber = parseInt(user.phoneNumber);
+      if (isNaN(phoneNumber)) {
+        toast.error("Invalid phone number format");
+        return;
+      }
 
-      if (isCorrect){ // check fields if information is correct
-        const res = await axios.post(`${API_LINK}/users/`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-  
-        if (res.status === 200) {
-          toast.success("Succesful");
-          navigate("/login");
-          console.log(res.data);
+      // Structure the user data according to the backend schema
+      const userData = {
+        credentials: {
+          username: user.username.trim(),
+          password: user.password,
+          email: user.email.trim()
+        },
+        info: {
+          firstName: user.firstName.trim(),
+          middleName: user.middleName ? user.middleName.trim() : "",
+          lastName: user.lastName.trim(),
+          birthDate: birthDate.toISOString(),
+          gender: user.gender,
+          phoneNumber: phoneNumber,
+          userType: user.userType,
+          address: user.userType === "Owner" ? {
+            houseNumber: user.address.houseNumber.trim(),
+            street: user.address.street.trim(),
+            city: user.address.city.trim(),
+            zip: user.address.zip.trim()
+          } : undefined
         }
-      } 
+      };
+
+      formData.append("user", JSON.stringify(userData));
+      if (profile) {
+        formData.append("file", profile);
+      }
+
+      const res = await axios.post(`${API_LINK}/users`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 200) {
+        toast.success("Registration successful!");
+        navigate("/login");
+      }
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
-      console.log(err);
+      console.error("Registration error:", err);
+      const errorMessage = err.response?.data?.message || err.message;
+      toast.error(`Registration failed: ${errorMessage}`);
     }
   };
 

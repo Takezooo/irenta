@@ -108,7 +108,11 @@ export const refreshAccessToken = async () => {
 // Register API call
 export const register = async (userData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/register`, userData);
+    const response = await axios.post(`${API_BASE_URL}`, userData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data; // Return registered user details
   } catch (error) {
     throw new Error(error.response?.data?.message || "Registration failed");

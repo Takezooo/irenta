@@ -203,8 +203,8 @@ const Register = () => {
         formData.append("file", profile);
       }
 
-      console.log("Sending request to:", `${API_LINK}/users/register`);
-      const res = await axios.post(`${API_LINK}/users/`, formData, {
+      console.log("Sending request to:", `${API_LINK}/users`);
+      const res = await axios.post(`${API_LINK}/users`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

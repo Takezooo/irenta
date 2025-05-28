@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     },
   ],
   likedListings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing" }], // Array to store liked listings
-  //   listings: [{ type: Types.ObjectId, ref: 'listings' }]
+  tenantBadge: { type: Boolean, default: false },
 });
 
 const User = mongoose.model("User", userSchema);

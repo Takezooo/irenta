@@ -8,8 +8,7 @@ import {
 } from "../utils/Token.js";
 
 // Base API URL
-const API_BASE_URL = "https://irenta-production.up.railway.app/api/users"; // Update with your backend API endpoint
-
+const API_BASE_URL = "https://irenta-production.up.railway.app/api/users";
 // Login API call
 export const loginUser = async (username, password) => {
   try {

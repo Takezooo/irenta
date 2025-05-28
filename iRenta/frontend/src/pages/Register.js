@@ -102,30 +102,73 @@ const Register = () => {
     try {
       e.preventDefault();
 
+      const isCorrect = await handleInputCorrectness(user);
+      if (!isCorrect) {
+        return;
+      }
+
       var formData = new FormData();
 
-      formData.append("user", JSON.stringify(user));
-      formData.append("file", profile);
+      // Format birth date to ISO string
+      const birthDate = new Date(user.birthDate);
+      if (isNaN(birthDate.getTime())) {
+        toast.error("Invalid birth date format");
+        return;
+      }
 
-      const isCorrect = await handleInputCorrectness(user); // returns true or false depending on fields value
+      // Convert phone number to integer
+      const phoneNumber = parseInt(user.phoneNumber);
+      if (isNaN(phoneNumber)) {
+        toast.error("Invalid phone number format");
+        return;
+      }
 
-      if (isCorrect){ // check fields if information is correct
-        const res = await axios.post(`${API_LINK}/users/`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-  
-        if (res.status === 200) {
-          toast.success("Succesful");
-          navigate("/login");
-          console.log(res.data);
+      // Structure the user data according to the backend schema
+      const userData = {
+        credentials: {
+          username: user.username.trim(),
+          password: user.password,
+          email: user.email.trim()
+        },
+        info: {
+          firstName: user.firstName.trim(),
+          middleName: user.middleName ? user.middleName.trim() : "",
+          lastName: user.lastName.trim(),
+          birthDate: birthDate.toISOString(),
+          gender: user.gender,
+          phoneNumber: phoneNumber,
+          userType: user.userType,
+          address: user.userType === "Owner" ? {
+            houseNumber: user.address.houseNumber.trim(),
+            street: user.address.street.trim(),
+            city: user.address.city.trim(),
+            zip: user.address.zip.trim()
+          } : undefined
         }
-      } 
+      };
+
+      // Add user data to formData
+      formData.append("user", JSON.stringify(userData));
+
+      // Only append file if it exists
+      if (profile) {
+        formData.append("file", profile);
+      }
+
+      const res = await axios.post(`${API_LINK}/users`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 200) {
+        toast.success("Registration successful!");
+        navigate("/login");
+      }
     } catch (err) {
+      console.error("Registration error:", err);
       const errorMsg = err.response?.data?.message || err.message;
-      toast.error(`Error: ${errorMsg}`);
-      console.log(err);
+      toast.error(`Registration failed: ${errorMsg}`);
     }
   };
 

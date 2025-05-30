@@ -68,6 +68,6 @@ iRenta is a comprehensive platform designed to simplify the management and searc
 ## 📘 Final Thesis Paper
 
 You can view or download the full thesis paper here:  
-➡️ [`docs/irenta_thesis_final.pdf`](docs/irenta_thesis_final.pdf) *(Upload this PDF to your repo's `/docs` folder)*
+➡️ [Irenta_Manuscript.pdf](https://github.com/user-attachments/files/20516846/Irenta_Manuscript.pdf) *(Upload this PDF to your repo's `/docs` folder)*
 
 ---
